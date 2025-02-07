@@ -1,0 +1,8 @@
+<video #videoElement class="movie" src="/assets/images/home_bg.mp4" muted></video>
+<app-loader *ngIf="isLoading"></app-loader>
+
+<div class="start-box" *ngIf="isVideoEnded">
+    <img src="/assets/images/promogym_logo.svg " alt="" class="logo"> 
+    <a (click)="login()">Login</a>
+    <a (click)="logout()">Logout</a>
+ </div>

@@ -1,0 +1,107 @@
+@use "../../../styles/variables.scss" as *;
+
+:host {
+  position: absolute;
+  display: flex;
+  z-index: 1500; //najwyższy indeks domyślny aby zawsze było menu na górze
+}
+
+.btn-close {
+  background-color: $secondaryColor !important;
+}
+
+.btn-close:hover {
+  background-color: $accent-color !important;
+}
+
+.logo-menu {
+  height: 12rem;
+}
+
+.side-menu {
+  height: 5rem;
+  width: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// menu container
+.offcanvas {
+  width: 270px !important ;
+  background-color: $primaryColor !important;
+  overflow: auto;
+}
+
+.offcanvas-header {
+  height: 5rem !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.offcanvas-body ul {
+  margin: 0 !important;
+  padding: 10px;
+  width: 100%;
+}
+
+.offcanvas-body {
+  margin-top: 5rem;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.logo-menu {
+  width: 200px;
+  margin-bottom: 20px;
+}
+
+.nav-link {
+  padding-left: 30px;
+  border-radius: 6px;
+  transition: background-color 0.1s ease, transform 0.1s ease;
+  margin: 2px 0;
+}
+
+.nav-link,
+.nav-link span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link:hover {
+  background-color: $accent-color !important;
+}
+
+.nav-link i {
+  font-size: 1rem;
+  color: $secondaryColor;
+}
+
+i {
+  font-size: 2rem;
+}
+
+button {
+  color: $secondaryColor;
+  font-size: 1rem;
+}
+
+button:hover {
+  color: $accent-color;
+}
+
+a {
+  color: $secondaryColor !important;
+  display: flex;
+}
+
+.navbar-toggler {
+  background-color: transparent !important;
+}

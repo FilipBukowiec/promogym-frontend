@@ -1,0 +1,134 @@
+@use 'variables' as *;
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Saira !important;
+  font-size: 16px;
+}
+
+
+::-webkit-scrollbar {
+  background-color: #31343b;
+  width: 8px; /* szerokość paska przewijania */
+}
+
+
+
+thead > tr {
+  background-color: transparent;
+  text-align: center;
+  color: #fff;
+}
+
+.add {
+  padding-bottom: 30px;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0px 3px;
+  width: 90%;
+  margin-bottom: 20px;
+}
+
+tr {
+  text-align: justify;
+  background-color: #000;
+  color: #a8a8a8;
+}
+
+.table-row:hover {
+  // background-color: #1e1e1f;
+  color: $accent-color;
+}
+
+td {
+  padding: 10px;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 20px;
+}
+
+.break-td {
+  word-break: break-all;
+}
+
+li {
+  list-style-type: none;
+}
+
+a {
+  color: $secondaryColor!important;
+  cursor: pointer;
+  list-style-type: none;
+  text-decoration: none;
+}
+
+a:hover{
+  color: $accent-color!important;
+}
+
+button {
+  background-color: red;
+  border: none;
+  color: #fff;
+  padding: 10px;
+}
+
+// button:hover {
+//   color: rgba(226, 33, 62, 0.863) !important;
+// }
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+i{
+  cursor: pointer;
+  color:$secondaryColor;
+  font-size: 1.5rem;
+  }
+
+
+  i:hover{
+    color: $accent-color;
+  }
+
+
+
+// .bi {
+//   cursor: pointer;
+//   color: $accent-color;
+// }
+
+
+
+// i {
+//   font-size: 1.5rem;
+//   font-weight: bolder;
+//   color: rgb(255, 255, 255);
+// }
+
+// i:hover{
+//   color: #1285f7;
+// }
+
+// li{
+//   font-weight: bold;
+// }
+
+// a{
+//   cursor: pointer;
+// }
