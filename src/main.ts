@@ -13,15 +13,13 @@ import { AuthService, provideAuth0 } from '@auth0/auth0-angular';
 bootstrapApplication(AppComponent, {
   providers: [
     provideHttpClient(),
-    provideRouter(routes,
-      withHashLocation()
-    ),
+    provideRouter(routes, withHashLocation()),
     provideAuth0({
       domain: 'dev-yaku6y1r82y6pb0p.us.auth0.com',
-      clientId: 'JQinAZtrxoZN1KNNVsHKSpugFQj0EUHH',
+      clientId: 'JQinAZtrxoZN1KNNVsHKSpugFQj0EUHH', 
       authorizationParams: {
         redirect_uri: window.location.origin + "/#/dashboard",
-
+        audience: 'https://promogym.com/api',
       },
     }),
   ],

@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-// import { FullscreenService } from '../../services/fullscreen.service';
+import { FullscreenService } from '../../services/fullscreen.service';
 // import { DataService } from '../../services/data.service';
 // import { RadioStreamService } from '../../services/radio-stream.service';
 // import { AnnouncementService } from '../../services/announcement.service'; 
@@ -18,21 +18,21 @@ import { AuthService } from '@auth0/auth0-angular';
   styleUrls: ['./side-menu.component.scss'],
 })
 export class SideMenuComponent implements AfterViewInit {
-  isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  // isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   shouldRefresh: boolean = false;
-  // isFullscreen$: Observable<boolean>;
+  isFullscreen$: Observable<boolean>;
   // isAnnouncementPlaying$: Observable<boolean>; 
   // isStreamPlaying$: Observable<boolean>;
 
   constructor(
-    // private fullscreenService: FullscreenService,
+    private fullscreenService: FullscreenService,
     private router: Router,
     // private dataService: DataService,
     // public radioStreamService: RadioStreamService,
     // private announcementService: AnnouncementService,
     private auth:AuthService,
   ) {
-    // this.isFullscreen$ = this.fullscreenService.isFullscreen$;
+    this.isFullscreen$ = this.fullscreenService.isFullscreen$;
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
     // this.isAnnouncementPlaying$ = this.announcementService.isPlaying$; 
   }
@@ -50,9 +50,9 @@ export class SideMenuComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {}
 
-  // toggleFullscreen(): void {
-  //   this.fullscreenService.toggleFullscreen();
-  // }
+  toggleFullscreen(): void {
+    this.fullscreenService.toggleFullscreen();
+  }
 
 
   // refreshComponents(componentKeys: string[]): void {
@@ -70,19 +70,19 @@ export class SideMenuComponent implements AfterViewInit {
   //   }, 100);
   // }
 
-  navigateToStart(): void {
-    if (!this.isOnStartPage$) {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.router.onSameUrlNavigation = 'reload';
-      this.router.navigate(['/start']).then(() => {
-        this.shouldRefresh = true;
-      });
-    } else {
-      if (this.shouldRefresh) {
-        this.shouldRefresh = false;
-      }
-    }
-  }
+  // navigateToStart(): void {
+  //   if (!this.isOnStartPage$) {
+  //     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+  //     this.router.onSameUrlNavigation = 'reload';
+  //     this.router.navigate(['/start']).then(() => {
+  //       this.shouldRefresh = true;
+  //     });
+  //   } else {
+  //     if (this.shouldRefresh) {
+  //       this.shouldRefresh = false;
+  //     }
+  //   }
+  // }
 
   // onStartClick(event: MouseEvent): void {
   //   if (this.isOnStartPage$) {

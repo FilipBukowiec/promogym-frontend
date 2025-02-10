@@ -1,0 +1,13 @@
+@use "../../../styles/variables.scss" as *;
+
+:host {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color:$primaryColor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $secondaryColor;
+  font-size: 4rem;
+}

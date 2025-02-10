@@ -13,7 +13,7 @@
             <img class="logo-menu" src="../../../assets/images/promogym_logo.svg" />
             <ul class="navbar-nav flex-grow-1">
                 <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['/homepage']" routerLinkActive="router-link-active"
+                    <a class="nav-link" [routerLink]="['welcome']" routerLinkActive="router-link-active"
                         data-bs-dismiss="offcanvas">
                         <i class="bi bi-house-door"></i>Home
                     </a>
@@ -33,14 +33,14 @@
                         <i class="bi bi-google-play"></i> Start app
                       </span>
                     </a>
-                  </li>
-                <li class="nav-item"> -->
+                  </li>-->
+                <li class="nav-item"> 
                   
-                        <!-- <a class="nav-link" [routerLink]="['/dashboard', 'news']" routerLinkActive="router-link-active"
+                       <a class="nav-link" [routerLink]="['news']" routerLinkActive="router-link-active"
         data-bs-dismiss="offcanvas">
                         <i class="bi bi-newspaper"></i> News</a>
                 </li>
-                <li class="nav-item">
+                <!--  <li class="nav-item">
                     <a class="nav-link" [routerLink]="['/dashboard', 'gym-schedule']" routerLinkActive="router-link-active"
                         data-bs-dismiss="offcanvas">
                         Gym schedule</a>
@@ -59,11 +59,11 @@
                         data-bs-dismiss="offcanvas">
                         Cooperation</a>
                 </li>
-
+-->
                 <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['/dashboard','admin']" routerLinkActive="router-link-active"
+                    <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
                         data-bs-dismiss="offcanvas">
-                        <i class="bi bi-person-fill"></i>Admin</a>
+                        <i class="bi bi-kanban"></i>Management</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleFullscreen()">
@@ -72,7 +72,7 @@
                             FullScreen</span>
                     </a>
                 </li>
-                
+                <!--
                 <li>
                     <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleStream()">
                         <span *ngIf="isStreamPlaying$ | async"><i class="bi bi-volume-mute-fill"></i>Stop stream</span>

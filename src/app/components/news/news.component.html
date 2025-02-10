@@ -1,0 +1,15 @@
+<p>news works!</p>
+<div *ngIf="news.length > 0; else noNews">
+    <h2>News</h2>
+    <ul>
+      <li *ngFor="let newsItem of news">
+        <p>{{ newsItem.content }}</p>
+        <p><strong>Order:</strong> {{ newsItem.order }}</p>
+      </li>
+    </ul>
+  </div>
+  
+  <ng-template #noNews>
+    <p>Brak dostępnych newsów.</p>
+  </ng-template>
+  
