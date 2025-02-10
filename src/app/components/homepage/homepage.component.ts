@@ -51,7 +51,4 @@ export class HomepageComponent implements OnInit, AfterViewInit {
     this.auth.loginWithRedirect();
   }
 
-  logout(): void {
-    this.auth.logout({ logoutParams: { returnTo: document.location.origin } });
-  }
 }
