@@ -7,6 +7,7 @@ import { appConfig } from './app/app.config';
 import { provideRouter, Router, withHashLocation } from '@angular/router';
 import { routes } from './app/app.routes';
 import { AuthService, provideAuth0 } from '@auth0/auth0-angular';
+import { GlobeComponent } from './app/components/globe/globe.component'
 
 // registerSwiperElements();
 
