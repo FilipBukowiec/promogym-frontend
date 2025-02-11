@@ -1,12 +1,12 @@
 /* globe.component.scss */
-.globe-container {
-    position: absolute;
-  /* Dopasuj wysokość kontenera */
-    margin: 0 auto; /* Wyśrodkowanie kontenera w poziomie */
-    position: relative;
-    overflow: hidden; /* Ukrywa wszystko, co wychodzi poza kontener */
-  }
-  
-
-  
- 
+div {
+  width: 100%;
+  height: 100vh;  /* pełna wysokość ekranu */
+  margin: 0;
+  padding: 0;
+  background-image: url('/assets/images/map.png');  /* Statyczne tło */
+  background-size: cover;  /* Wypełnia tło */
+  background-position: center;  /* Wyśrodkowanie tła */
+  background-attachment: fixed; /* Zapewnia, że tło nie porusza się przy przewijaniu */
+  background-color: transparent;  /* Tło przezroczyste (tło nie jest widoczne, jeśli nie ma obrazu) */
+}

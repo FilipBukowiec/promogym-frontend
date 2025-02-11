@@ -6,7 +6,8 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
-background-color: red;
+  background-color: #f6f7fb;
+ 
 }
 
 nav {
@@ -33,3 +34,5 @@ ul {
 li:hover {
   color: $accent-color;
 }
+
+

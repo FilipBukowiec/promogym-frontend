@@ -1,7 +1,9 @@
-:host {
-    position: absolute;
-      display: flex;
-  justify-content: center;
-  width: 100%;
-  
+
+
+.box{
+  position: absolute;
+  width: 700px;
+  height: 200px;
+  background-color: rgb(194, 31, 31);
+  border-radius: 10px;
 }

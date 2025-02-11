@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { GlobeComponent } from '../globe/globe.component';
+import { GlobeComponent } from '../globe/globe.component';  // Importujemy GlobeComponent
 
 @Component({
+
+  // imports: [GlobeComponent],
   selector: 'app-welcome',
-  imports: [GlobeComponent],
   templateUrl: './welcome.component.html',
-  styleUrl: './welcome.component.scss'
+  styleUrls: ['./welcome.component.scss']
 })
 export class WelcomeComponent {
-
+  // Możesz dodać logikę do komponentu WelcomeComponent, np. dane powitalne
 }
