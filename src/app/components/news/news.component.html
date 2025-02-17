@@ -1,15 +1,22 @@
-<p>news works!</p>
-<div *ngIf="news.length > 0; else noNews">
-    <h2>News</h2>
+<div>
+  <h1>News dla tenant_id: {{ tenant_id }}</h1>
+
+  <div>
+    <h2>Dodaj nowy news</h2>
+    <label for="content">Treść:</label>
+    <input type="text" id="content" [(ngModel)]="content">
+    <label for="order">Kolejność:</label>
+    <input type="number" id="order" [(ngModel)]="order">
+    <button (click)="addNews()">Dodaj News</button>
+  </div>
+
+  <div>
+    <h2>News:</h2>
     <ul>
-      <li *ngFor="let newsItem of news">
-        <p>{{ newsItem.content }}</p>
-        <p><strong>Order:</strong> {{ newsItem.order }}</p>
+      <li *ngFor="let news of newsList">
+        {{ news.content }} - Order: {{ news.order }}
       </li>
     </ul>
   </div>
-  
-  <ng-template #noNews>
-    <p>Brak dostępnych newsów.</p>
-  </ng-template>
-  
+</div>
+

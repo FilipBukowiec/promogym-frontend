@@ -1,11 +1,15 @@
 <nav>
     <ul>
         <li><a [routerLink]="['settings']">General settings</a></li>
-        <li><a [routerLink]="['settings']">News</a></li>
+        <li><a [routerLink]="['admin-news']">News</a></li>
         <li><a [routerLink]="['settings']">Media</a></li>
         <li><a [routerLink]="['settings']">Announcement</a></li>
         <li><a [routerLink]="['settings']">Admin</a></li>
     
     </ul>
 </nav>
-<router-outlet><ng-template><div class="box"></div></ng-template></router-outlet>
+<div class="box">
+    <div class="content">
+
+<router-outlet></router-outlet>
+</div></div>

@@ -6,6 +6,7 @@ import { WelcomeComponent } from "./components/welcome/welcome.component";
 import { NewsComponent } from "./components/news/news.component";
 import { ManagementComponent } from "./components/management/management.component";
 import { SettingsComponent } from "./components/settings/settings.component";
+import { AdminNewsComponent } from "./components/admin-news/admin-news.component";
 
 export const routes: Routes = [
   {
@@ -33,11 +34,10 @@ export const routes: Routes = [
       {
         path: "management",
         component: ManagementComponent,
-        children: [{ path: "settings", component: SettingsComponent },
-          {path: "",
-            redirectTo:"settings",
-            pathMatch:"full"
-          }
+        children: [
+          { path: "settings", component: SettingsComponent },
+          { path: "admin-news", component: AdminNewsComponent },
+          { path: "", redirectTo: "settings", pathMatch: "full" },
         ],
       },
     ],

@@ -9,6 +9,7 @@ import { RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
+import {jwtDecode} from "jwt-decode";
 
 @Component({
   selector: 'app-side-menu',
@@ -21,6 +22,10 @@ export class SideMenuComponent implements AfterViewInit {
   // isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   shouldRefresh: boolean = false;
   isFullscreen$: Observable<boolean>;
+  isAdmin = false;
+
+
+
   // isAnnouncementPlaying$: Observable<boolean>; 
   // isStreamPlaying$: Observable<boolean>;
 
@@ -35,7 +40,25 @@ export class SideMenuComponent implements AfterViewInit {
     this.isFullscreen$ = this.fullscreenService.isFullscreen$;
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
     // this.isAnnouncementPlaying$ = this.announcementService.isPlaying$; 
+
+    this.auth.getAccessTokenSilently().subscribe(
+      (token) => {
+        const decodedToken: any = jwtDecode(token);
+        const roles = decodedToken['https://promogym.com/roles'] || [];
+        this.isAdmin = roles.includes('admin');
+  
+        console.log('Decoded token:', decodedToken);
+        console.log('Rola admin:', this.isAdmin);
+      },
+      (error) => {
+        console.error('Błąd podczas pobierania tokenu:', error);
+      }
+    );
   }
+  
+
+
+  
 
   // ngOnInit(): void {
   //   this.router.events
@@ -47,6 +70,9 @@ export class SideMenuComponent implements AfterViewInit {
   //       this.isOnStartPage$.next(isOnStart);
   //     });
   // }
+
+
+  
 
   ngAfterViewInit(): void {}
 

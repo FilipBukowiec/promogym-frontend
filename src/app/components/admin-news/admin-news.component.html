@@ -1,0 +1,47 @@
+
+<p>dfsdf</p>
+<!-- <table>
+    <thead>
+      <tr>
+        <th class="add" colspan="2">
+          <input class="news" type="text"
+           [(ngModel)]="newContent" 
+           placeholder="Write something and add news" />
+        </th>
+        <th class="add">
+          <button (click)="addNews()">Add news</button>
+        </th>
+      </tr>
+    </thead>
+  
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>News</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-row" *ngFor="let news of newsList; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td class="news" *ngIf="editingNewsId !== news._id">
+          {{ news.content }}
+        </td>
+  
+        <td *ngIf="editingNewsId === news._id">
+          <input [(ngModel)]="editedContent" placeholder="Edit news content" />
+        </td>
+        <td>
+          <div class="icon-container">
+            <i class="bi bi-arrow-up" *ngIf="i > 0" (click)="moveUp(news._id)" title="Move up news"></i>
+            <i class="bi bi-arrow-down" *ngIf="i < newsList.length - 1" (click)="moveDown(news._id)"
+              title="Move down news"></i>
+            <i class="bi bi-pencil-fill" *ngIf="editingNewsId !== news._id" (click)="startEditing(news)"
+              title="Edit news"></i>
+            <i class="bi bi-floppy-fill" *ngIf="editingNewsId === news._id" (click)="saveChanges()" title="Save news"></i>
+            <i class="bi bi-trash3-fill" (click)="deleteNews(news._id)" title="Delete news"></i>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table> -->
