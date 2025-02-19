@@ -1,0 +1,11 @@
+@import "swiper/swiper-bundle.css";
+
+:host {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  z-index: -1;
+}

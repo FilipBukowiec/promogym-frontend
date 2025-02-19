@@ -139,5 +139,10 @@ input{
 
 th{
   vertical-align: middle!important;
+  // margin-bottom: 10px;
 }
 
+
+thead tr.special-row th {
+  padding-bottom: 60px;
+}

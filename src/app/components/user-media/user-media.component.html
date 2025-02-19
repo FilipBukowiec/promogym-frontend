@@ -1,1 +1,46 @@
 <h1>Media</h1>
+
+
+<table> 
+    <thead>
+      <tr class="special-row">
+        <th class="add" colspan="3">
+          <input type="file" id="fileInput" (change)="onFileSelected($event)" />
+        </th>
+        <th class="add">
+          <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
+        </th>
+      </tr>
+    </thead>
+  
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>File name</th>
+        <th>Preview</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+  
+    <tbody>
+      <tr class="table-row" *ngFor="let media of mediaList; let i = index">
+        <td class="td-left">{{ media.order }}</td>
+        <td>{{ media.fileName }}</td>
+        <td class="photo-container">
+          <img *ngIf="media.fileType.startsWith('image')" class="media" [src]="getFullFilePath(media.filePath)"
+            alt="{{ media.fileName }}" />
+          <video *ngIf="media.fileType.startsWith('video')" class="media" [src]="getFullFilePath(media.filePath)"
+            controls></video>
+        </td>
+        <td class="td-right">
+          <div class="icon-container">
+            <i class="bi bi-arrow-up" *ngIf="i > 0" (click)="moveUp(media._id)" title="Przesuń w górę"></i>
+            <i class="bi bi-arrow-down" *ngIf="i < mediaList.length - 1" (click)="moveDown(media._id)"
+              title="Przesuń w dół"></i>
+            <i class="bi bi-trash3-fill" (click)="deleteMedia(media._id)" title="Usuń media"></i>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
