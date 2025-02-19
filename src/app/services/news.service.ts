@@ -1,61 +1,89 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { AuthService } from '@auth0/auth0-angular'; // Importujemy AuthService z Auth0
-import {jwtDecode} from 'jwt-decode'; // Dekodowanie JWT
+import { AuthService } from '@auth0/auth0-angular';  // Zakładając, że używasz oficjalnego pakietu Auth0
+import { catchError, switchMap } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NewsService {
-  private apiUrl = 'http://localhost:3000/news'; // Twój URL API do backendu
+  private apiUrl = 'http://localhost:3000/news';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
-  // Pobieranie newsów na podstawie tenant_id z tokenu JWT
+  private getAuthHeaders(): Observable<HttpHeaders> {
+    return this.auth.getAccessTokenSilently().pipe(
+      switchMap((token) => {
+        const decodedToken: any = jwtDecode(token);
+        const tenant_id = decodedToken.tenant_id;
+
+        const headers = new HttpHeaders()
+          .set('Authorization', `Bearer ${token}`)
+          .set('tenant-id', tenant_id);
+
+        return new Observable<HttpHeaders>((observer) => {
+          observer.next(headers);
+          observer.complete();
+        });
+      })
+    );
+  }
+
+  
+
+  /// Pobieranie newsów
   getNewsByTenant(): Observable<any[]> {
-    return this.auth.getAccessTokenSilently().pipe(
-      switchMap((token) => {
-        // Dekodujemy token, aby uzyskać tenant_id
-        const decodedToken = this.decodeToken(token);
-        const tenant_id = decodedToken.tenant_id; // Zakładając, że tenant_id jest w tokenie
-        
-        // Tworzymy nagłówek z tokenem
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        
-        // Wysyłamy zapytanie HTTP z nagłówkiem i tenant_id
-        return this.http.get<any[]>(`${this.apiUrl}?tenant_id=${tenant_id}`, { headers });
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => this.http.get<any[]>(this.apiUrl, { headers }).pipe(catchError(this.handleError)))
+    );
+  }
+
+  // Dodawanie newsa
+  addNews(content: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => {
+        const payload = { content, tenant_id: headers.get('tenant-id') };
+        return this.http.post<any>(this.apiUrl, payload, { headers }).pipe(catchError(this.handleError));
       })
     );
   }
 
-  // Metoda do dodawania newsa
-  addNews(content: string, order: number): Observable<any> {
-    return this.auth.getAccessTokenSilently().pipe(
-      switchMap((token) => {
-        // Dekodujemy token, aby uzyskać tenant_id
-        const decodedToken = this.decodeToken(token);
-        const tenant_id = decodedToken.tenant_id; // Zakładając, że tenant_id jest w tokenie
-        
-        // Tworzymy nagłówek z tokenem
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        
-        // Tworzymy ciało zapytania do dodania newsa
-        const newNews = {
-          tenant_id: tenant_id, // Przypisujemy tenant_id
-          content: content,
-          order: order
-        };
-        
-        // Wysyłamy zapytanie HTTP do backendu
-        return this.http.post<any>(this.apiUrl, newNews, { headers });
+  // Edytowanie newsa
+  updateNews(id: string, content: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => {
+        const payload = { content, tenant_id: headers.get('tenant-id') };
+        return this.http.put<any>(`${this.apiUrl}/${id}`, payload, { headers }).pipe(catchError(this.handleError));
       })
     );
   }
 
-  // Dekodowanie tokenu JWT (przy pomocy jwt-decode)
-  private decodeToken(token: string): any {
-    return jwtDecode(token); // Zwróci cały obiekt dekodowany z JWT, w tym tenant_id
+  // Usuwanie newsa
+  deleteNews(id: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => this.http.delete<any>(`${this.apiUrl}/${id}`, { headers }).pipe(catchError(this.handleError)))
+    );
+  }
+
+  // Przesuwanie newsa w górę
+  moveNewsUp(id: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => this.http.put<any>(`${this.apiUrl}/${id}/move-up`, {}, { headers }).pipe(catchError(this.handleError)))
+    );
+  }
+
+  // Przesuwanie newsa w dół
+  moveNewsDown(id: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap((headers) => this.http.put<any>(`${this.apiUrl}/${id}/move-down`, {}, { headers }).pipe(catchError(this.handleError)))
+    );
+  }
+
+  // Obsługa błędów
+  private handleError(error: any): Observable<never> {
+    console.error('An error occurred', error);
+    throw error;
   }
 }

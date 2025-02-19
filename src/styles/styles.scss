@@ -1,4 +1,4 @@
-@use 'variables' as *;
+@use "variables" as *;
 
 html,
 body {
@@ -8,13 +8,10 @@ body {
   font-size: 16px;
 }
 
-
 ::-webkit-scrollbar {
   background-color: #31343b;
   width: 8px; /* szerokość paska przewijania */
 }
-
-
 
 thead > tr {
   background-color: transparent;
@@ -22,30 +19,43 @@ thead > tr {
   color: #fff;
 }
 
-.add {
-  padding-bottom: 30px;
-}
+
 
 table {
   border-collapse: separate;
   border-spacing: 0px 3px;
-  width: 90%;
+  width: 100%;
   margin-bottom: 20px;
 }
 
 tr {
   text-align: justify;
-  background-color: #000;
+  // background-color: #000;
   color: #a8a8a8;
+  // border-radius: 100px;
+  color: $accent-color;
+
 }
 
-.table-row:hover {
-  // background-color: #1e1e1f;
-  color: $accent-color;
+.table-row:hover{
+  background-color: $accent-color;
+  color: $secondaryColor;
 }
+
+.td-left {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.td-right {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
 
 td {
   padding: 10px;
+ 
 }
 
 .icon-container {
@@ -62,61 +72,48 @@ td {
 
 li {
   list-style-type: none;
-  
-
 }
 
-
 a {
-  color: $secondaryColor!important;
+  color: $secondaryColor !important;
   cursor: pointer;
   list-style-type: none;
   text-decoration: none;
 }
 
-a:hover{
-  color: $accent-color!important;
+a:hover {
+  color: $accent-color !important;
 }
 
 button {
-  background-color: red;
-  border: none;
-  color: #fff;
-  padding: 10px;
+  background-color: transparent;
+  // border: 1px solid $accent-color;
+  border:none;
+  color: $accent-color;
+  padding: 3px;
 }
 
-// button:hover {
-//   color: rgba(226, 33, 62, 0.863) !important;
-// }
-
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-i{
-  cursor: pointer;
+button:hover{
   color:$secondaryColor;
+}
+
+
+
+
+i {
+  cursor: pointer;
+  color: $secondaryColor;
   font-size: 1.5rem;
-  }
+}
 
-
-  i:hover{
-    color: $accent-color;
-  }
-
-
+i:hover {
+  color: $primaryColor;
+}
 
 // .bi {
 //   cursor: pointer;
 //   color: $accent-color;
 // }
-
-
 
 // i {
 //   font-size: 1.5rem;
@@ -135,3 +132,12 @@ i{
 // a{
 //   cursor: pointer;
 // }
+
+input{
+  width: 100%;
+}
+
+th{
+  vertical-align: middle!important;
+}
+

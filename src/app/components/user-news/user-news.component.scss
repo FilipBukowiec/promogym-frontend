@@ -1,0 +1,27 @@
+@use "../../../styles/variables.scss" as *;
+
+.news {
+  width: 100%;
+}
+
+.add-box {
+  display: flex;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-box {
+  vertical-align: bottom;
+}
+
+
+button {
+  border-radius: 6px;
+}
+
+button:hover {
+  background-color: $accent-color;
+}
+
