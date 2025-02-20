@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';  
 import { switchMap, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MediaService {
-  private apiUrl = 'http://localhost:3000/media';
+  private apiUrl = `${environment.apiUrl}media`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
