@@ -5,10 +5,11 @@ import { AuthGuard } from "@auth0/auth0-angular";
 import { WelcomeComponent } from "./components/welcome/welcome.component";
 import { NewsComponent } from "./components/news/news.component";
 import { ManagementComponent } from "./components/management/management.component";
-import { SettingsComponent } from "./components/settings/settings.component";
-// import { AdminNewsComponent } from "./components/admin-news/admin-news.component";
+import { UserSettingsComponent } from "./components/user-settings/user-settings.component";
 import { UserNewsComponent } from "./components/user-news/user-news.component";
 import { UserMediaComponent } from "./components/user-media/user-media.component";
+import { UserAnnouncementsComponent } from "./components/user-announcements/user-announcements.component";
+import { SwiperComponent } from "./components/swiper/swiper.component";
 
 export const routes: Routes = [
   {
@@ -30,16 +31,17 @@ export const routes: Routes = [
       },
       {
         path: "welcome",
-        component: WelcomeComponent,
+        component: SwiperComponent,
       },
       { path: "news", component: NewsComponent },
       {
         path: "management",
         component: ManagementComponent,
         children: [
-          { path: "settings", component: SettingsComponent },
+          { path: "user-settings", component: UserSettingsComponent },
           { path: "user-news", component: UserNewsComponent },
           { path: "user-media", component: UserMediaComponent },
+          {path: "user-announcements", component: UserAnnouncementsComponent},
           { path: "", redirectTo: "settings", pathMatch: "full" },
         ],
       },

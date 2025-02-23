@@ -1,16 +1,24 @@
+export interface Location {
+  type: 'Point';
+  coordinates: [number, number];
+}
+
+export interface RadioStream {
+  url: string;
+  description: string;
+}
+
+export interface FooterVisibilityRule {
+  startMinute: number;
+  endMinute: number;
+}
+
 export interface Settings {
-    selectedRadioStream: string | null;
-    radioStreamList: RadioStream[];
-    footerVisibilityRules: FooterVisibilityRule[];
-    pictureSlideDuration: number;
-  }
-  
-  export interface FooterVisibilityRule {
-    startMinute: number | null;
-    endMinute: number | null;
-  }
-  
-  export interface RadioStream {
-    url: string;
-    description: string;
-  }
+  tenant_id: string;
+  name: string;
+  selectedRadioStream?: string;
+  radioStreamList?: RadioStream[];
+  footerVisibilityRules?: FooterVisibilityRule[];
+  pictureSlideDuration?: number;
+  location?: Location;
+}

@@ -1,86 +1,73 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Settings } from '../models/settings.model'; // Zaimportuj modele
+import { AuthService } from './auth.service';  // Zaimportuj AuthService
+import { switchMap, catchError } from 'rxjs/operators';
 
+@Injectable({
+  providedIn: 'root',
+})
+export class SettingsService {
+  private apiUrl = `${environment.apiUrl}settings`;
 
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
+  // Pobieranie ustawień, jeśli nie ma to tworzymy domyślne
+  getSettings(): Observable<Settings> {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) => {
+        const tenant_id = headers.get('tenant-id');
+        console.log('tenant-id z nagłówków:', tenant_id);  // Logowanie tenant_id
+        return this.http.get<Settings>(`${this.apiUrl}?tenant_id=${tenant_id}`, { headers });
+      }),
+      catchError((error) => {
+        console.log('Błąd w pobieraniu ustawień:', error);
+        if (error.status === 404) {
+          return this.createDefaultSettings();
+        }
+        return this.handleError(error);
+      })
+    );
+  }
 
+  // Tworzenie domyślnych ustawień dla tenanta
+  private createDefaultSettings(): Observable<Settings> {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) => {
+        const tenant_id = headers.get('tenant-id');
+        const defaultSettings: Settings = {
+          tenant_id: tenant_id || '',
+          name: tenant_id || 'Default Name',
+          selectedRadioStream: '',
+          radioStreamList: [],
+          footerVisibilityRules: [],
+          pictureSlideDuration: 5,
+          location: { type: 'Point', coordinates: [0, 0] },
+        };
 
+        return this.http.post<Settings>(this.apiUrl, defaultSettings, { headers });
+      }),
+      catchError(this.handleError)
+    );
+  }
 
+  // Aktualizacja ustawień
+  updateSettings(settings: Settings): Observable<Settings> {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) => {
+        const tenant_id = headers.get('tenant-id');
+        const updatedSettings = { ...settings, tenant_id };
+        return this.http.put<Settings>(this.apiUrl, updatedSettings, { headers });
+      }),
+      catchError(this.handleError)
+    );
+  }
 
-// do obrobienia niżej serwis
-
-
-
-
-
-// import { Injectable } from '@angular/core';
-// import { HttpClient, HttpHeaders } from '@angular/common/http';
-// import { BehaviorSubject, Observable } from 'rxjs';
-
-// import { Settings } from '../models/settings.model';
-// import { io, Socket } from 'socket.io-client';
-// import { AuthService } from './auth.service'; // Importowanie AuthService
-// import { TokenService } from './token.service';
-// import { catchError, switchMap, tap } from 'rxjs/operators';
-// import { throwError, of } from 'rxjs';
-// import { environment } from '../../environments/environment';
-
-// @Injectable({
-//   providedIn: 'root',
-// })
-// export class SettingsService {
-//   private apiUrl = `${environment.apiUrl}settings`;
-//   private settingsSubject = new BehaviorSubject<Settings | null>(null);
-//   private socket: Socket;
-
-//   constructor(private http: HttpClient, private tokenService: TokenService) {
-//     this.socket = io(`${environment.socketUrl}`, {
-//       path: '/backend/socket.io', 
-//     });
-
-//     this.socket.on('connect', () => {
-//       console.log('Socket.IO connected:', this.socket.id);
-//     });
-
-//     this.socket.on('settingsUpdated', (updatedSettings: Settings) => {
-//       console.log('Received updated settings via socket:', updatedSettings);
-//       this.settingsSubject.next(updatedSettings);
-//     });
-
-//     this.loadInitialSettings();
-//   }
-
-//   private loadInitialSettings(): void {
-//     this.getSettings().subscribe(
-//       (settings) => {
-//         this.settingsSubject.next(settings);
-//       },
-//       (error) => console.error('Error loading initial settings', error)
-//     );
-//   }
-
-//   getSettings(): Observable<Settings> {
-//     const headers = this.tokenService.getAuthHeaders();
-//     return this.http.get<Settings>(this.apiUrl, {});
-//   }
-
-//   saveSettings(settings: Settings): Observable<Settings> {
-//     return this.tokenService.getAuthHeaders().pipe(
-//       switchMap((headers) => {
-//         return this.http.put<Settings>(this.apiUrl, settings, {
-//           headers,
-//           withCredentials: true,
-//         });
-//       }),
-//       tap((response: Settings) => {
-//         this.settingsSubject.next(response);
-//       }),
-//       catchError((error) => {
-//         console.error('Error saving settings:', error);
-//         return throwError(() => new Error('Failed to save settings'));
-//       })
-//     );
-//   }
-
-//   observeSettings(): Observable<Settings | null> {
-//     return this.settingsSubject.asObservable();
-//   }
-// }
+  // Obsługa błędów
+  private handleError(error: any): Observable<never> {
+    console.error('An error occurred', error);
+    throw error;
+  }
+}
