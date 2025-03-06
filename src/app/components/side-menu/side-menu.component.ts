@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { FullscreenService } from '../../services/fullscreen.service';
-// import { DataService } from '../../services/data.service';
+import { DataService } from '../../services/data.service';
 // import { RadioStreamService } from '../../services/radio-stream.service';
 // import { AnnouncementService } from '../../services/announcement.service'; 
 import { CommonModule } from '@angular/common';
@@ -19,8 +19,8 @@ import {jwtDecode} from "jwt-decode";
   styleUrls: ['./side-menu.component.scss'],
 })
 export class SideMenuComponent implements AfterViewInit {
-  // isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  shouldRefresh: boolean = false;
+  isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  shouldRefresh$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false); // <-- Zmienione na BehaviorSubject
   isFullscreen$: Observable<boolean>;
   isAdmin = false;
 
@@ -32,7 +32,7 @@ export class SideMenuComponent implements AfterViewInit {
   constructor(
     private fullscreenService: FullscreenService,
     private router: Router,
-    // private dataService: DataService,
+    private dataService: DataService,
     // public radioStreamService: RadioStreamService,
     // private announcementService: AnnouncementService,
     private auth:AuthService,
@@ -60,16 +60,16 @@ export class SideMenuComponent implements AfterViewInit {
 
   
 
-  // ngOnInit(): void {
-  //   this.router.events
-  //     .pipe(
-  //       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-  //       map((event: NavigationEnd): boolean => event.url === '/dashboard/start')
-  //     )
-  //     .subscribe((isOnStart) => {
-  //       this.isOnStartPage$.next(isOnStart);
-  //     });
-  // }
+  ngOnInit(): void {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        map((event: NavigationEnd): boolean => event.url === '/dashboard/start')
+      )
+      .subscribe((isOnStart) => {
+        this.isOnStartPage$.next(isOnStart);
+      });
+  }
 
 
   
@@ -81,43 +81,43 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
 
-  // refreshComponents(componentKeys: string[]): void {
-  //   const newData: { [key: string]: boolean } = {};
-  //   componentKeys.forEach((key) => {
-  //     newData[key] = false;
-  //   });
-  //   this.dataService.updateData(newData);
-  //   setTimeout(() => {
-  //     const updatedData: { [key: string]: boolean } = {};
-  //     componentKeys.forEach((key) => {
-  //       updatedData[key] = true;
-  //     });
-  //     this.dataService.updateData(updatedData);
-  //   }, 100);
-  // }
+  refreshComponents(componentKeys: string[]): void {
+    const newData: { [key: string]: boolean } = {};
+    componentKeys.forEach((key) => {
+      newData[key] = false;
+    });
+    this.dataService.updateData(newData);
+    setTimeout(() => {
+      const updatedData: { [key: string]: boolean } = {};
+      componentKeys.forEach((key) => {
+        updatedData[key] = true;
+      });
+      this.dataService.updateData(updatedData);
+    }, 100);
+  }
 
-  // navigateToStart(): void {
-  //   if (!this.isOnStartPage$) {
-  //     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-  //     this.router.onSameUrlNavigation = 'reload';
-  //     this.router.navigate(['/start']).then(() => {
-  //       this.shouldRefresh = true;
-  //     });
-  //   } else {
-  //     if (this.shouldRefresh) {
-  //       this.shouldRefresh = false;
-  //     }
-  //   }
-  // }
+  navigateToStart(): void {
+    if (!this.isOnStartPage$) {
+      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+      this.router.onSameUrlNavigation = 'reload';
+      this.router.navigate(['dashboard/start']).then(() => {
+        this.shouldRefresh$.next(true);
+      });
+    } else {
+      if (this.shouldRefresh$) {
+        this.shouldRefresh$.next;
+      }
+    }
+  }
 
-  // onStartClick(event: MouseEvent): void {
-  //   if (this.isOnStartPage$) {
-  //     this.refreshComponents(['swiper', 'footer']);
-  //     event.preventDefault();
-  //   } else {
-  //     this.navigateToStart();
-  //   }
-  // }
+  onStartClick(event: MouseEvent): void {
+    if (this.isOnStartPage$.value) {
+      this.refreshComponents(['swiper', 'footer']);
+      event.preventDefault();
+    } else {
+      this.navigateToStart();
+    }
+  }
 
   // toggleStream(): void {
   //   this.radioStreamService.toggleStream();

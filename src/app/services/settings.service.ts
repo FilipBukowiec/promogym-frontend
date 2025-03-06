@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Settings } from '../models/settings.model'; // Zaimportuj modele
 import { AuthService } from './auth.service';  // Zaimportuj AuthService
@@ -43,7 +43,7 @@ export class SettingsService {
           selectedRadioStream: '',
           radioStreamList: [],
           footerVisibilityRules: [],
-          pictureSlideDuration: 5,
+          pictureSlideDuration: 15,
           location: { type: 'Point', coordinates: [0, 0] },
         };
 

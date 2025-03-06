@@ -18,7 +18,7 @@ export interface Settings {
   name: string;
   selectedRadioStream?: string;
   radioStreamList?: RadioStream[];
-  footerVisibilityRules?: FooterVisibilityRule[];
+  footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
   location?: Location;
 }

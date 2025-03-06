@@ -1,0 +1,30 @@
+@use "../../../styles/variables.scss" as *;
+
+button:hover {
+    background-color: $accent-color;
+  }
+  
+
+// td{
+//     border: 1px solid red
+// }
+.new-rule{
+    
+    background-color:$accent-color;
+    border-radius: 6px;
+    text-align: center;
+    color: $secondaryColor;
+}
+
+button{
+    margin: 10px;
+    background-color: $accent-color;
+    border-radius: 6px;
+    color: $secondaryColor;
+    padding: 10px
+}
+
+
+button:hover{
+    color: $primaryColor;
+}

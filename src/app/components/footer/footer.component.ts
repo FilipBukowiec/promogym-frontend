@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ClockService } from '../../services/clock.service';
-// import { SettingsService } from '../../services/settings.service';
+import { SettingsService } from '../../services/settings.service';
 import { combineLatest, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NewsTickerComponent } from '../news-ticker/news-ticker.component';
@@ -19,19 +19,17 @@ export class FooterComponent implements OnInit, OnDestroy {
 
   constructor(
     private clockService: ClockService,
-    // private settingsService: SettingsService
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
     this.subscription = combineLatest([
       this.clockService.currentTime$,
-      // this.settingsService.observeSettings(),
     ]).subscribe({
       next: ([currentTime, 
         // settings
       ]) => {
         this.currentTime = currentTime;
-        // this.evaluateVisibility(settings);
       },
       error: (error) => console.error('Error observing combineLatest changes', error),
     });

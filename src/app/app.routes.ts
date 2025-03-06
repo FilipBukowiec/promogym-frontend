@@ -10,6 +10,8 @@ import { UserNewsComponent } from "./components/user-news/user-news.component";
 import { UserMediaComponent } from "./components/user-media/user-media.component";
 import { UserAnnouncementsComponent } from "./components/user-announcements/user-announcements.component";
 import { SwiperComponent } from "./components/swiper/swiper.component";
+import { MainAppComponent } from "./components/main-app/main-app.component";
+import { AdminSettingsComponent } from "./components/admin-settings/admin-settings.component";
 
 export const routes: Routes = [
   {
@@ -31,8 +33,10 @@ export const routes: Routes = [
       },
       {
         path: "welcome",
-        component: SwiperComponent,
+        component: WelcomeComponent,
       },
+      { path: "start", component: MainAppComponent },
+
       { path: "news", component: NewsComponent },
       {
         path: "management",
@@ -41,8 +45,9 @@ export const routes: Routes = [
           { path: "user-settings", component: UserSettingsComponent },
           { path: "user-news", component: UserNewsComponent },
           { path: "user-media", component: UserMediaComponent },
-          {path: "user-announcements", component: UserAnnouncementsComponent},
-          { path: "", redirectTo: "settings", pathMatch: "full" },
+          { path: "user-announcements", component: UserAnnouncementsComponent },
+          { path: "admin-settings", component: AdminSettingsComponent },
+          { path: "", redirectTo: "user-settings", pathMatch: "full" },
         ],
       },
     ],

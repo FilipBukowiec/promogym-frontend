@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { GlobeComponent } from '../globe/globe.component';  // Importujemy GlobeComponent
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
 
@@ -9,5 +9,14 @@ import { GlobeComponent } from '../globe/globe.component';  // Importujemy Globe
   styleUrls: ['./welcome.component.scss']
 })
 export class WelcomeComponent {
-  // Możesz dodać logikę do komponentu WelcomeComponent, np. dane powitalne
+  user: string = "";
+
+  constructor(private settingsService: SettingsService){}
+
+ngOnInit():void {
+  this.settingsService.getSettings().subscribe(settings => {
+    this.user = settings.name;
+  })
+
+  }
 }
