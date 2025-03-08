@@ -1,6 +1,11 @@
 <div class="side-menu">
-    <button class="navbar-toggler menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
-        aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+    <button class="navbar-toggler menu-btn" 
+    
+    [class.opacity-0]="isOnStartPage$ | async"
+        [class.pointer-events-none]="isOnStartPage$ | async" type="button" 
+        
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>
     </button>
 
@@ -48,30 +53,35 @@
                         </span>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
+                    data-bs-dismiss="offcanvas">
+                    <i class="bi bi-kanban"></i>Management</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="" class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
+                    data-bs-dismiss="offcanvas">
+                    <i class="bi bi-question-diamond-fill"></i>FAQ</a>
+                </li>
                 <li class="nav-item">
 
                     <a class="nav-link" [routerLink]="['news']" routerLinkActive="router-link-active"
                         data-bs-dismiss="offcanvas">
-                        <i class="bi bi-newspaper"></i> News</a>
+                        <i class="bi bi-newspaper"></i>Tutorials</a>
                 </li>
-
+                <li *ngIf="isAdmin" class="nav-item">
+                    <a href="" class="nav-link" [routerLink]="['admin']" routerLinkActive="router-link-active"
+                    data-bs-dismiss="offcanvas">
+                    <i class="bi bi-person-fill"></i>Admin</a>
+                </li>
                 <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
-                        data-bs-dismiss="offcanvas">
-                        <i class="bi bi-kanban"></i>Management</a>
+                    <a class="nav-link" [routerLink]="['about']" routerLinkActive="rout er-link-active"
+                    data-bs-dismiss="offcanvas"><i class="bi bi-chat-dots-fill"></i>
+                    Contact</a>
                 </li>
-
-<li class="nav-item">
-    <a href="" class="nav-link"[routerLink]="['management']" routerLinkActive="router-link-active"
-    data-bs-dismiss="offcanvas">
-    <i class="bi bi-question-diamond-fill"></i>FAQ</a>
-</li>
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['/dashboard','about']" routerLinkActive="rout er-link-active"
-                        data-bs-dismiss="offcanvas"><i class="bi bi-chat-dots-fill"></i>
-                        Contact</a>
-                </li>
-
+                
                 <li class="nav-item">
                     <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleFullscreen()">
                         <span *ngIf="isFullscreen$ | async"><i class="bi bi-fullscreen-exit"></i>Exit FullScreen</span>

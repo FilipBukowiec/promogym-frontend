@@ -27,16 +27,16 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initializeMarquee();
-    // this.subscribeToNewsUpdates();
+    this.subscribeToNewsUpdates();
   }
 
-  // subscribeToNewsUpdates(): void {
-  //   this.newsSubscription = this.newsService.news$.subscribe((news: News[]) => {
-  //     console.log('Zmienione dane na backendzie:', news);
-  //     this.newsList = news;
-  //     this.resetMarquee();
-  //   });
-  // }
+  subscribeToNewsUpdates(): void {
+    this.newsSubscription = this.newsService.news$.subscribe((news: News[]) => {
+      console.log('Zmienione dane na backendzie:', news);
+      this.newsList = news;
+      this.resetMarquee();
+    });
+  }
 
   resetMarquee(): void {
     console.log('Komponent NewsTickerComponent został załadowany');

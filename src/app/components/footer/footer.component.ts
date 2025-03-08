@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ClockService } from '../../services/clock.service';
-import { SettingsService } from '../../services/settings.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 import { combineLatest, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NewsTickerComponent } from '../news-ticker/news-ticker.component';
@@ -19,19 +19,20 @@ export class FooterComponent implements OnInit, OnDestroy {
 
   constructor(
     private clockService: ClockService,
-    private settingsService: SettingsService
+    private userSettingsService: UserSettingsService
   ) {}
 
   ngOnInit(): void {
     this.subscription = combineLatest([
       this.clockService.currentTime$,
+      this.userSettingsService.observeSettings(),
     ]).subscribe({
-      next: ([currentTime, 
-        // settings
-      ]) => {
+      next: ([currentTime, settings]) => {
+        console.log('⏳ Otrzymane settings w FooterComponent:', settings);
         this.currentTime = currentTime;
+        this.evaluateVisibility(settings);
       },
-      error: (error) => console.error('Error observing combineLatest changes', error),
+      error: (error) => console.error('❌ Błąd w subscribe:', error),
     });
   }
 
@@ -44,20 +45,31 @@ export class FooterComponent implements OnInit, OnDestroy {
   private evaluateVisibility(settings: any): void {
     const now = new Date();
     const currentMinute = now.getMinutes();
-
-    this.isVisible = false; // Reset na początku
-
-    if (settings?.footerVisibilityRules) {
-      settings.footerVisibilityRules.forEach((rule: any) => {
-        if (
-          rule.startMinute !== null &&
-          rule.endMinute !== null &&
-          currentMinute >= rule.startMinute &&
-          currentMinute <= rule.endMinute
-        ) {
-          this.isVisible = true; // Ustaw na true jeśli warunek spełniony
-        }
-      });
+        
+    if (!settings || !settings.footerVisibilityRules || settings.footerVisibilityRules.length === 0) {
+      console.warn('⚠️ Brak reguł widoczności stopki lub ustawienia są niepoprawne!');
+      return;
     }
+  
+    this.isVisible = false; // Resetuj widoczność
+  
+    settings.footerVisibilityRules.forEach((rule: any) => {
+      console.log(`⏳ Sprawdzam regułę: ${JSON.stringify(rule)}`);
+  
+      if (
+        rule.startMinute !== undefined &&
+        rule.endMinute !== undefined &&
+        rule.startMinute !== null &&
+        rule.endMinute !== null &&
+        currentMinute >= rule.startMinute &&
+        currentMinute <= rule.endMinute
+      ) {
+        console.log('✅ Warunek spełniony, stopka powinna być widoczna!');
+        this.isVisible = true;
+      }
+    });
+  
+    console.log('👀 Stopka widoczna?', this.isVisible);
   }
+  
 }

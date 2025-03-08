@@ -13,8 +13,9 @@ export interface FooterVisibilityRule {
   endMinute: number;
 }
 
-export interface Settings {
+export interface UserSettings {
   tenant_id: string;
+  language: string;
   name: string;
   selectedRadioStream?: string;
   radioStreamList?: RadioStream[];

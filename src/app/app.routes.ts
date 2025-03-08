@@ -9,9 +9,9 @@ import { UserSettingsComponent } from "./components/user-settings/user-settings.
 import { UserNewsComponent } from "./components/user-news/user-news.component";
 import { UserMediaComponent } from "./components/user-media/user-media.component";
 import { UserAnnouncementsComponent } from "./components/user-announcements/user-announcements.component";
-import { SwiperComponent } from "./components/swiper/swiper.component";
 import { MainAppComponent } from "./components/main-app/main-app.component";
 import { AdminSettingsComponent } from "./components/admin-settings/admin-settings.component";
+import { AdminComponent } from "./components/admin/admin.component";
 
 export const routes: Routes = [
   {
@@ -38,6 +38,8 @@ export const routes: Routes = [
       { path: "start", component: MainAppComponent },
 
       { path: "news", component: NewsComponent },
+
+      {path: "admin", component: AdminComponent},
       {
         path: "management",
         component: ManagementComponent,

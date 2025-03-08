@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SettingsService } from '../../services/settings.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 
 @Component({
 
@@ -11,10 +11,10 @@ import { SettingsService } from '../../services/settings.service';
 export class WelcomeComponent {
   user: string = "";
 
-  constructor(private settingsService: SettingsService){}
+  constructor(private userSettingsService: UserSettingsService){}
 
 ngOnInit():void {
-  this.settingsService.getSettings().subscribe(settings => {
+  this.userSettingsService.getSettings().subscribe(settings => {
     this.user = settings.name;
   })
 

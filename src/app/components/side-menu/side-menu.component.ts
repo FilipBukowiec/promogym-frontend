@@ -61,15 +61,16 @@ export class SideMenuComponent implements AfterViewInit {
   
 
   ngOnInit(): void {
+    this.isOnStartPage$.next(this.router.url === '/dashboard/start');
     this.router.events
-      .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        map((event: NavigationEnd): boolean => event.url === '/dashboard/start')
-      )
-      .subscribe((isOnStart) => {
-        this.isOnStartPage$.next(isOnStart);
-      });
-  }
+    .pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event: NavigationEnd) => event.url === '/dashboard/start')
+    )
+    .subscribe((isOnStart) => {
+      this.isOnStartPage$.next(isOnStart);
+    });
+}
 
 
   

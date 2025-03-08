@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
+import { Media } from '../../models/media.model';
 
 @Component({
   standalone:true,
@@ -10,7 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./user-media.component.scss'],
 })
 export class UserMediaComponent implements OnInit {
-  mediaList: any[] = [];
+  mediaList: Media[] = [];
   selectedFile: File | null = null;
 
   constructor(private mediaService: MediaService) {}

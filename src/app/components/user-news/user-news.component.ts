@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NewsService } from '../../services/news.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { News } from '../../models/news.model';
 
 @Component({
   selector: 'app-user-news',
@@ -10,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './user-news.component.scss'
 })
 export class UserNewsComponent  implements OnInit {
-  newsList: any[] = [];
+  newsList: News[] = [];
   newContent: string = '';
   editedContent: string = '';
   editingNewsId: string | null = null;

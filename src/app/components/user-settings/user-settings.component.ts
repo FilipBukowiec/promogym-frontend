@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { SettingsService } from '../../services/settings.service';
-import { Settings } from '../../models/settings.model';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { UserSettings } from '../../models/user-settings.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,8 +12,9 @@ import { FormsModule } from '@angular/forms';
 })
 export class UserSettingsComponent {
   
-  settings: Settings = {
+  settings: UserSettings = {
   tenant_id: '',
+  language: "ENG",
   name: '',
   selectedRadioStream: '',
   footerVisibilityRules: [],
@@ -33,7 +34,7 @@ export class UserSettingsComponent {
   error: string | null = null; // Dodano stan błędu
 
   constructor(
-    private settingsService: SettingsService
+    private userSettingsService: UserSettingsService
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +43,7 @@ export class UserSettingsComponent {
 
   loadSettings(): void {
     this.loading = true;
-    this.settingsService.getSettings().subscribe({
+    this.userSettingsService.getSettings().subscribe({
       next: (response) => {
         this.settings = response;
         this.loading = false;
@@ -116,7 +117,7 @@ export class UserSettingsComponent {
   }
 
   saveSettings(): void {
-    this.settingsService.updateSettings(this.settings).subscribe({
+    this.userSettingsService.updateSettings(this.settings).subscribe({
       next: (response) => {
         alert('Settings saved successfully');
         console.log(response);

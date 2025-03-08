@@ -8,6 +8,7 @@ export class ClockService {
   private currentTimeSubject = new BehaviorSubject<string>('');
   currentTime$ = this.currentTimeSubject.asObservable();
   private intervalId: any;
+  private lastMinute: number | null = null;
 
   constructor() {
     this.updateTime();
@@ -22,11 +23,17 @@ export class ClockService {
 
   private updateTime(): void {
     const now = new Date();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-    this.currentTimeSubject.next(`${hours}:${formattedMinutes}`);
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+    if (this.lastMinute !== minutes) {
+      // Emitujemy TYLKO jeśli zmieniła się minuta
+      this.currentTimeSubject.next(`${hours}:${formattedMinutes}`);
+      this.lastMinute = minutes;
+    }
   }
+  
   ngOnDestroy(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);

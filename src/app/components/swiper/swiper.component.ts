@@ -12,7 +12,7 @@ import { Media } from '../../models/media.model';
 import { LoaderComponent } from '../loader/loader.component';
 import { CommonModule } from '@angular/common';
 import { combineLatest, Subscription } from 'rxjs';
-import { SettingsService } from '../../services/settings.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 
 Swiper.use([Autoplay]);
 
@@ -33,13 +33,13 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private mediaService: MediaService,
-    private settingsService: SettingsService
+    private userSettingsService: UserSettingsService
   ) {}
 
   ngOnInit(): void {
     this.combinedSubscription = combineLatest([
       this.mediaService.getFiles(),
-      this.settingsService.getSettings(),
+      this.userSettingsService.getSettings(),
     ]).subscribe({
       next: ([media, settings]) => {
         console.log('Media:', media);
