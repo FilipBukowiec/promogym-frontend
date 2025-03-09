@@ -12,9 +12,9 @@ import { FormsModule } from '@angular/forms';
 })
 export class UserSettingsComponent {
   
-  settings: UserSettings = {
+  userSettings: UserSettings = {
   tenant_id: '',
-  language: "ENG",
+  language: '',
   name: '',
   selectedRadioStream: '',
   footerVisibilityRules: [],
@@ -24,6 +24,7 @@ export class UserSettingsComponent {
    editUserName: boolean = false;
 
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
+  languages: string[] = ['pl', 'eng']
   newStartMinute: number | null = null;
   newEndMinute: number | null = null;
   newRadioUrl: string = '';
@@ -45,7 +46,7 @@ export class UserSettingsComponent {
     this.loading = true;
     this.userSettingsService.getSettings().subscribe({
       next: (response) => {
-        this.settings = response;
+        this.userSettings = response;
         this.loading = false;
       },
       error: (error) => {
@@ -66,7 +67,6 @@ export class UserSettingsComponent {
 
   saveUserName(): void {
     this.editUserName = false;
-    // Możesz tu dodać zapis do backendu, jeśli chcesz
   }
 
 
@@ -78,11 +78,11 @@ export class UserSettingsComponent {
       alert('Start time must be less than end time.');
       return;
     }
-    this.settings.footerVisibilityRules.push({
+    this.userSettings.footerVisibilityRules.push({
       startMinute: this.newStartMinute,
       endMinute: this.newEndMinute,
     });
-    console.log(this.settings.footerVisibilityRules);
+    console.log(this.userSettings.footerVisibilityRules);
     this.newStartMinute = null;
     this.newEndMinute = null;
   }
@@ -93,7 +93,7 @@ export class UserSettingsComponent {
   }
 
   saveFooterVisibilityRule(index: number): void {
-    const rule = this.settings.footerVisibilityRules[index];
+    const rule = this.userSettings.footerVisibilityRules[index];
 
     if (rule.startMinute === null || rule.endMinute === null) {
       alert('Both start and end minutes must be selected.');
@@ -112,12 +112,12 @@ export class UserSettingsComponent {
       'Are you sure you want to delete this Footer Visibility Rule?'
     );
     if (confirmDelete) {
-      this.settings.footerVisibilityRules.splice(index, 1);
+      this.userSettings.footerVisibilityRules.splice(index, 1);
     }
   }
 
   saveSettings(): void {
-    this.userSettingsService.updateSettings(this.settings).subscribe({
+    this.userSettingsService.updateSettings(this.userSettings).subscribe({
       next: (response) => {
         alert('Settings saved successfully');
         console.log(response);

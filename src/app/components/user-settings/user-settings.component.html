@@ -3,8 +3,8 @@
   <tr>
     <td>
       User name: 
-      <span *ngIf="!editUserName">{{settings.name}}</span>
-      <input *ngIf="editUserName" [(ngModel)]="settings.name" type="text">
+      <span *ngIf="!editUserName">{{userSettings.name}}</span>
+      <input *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text">
     </td>
     <td>
       <div class="icon-container">
@@ -14,8 +14,11 @@
     </td>
   </tr>
 
-  <tr>4esw57
-    <td>Select language: {{settings.language}}</td>
+  <tr>
+    <td>Select language: 
+      <select name="" id="" [(ngModel)]="userSettings.language">
+        <option *ngFor="let language of languages" [value]="language">{{language}}</option>
+      </select></td>
   </tr>
   <tr>   
     <td>Select radio stream <select name="" id=""></select></td>
@@ -26,7 +29,7 @@
   <tr>
     <td colspan="2">
       Set picture slide duration:
-      <select name="" id="" [(ngModel)]="settings.pictureSlideDuration">
+      <select name="" id="" [(ngModel)]="userSettings.pictureSlideDuration">
         <option *ngFor="let seconds of time" [value]="seconds">
           {{ seconds }}
         </option>
@@ -35,7 +38,7 @@
     </td>
   </tr>
 
-  <tr *ngFor="let rule of settings.footerVisibilityRules; let i = index">
+  <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
     <td>
       <ng-container *ngIf="editFooterVisibilityIndex === i; else displayRule">
         Footer visible from minute
