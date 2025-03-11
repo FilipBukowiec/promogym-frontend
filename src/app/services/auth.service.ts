@@ -18,7 +18,6 @@ export class AuthService {
         console.error('Błąd pobierania tokena:', error);
   
         if (error.error === 'login_required' || error.error === 'consent_required') {
-          // Jeśli wymagane jest ponowne logowanie, przekieruj użytkownika
           this.auth0.loginWithRedirect();
           return throwError(() => new Error('Login required'));
         }

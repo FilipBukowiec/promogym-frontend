@@ -36,7 +36,7 @@ export class NewsService {
 
   // Dodaje newsa i odświeża listę
   addNews(content: string): Observable<News> {
-    return this.auth.getAuthHeaders().pipe(
+    return this.auth.getAuthHeaders().pipe( 
       switchMap((headers) => {
         const payload = { content, tenant_id: headers.get('tenant-id') };
         return this.http.post<News>(this.apiUrl, payload, { headers });

@@ -1,0 +1,36 @@
+@use "../../../styles/variables.scss" as *;
+
+:host{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: red;
+}
+
+
+td{
+    word-break: break-all;
+    }
+  
+  .media {
+    width: 192px;
+    height: 108px;
+    // border-radius: 50%;
+    object-fit: cover;
+  }
+  
+
+  
+  .photo-container{
+    display: flex;
+    justify-content: center;
+  }
+  
+//   table{
+//     width: 700px;
+//   }
+
+
+  .action{
+    display: flex;
+  }

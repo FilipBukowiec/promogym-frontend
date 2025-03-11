@@ -12,6 +12,7 @@ import { UserAnnouncementsComponent } from "./components/user-announcements/user
 import { MainAppComponent } from "./components/main-app/main-app.component";
 import { AdminSettingsComponent } from "./components/admin-settings/admin-settings.component";
 import { AdminComponent } from "./components/admin/admin.component";
+import { AdvertisementComponent } from "./components/advertisement/advertisement.component";
 
 export const routes: Routes = [
   {
@@ -39,7 +40,7 @@ export const routes: Routes = [
 
       { path: "news", component: NewsComponent },
 
-      {path: "admin", component: AdminComponent},
+      {path: "admin", component: AdvertisementComponent},
       {
         path: "management",
         component: ManagementComponent,
