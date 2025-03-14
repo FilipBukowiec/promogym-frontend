@@ -15,6 +15,7 @@ export class UserSettingsComponent {
   userSettings: UserSettings = {
   tenant_id: '',
   language: '',
+  country: "",
   name: '',
   selectedRadioStream: '',
   footerVisibilityRules: [],

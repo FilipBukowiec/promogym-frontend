@@ -10,19 +10,20 @@ import { catchError, switchMap } from "rxjs/operators";
   providedIn: "root",
 })
 export class AdvertisementService {
-  private apiUrl = `${environment.apiUrl}/advertisement`;
+  private apiUrl = `${environment.apiUrl}advertisement`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   // 📌 Przesyłanie ogłoszenia
-  uploadFile(file: File, languages?: string[]): Observable<Advertisement> {
+  uploadFile(file: File, countries: string[]): Observable<Advertisement> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const formData = new FormData();
         formData.append("file", file);
-        if (languages && languages.length > 0) {
-          formData.append("languages", JSON.stringify(languages));
+        if (countries && countries.length >0){
+          formData.append("countries", JSON.stringify(countries));
         }
+        
 
         return this.http.post<Advertisement>(
           `${this.apiUrl}/upload`,
@@ -32,21 +33,23 @@ export class AdvertisementService {
       }),
       catchError((error) => {
         console.error("Wystąpił błąd podczas przesyłania ogłoszenia: ", error);
-        return throwError("Nie udało się przesłać ogłoszenia. Spróbuj ponownie.");
+        return throwError(
+          "Nie udało się przesłać ogłoszenia. Spróbuj ponownie."
+        );
       })
     );
   }
 
   // 📌 Pobieranie ogłoszeń
-  getAll(language?: string): Observable<Advertisement[]> {
+  getAdvertisements(language?: string): Observable<Advertisement[]> {
     const url = language ? `${this.apiUrl}?language=${language}` : this.apiUrl;
-
+  
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
         this.http.get<Advertisement[]>(url, { headers }).pipe(
           catchError((error) => {
-            console.error("Wystąpił błąd podczas pobierania ogłoszeń: ", error);
-            return throwError("Nie udało się pobrać ogłoszeń. Spróbuj ponownie.");
+            console.error("❌ Błąd podczas pobierania ogłoszeń: ", error);
+            return throwError(() => new Error("Nie udało się pobrać ogłoszeń. Spróbuj ponownie."));
           })
         )
       )
@@ -60,7 +63,9 @@ export class AdvertisementService {
         this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
           catchError((error) => {
             console.error("Wystąpił błąd podczas usuwania ogłoszenia: ", error);
-            return throwError("Nie udało się usunąć ogłoszenia. Spróbuj ponownie.");
+            return throwError(
+              "Nie udało się usunąć ogłoszenia. Spróbuj ponownie."
+            );
           })
         )
       )
@@ -71,12 +76,19 @@ export class AdvertisementService {
   moveUp(id: string): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
-        this.http.put<void>(`${this.apiUrl}/move-up/${id}`, {}, { headers }).pipe(
-          catchError((error) => {
-            console.error("Wystąpił błąd podczas przesuwania ogłoszenia w górę: ", error);
-            return throwError("Nie udało się przesunąć ogłoszenia w górę. Spróbuj ponownie.");
-          })
-        )
+        this.http
+          .put<void>(`${this.apiUrl}/move-up/${id}`, {}, { headers })
+          .pipe(
+            catchError((error) => {
+              console.error(
+                "Wystąpił błąd podczas przesuwania ogłoszenia w górę: ",
+                error
+              );
+              return throwError(
+                "Nie udało się przesunąć ogłoszenia w górę. Spróbuj ponownie."
+              );
+            })
+          )
       )
     );
   }
@@ -85,12 +97,19 @@ export class AdvertisementService {
   moveDown(id: string): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
-        this.http.put<void>(`${this.apiUrl}/move-down/${id}`, {}, { headers }).pipe(
-          catchError((error) => {
-            console.error("Wystąpił błąd podczas przesuwania ogłoszenia w dół: ", error);
-            return throwError("Nie udało się przesunąć ogłoszenia w dół. Spróbuj ponownie.");
-          })
-        )
+        this.http
+          .put<void>(`${this.apiUrl}/move-down/${id}`, {}, { headers })
+          .pipe(
+            catchError((error) => {
+              console.error(
+                "Wystąpił błąd podczas przesuwania ogłoszenia w dół: ",
+                error
+              );
+              return throwError(
+                "Nie udało się przesunąć ogłoszenia w dół. Spróbuj ponownie."
+              );
+            })
+          )
       )
     );
   }
@@ -99,12 +118,19 @@ export class AdvertisementService {
   updateOrder(orders: { id: string; order: number }[]): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
-        this.http.put<void>(`${this.apiUrl}/update-order`, orders, { headers }).pipe(
-          catchError((error) => {
-            console.error("Wystąpił błąd podczas aktualizacji kolejności ogłoszeń: ", error);
-            return throwError("Nie udało się zaktualizować kolejności ogłoszeń. Spróbuj ponownie.");
-          })
-        )
+        this.http
+          .put<void>(`${this.apiUrl}/update-order`, orders, { headers })
+          .pipe(
+            catchError((error) => {
+              console.error(
+                "Wystąpił błąd podczas aktualizacji kolejności ogłoszeń: ",
+                error
+              );
+              return throwError(
+                "Nie udało się zaktualizować kolejności ogłoszeń. Spróbuj ponownie."
+              );
+            })
+          )
       )
     );
   }

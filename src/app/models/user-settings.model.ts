@@ -16,10 +16,12 @@ export interface FooterVisibilityRule {
 export interface UserSettings {
   tenant_id: string;
   language: string;
+  country: string;
   name: string;
   selectedRadioStream?: string;
   radioStreamList?: RadioStream[];
   footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
   location?: Location;
+
 }

@@ -16,21 +16,52 @@ export class UserSettingsService {
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
+  // Pobranie ustawień użytkownika
   getSettings(): Observable<UserSettings> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const tenant_id = headers.get("tenant-id");
-        return this.http.get<UserSettings>(
-          `${this.apiUrl}?tenant_id=${tenant_id}`,
-          { headers }
-        );
-      }),
-      tap((settings) => {
-        this.settingsSubject.next(settings); // Upewnij się, że aktualizujesz Subject
+        const authCountry = headers.get("country");
+
+        return this.http
+          .get<UserSettings>(`${this.apiUrl}?tenant_id=${tenant_id}`, {
+            headers,
+          })
+          .pipe(
+            tap((settings) => {
+              // console.log("settings.country:", settings.country); // Sprawdź wartość settings.country
+              // console.log("authCountry:", authCountry); // Sprawdź wartość authCountry
+              // Sprawdzamy, czy country w ustawieniach jest różne od authCountry
+              if (settings.country !== (authCountry || "")) {
+                console.log(
+                  `Zmiana kraju: ${settings.country} -> ${authCountry}`
+                );
+                settings.country = authCountry ? authCountry : ""; // Zaktualizuj country na authCountry lub pusty ciąg
+
+                // Teraz wywołujemy aktualizację ustawień
+                this.updateSettings(settings).subscribe({
+                  next: (updatedSettings) => {
+                    console.log(
+                      "Ustawienia zaktualizowane na serwerze:",
+                      updatedSettings
+                    );
+                    this.settingsSubject.next(updatedSettings); // Uaktualniając Subject po zapisaniu
+                  },
+                  error: (error) => {
+                    console.error("Błąd podczas aktualizacji ustawień:", error);
+                  },
+                });
+              }
+
+              // console.log("Pobrane ustawienia usera:", settings);
+              this.settingsSubject.next(settings); // Upewnij się, że aktualizujesz Subject
+            })
+          );
       }),
       catchError((error) => {
         if (error.status === 404) {
           // Jeśli nie znaleziono ustawień, tworzę domyślne.
+         
           return this.createDefaultSettings(); // Tworzymy domyślne ustawienia
         }
         return throwError(() => error); // W przeciwnym razie przekazujemy błąd
@@ -38,14 +69,17 @@ export class UserSettingsService {
     );
   }
 
+  // Funkcja tworzenia domyślnych ustawień
   private createDefaultSettings(): Observable<UserSettings> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const tenant_id = headers.get("tenant-id");
+        const country = headers.get("country");
         const defaultSettings: UserSettings = {
           tenant_id: tenant_id || "",
           name: tenant_id || "Default Name",
           language: "ENG",
+          country: country || "",
           selectedRadioStream: "",
           radioStreamList: [],
           footerVisibilityRules: [],
@@ -66,11 +100,13 @@ export class UserSettingsService {
     );
   }
 
+  // Aktualizacja ogólnych ustawień
   updateSettings(settings: UserSettings): Observable<UserSettings> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const tenant_id = headers.get("tenant-id");
-        const updatedSettings = { ...settings, tenant_id };
+        const country = headers.get("country");
+        const updatedSettings = { ...settings, tenant_id, country }; // Przekazujemy zaktualizowane ustawienia
         return this.http
           .put<UserSettings>(this.apiUrl, updatedSettings, { headers })
           .pipe(
@@ -84,6 +120,7 @@ export class UserSettingsService {
     );
   }
 
+  // Obserwacja zmian w ustawieniach
   observeSettings(): Observable<UserSettings | null> {
     if (!this.settingsSubject.value) {
       console.warn("🔄 settingsSubject jest null, pobieram ustawienia...");

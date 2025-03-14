@@ -28,11 +28,13 @@ export class AuthService {
         try {
           const decodedToken: any = jwtDecode(token);
           const tenant_id = decodedToken.tenant_id;
-  
+          const country = decodedToken.country;
+
           const headers = new HttpHeaders()
             .set('Authorization', `Bearer ${token}`)
-            .set('tenant-id', tenant_id);
-  
+            .set('tenant-id', tenant_id)
+            .set("country", country)
+   
           return of(headers);
         } catch (decodeError) {
           return throwError(() => new Error('Błąd dekodowania tokena'));

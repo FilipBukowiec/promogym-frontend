@@ -1,76 +1,97 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AdvertisementService } from '../../services/advertisement.service';
-import { Advertisement } from '../../models/advertisement.model';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { AdvertisementService } from "../../services/advertisement.service";
+import { Advertisement } from "../../models/advertisement.model";
+import { environment } from "../../../environments/environment";
+import { AdminSettingsService } from "../../services/admin-settings.service";
 
 @Component({
   standalone: true,
   imports: [CommonModule],
-  selector: 'app-advertisement',
-  templateUrl: './advertisement.component.html',
-  styleUrls: ['./advertisement.component.scss'],
+  selector: "app-advertisement",
+  templateUrl: "./advertisement.component.html",
+  styleUrls: ["./advertisement.component.scss"],
 })
 export class AdvertisementComponent implements OnInit {
   advertisementList: Advertisement[] = [];
   selectedFile: File | null = null;
-  // Jeśli chcesz przekazywać opcjonalnie języki, możesz dodać np.:
-  // selectedLanguages: string[] = [];
+  availableCountries: string[]=[];
+  selectedCountry: string[] = [];
 
-  constructor(private advertisementService: AdvertisementService) {}
+  constructor(
+    private advertisementService: AdvertisementService,
+    private adminSettingsService: AdminSettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.loadAdminSettings();
     this.loadAdvertisements();
   }
 
-  // 📌 Pobieranie listy reklam
-  loadAdvertisements(): void {
-    // Jeśli nie filtrujesz po języku, wywołaj bez argumentu:
-    this.advertisementService.getAll().subscribe(
+  loadAdminSettings(): void {
+    this.adminSettingsService.getSettings().subscribe(
       (data) => {
-        this.advertisementList = data;
+        this.availableCountries = data.countries || [];
+        console.log(this.availableCountries)
       },
-      (error) => console.error('Błąd podczas pobierania reklam:', error)
+      (error) =>
+        console.error(
+          "Błąd podczas pobierania ustawień administracyjnych:",
+          error
+        )
     );
   }
 
-  // 📌 Obsługa wyboru pliku
+  loadAdvertisements(): void {
+    this.advertisementService.getAdvertisements().subscribe(
+      (data) => {
+        this.advertisementList = data;
+      },
+      (error) => console.error("Błąd podczas pobierania reklam:", error)
+    );
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
     }
-  }
+  } 
 
   // 📌 Dodawanie reklamy
   addAdvertisement(): void {
-    if (!this.selectedFile) return;
+    if (!this.selectedFile || this.selectedCountry.length === 0){
+      console.error("Plik i kraje sa wymagane")
+      return;
+    } 
 
-    // Jeśli chcesz przekazać języki, możesz je tutaj podać (np. ['pl', 'en'])
-    // const languages = this.selectedLanguages; 
-    // W tym przykładzie pomijamy languages
-    this.advertisementService.uploadFile(this.selectedFile).subscribe(
-      () => {
+    this.advertisementService.uploadFile(this.selectedFile, this.selectedCountry).subscribe(
+      (response) => {
+        console.log("Reklama została dodana:", response);
         this.selectedFile = null;
+        this.selectedCountry = [];
         this.loadAdvertisements(); // Odświeżenie listy
       },
-      (error) => console.error('Błąd podczas dodawania reklamy:', error)
+      (error) => console.error("Błąd podczas dodawania reklamy:", error)
     );
   }
 
   // 📌 Usuwanie reklamy
   deleteAdvertisement(id: string): void {
-    const confirmed = window.confirm('Czy na pewno chcesz usunąć tę reklamę?');
+    const confirmed = window.confirm("Czy na pewno chcesz usunąć tę reklamę?");
     if (confirmed) {
       this.advertisementService.delete(id).subscribe(
         () => {
           // Aktualizujemy lokalną listę lub odświeżamy ją z backendu
-          this.advertisementList = this.advertisementList.filter(ad => ad._id !== id);
+          this.advertisementList = this.advertisementList.filter(
+            (ad) => ad._id !== id
+          );
           // Alternatywnie, możesz odświeżyć całą listę:
           this.loadAdvertisements();
         },
         (error) => {
-          console.error('Błąd podczas usuwania reklamy:', error);
-          alert('Nie udało się usunąć reklamy.');
+          console.error("Błąd podczas usuwania reklamy:", error);
+          alert("Nie udało się usunąć reklamy.");
         }
       );
     }
@@ -80,7 +101,8 @@ export class AdvertisementComponent implements OnInit {
   moveUp(id: string): void {
     this.advertisementService.moveUp(id).subscribe(
       () => this.loadAdvertisements(),
-      (error) => console.error('Błąd podczas przesuwania reklamy w górę:', error)
+      (error) =>
+        console.error("Błąd podczas przesuwania reklamy w górę:", error)
     );
   }
 
@@ -88,7 +110,7 @@ export class AdvertisementComponent implements OnInit {
   moveDown(id: string): void {
     this.advertisementService.moveDown(id).subscribe(
       () => this.loadAdvertisements(),
-      (error) => console.error('Błąd podczas przesuwania reklamy w dół:', error)
+      (error) => console.error("Błąd podczas przesuwania reklamy w dół:", error)
     );
   }
 
@@ -96,4 +118,16 @@ export class AdvertisementComponent implements OnInit {
   getFullFilePath(filePath: string): string {
     return `http://localhost:3000/${filePath}`;
   }
+
+  toggleRegionSelection(country: string): void {
+    const index = this.selectedCountry.indexOf(country);
+    if (index > -1) {
+      // Jeśli kraj już jest wybrany, usuń go
+      this.selectedCountry.splice(index, 1);
+    } else {
+      // Jeśli kraj nie jest wybrany, dodaj go
+      this.selectedCountry.push(country);
+    }
+  }
+
 }
