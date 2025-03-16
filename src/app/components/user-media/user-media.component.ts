@@ -22,6 +22,7 @@ export class UserMediaComponent implements OnInit {
 
   // 📌 Pobieranie listy plików
   loadMedia(): void {
+    // this.mediaService.getFilesForSwiper().subscribe(
     this.mediaService.getFiles().subscribe(
       (data) => {
         this.mediaList = data;

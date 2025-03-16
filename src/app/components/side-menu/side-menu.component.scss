@@ -11,7 +11,7 @@
 }
 
 .btn-close:hover {
-  background-color: $accent-color !important;
+  background-color: $accentColor !important;
 }
 
 .logo-menu {
@@ -76,7 +76,7 @@
 }
 
 .nav-link:hover {
-  background-color: $accent-color !important;
+  background-color: $accentColor !important;
 }
 
 .nav-link i {
@@ -90,7 +90,7 @@ i {
 }
 
 i:hover{
-  color: $accent-color;
+  color: $accentColor;
 }
 
 button {
@@ -99,7 +99,7 @@ button {
 }
 
 button:hover {
-  color: $accent-color;
+  color: $accentColor;
 }
 
 a {
@@ -122,6 +122,6 @@ a {
 }
 
 .dropdown-toggle:hover{
-  background-color: $accent-color;
+  background-color: $accentColor;
   color: $secondaryColor;
 }

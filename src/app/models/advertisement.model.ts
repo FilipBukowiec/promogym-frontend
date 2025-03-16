@@ -4,5 +4,5 @@ export interface Advertisement {
   filePath: string;
   fileType: string;
   order: number;
-  languages: string[];
+  countries?: string[];
 }

@@ -44,17 +44,8 @@ export class AdminSettingsService {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const tenant_id = headers.get("tenant-id");
-        // console.log('📡 Wysyłane nagłówki dla POST', headers); // Debug nagłówków
-        // console.log('📡 Wysyłanie żądania POST do:sss', this.apiUrl); // Sprawdzenie URL
-
-        // if (!tenant_id) {
-        //   console.error('❌ Brak tenant-id w nagłówkach!');
-        //   return throwError(() => new Error('Brak tenant-id w nagłówkach!'));
-        // }
-
-        // Definiujemy defaultSettings PRZED użyciem w console.log
-        const defaultSettings: AdminSettings = {
-          languages: ["PL", "ENG"],
+             const defaultSettings: AdminSettings = {
+          languages: ["pl", "eng"],
           countries: ["Poland"],
           radioStreamList: [{ url: "dupa", description: "sfaf" }],
         };

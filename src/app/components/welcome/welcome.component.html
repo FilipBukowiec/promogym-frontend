@@ -1,5 +1,5 @@
-
-<div>
+<app-loader *ngIf="isLoading"></app-loader> 
+<div *ngIf="isStarting">
     <h1>Welcome {{user}} on promogym</h1>
 
     <p>Today is...</p>

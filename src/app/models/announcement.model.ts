@@ -9,4 +9,5 @@ export interface Announcement {
     selectedHours?: number[]; 
     selectedMinutes?: number[]; 
     cronSchedule?: string; 
+    countries?:string[]
   }

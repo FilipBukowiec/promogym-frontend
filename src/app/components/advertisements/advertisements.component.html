@@ -1,0 +1,81 @@
+<h1>Advertisement</h1>
+<table>
+  <thead>
+    <tr class="special-row">
+      <th class="add" colspan="3">
+        <input type="file" (change)="onFileSelected($event)" id="fileInput" />
+      </th>
+
+      <th class="add">
+                <div>
+          <span class="country" *ngFor="let country of availableCountries">
+            <input class="check" type="checkbox" [value]="country"
+              (change)="toggleRegionSelection(country)" [checked]="selectedCountry.includes(country)" />
+            <span class="country-name">{{ country }}</span>
+          </span>
+        </div>
+      </th>
+      <th class="add">
+        <button (click)="addAdvertisement()" [disabled]="!selectedFile">Add media</button>
+      </th>
+    </tr>
+  </thead>
+
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>File name</th>
+      <th>Preview</th>
+      <th>Region</th>
+      <th>Action</th>
+
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr class="table-row" *ngFor="let advertisement of advertisementList; let i = index">
+      <td>{{advertisement.order}}</td>
+      <td class="media-name">{{advertisement.fileName}}</td>
+      <td class="photo-container">
+        <img *ngIf="advertisement.fileType.startsWith('image')" class="media"
+          [src]="getFullFilePath(advertisement.filePath)" alt="{{ advertisement.fileName }}" />
+        <video *ngIf="advertisement.fileType.startsWith('video')" class="media"
+          [src]="getFullFilePath(advertisement.filePath)" controls></video>
+      </td>
+
+
+      <td>
+        <div *ngIf="editingAdvertisementId !== advertisement._id">
+          <div class="countries">
+            <span *ngFor="let country of advertisement.countries">{{ country }}</span>
+          </div>
+        </div>
+      
+        <div *ngIf="editingAdvertisementId === advertisement._id">
+          <span class="country" *ngFor="let country of availableCountries">
+            <input class="check" type="checkbox" [value]="country" (change)="toggleEditRegionSelection(country)"
+              [checked]="editedCountries.includes(country)" />
+            {{ country }}
+          </span>
+         
+        </div>
+      </td>
+
+
+
+
+      <td class="td-right">
+        <div class="icon-container">
+          <i class="bi bi-arrow-up" *ngIf="i > 0" (click)="moveUp(advertisement._id)" title="Przesuń w górę"></i>
+          <i class="bi bi-arrow-down" *ngIf="i < advertisementList.length - 1" (click)="moveDown(advertisement._id)"
+            title="Przesuń w dół"></i>
+            <i class="bi bi-pencil-fill" *ngIf="editingAdvertisementId !== advertisement._id" (click)="startEditing(advertisement)" title="Edit advertisement"></i>
+            <i class="bi bi-floppy-fill" *ngIf="editingAdvertisementId === advertisement._id" (click)="saveChanges(advertisement)" title="Save changes"></i>
+          <i class="bi bi-trash3-fill" (click)="deleteAdvertisement(advertisement._id)" title="Usuń media"></i>
+        </div>
+      </td>
+    </tr>
+
+
+  </tbody>
+</table>

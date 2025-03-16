@@ -1,4 +1,71 @@
-<h1>admin-settings works!</h1>
+<h1>Admin general settings</h1>
+
+<table>
+  <tr>
+    <th colspan="3">Available radio streams:</th>
+  </tr>
+  <tr>
+    <th>Description</th>
+    <th>Stream URL</th>
+    <th>Action</th>
+  </tr>
+  <tr *ngFor="let radio of adminSettings.radioStreamList; let i = index">
+    <td>
+      <ng-container *ngIf="editRadioStreamIndex === i; else displayDescription">
+        <input type="text" [(ngModel)]="radio.description" />
+      </ng-container>
+      <ng-template #displayDescription>
+        {{ radio.description }}
+      </ng-template>
+    </td>
+
+    <td class="break-td">
+      <ng-container *ngIf="editRadioStreamIndex === i; else displayUrl">
+        <input type="text" [(ngModel)]="radio.url" />
+      </ng-container>
+      <ng-template #displayUrl>
+        {{ radio.url }}
+      </ng-template>
+    </td>
+    <td>
+      <div class="icons">
+        <i
+          class="bi bi-pencil-fill"
+          *ngIf="editRadioStreamIndex !== i"
+          (click)="editRadioStream(i)"
+        ></i>
+        <i
+          class="bi bi-floppy-fill"
+          *ngIf="editRadioStreamIndex == i"
+          (click)="saveRadioStream(i)"
+        ></i>
+        <i class="bi bi-trash3-fill" (click)="deleteRadioStream(i)"></i>
+        <i class="bi bi-play-fill"></i>
+      </div>
+    </td>
+  </tr>
+  <tr class="new-record">
+    <td>
+      <input
+        [(ngModel)]="newRadioDescription"
+        type="text"
+        placeholder="Enter radio description"
+        [value]="newRadioDescription"
+      />
+    </td>
+    <td>
+      <input
+        [(ngModel)]="newRadioUrl"
+        type="text"
+        placeholder="Enter stream URL"
+        [value]="newRadioUrl"
+      />
+    </td>
+    <td>
+      <button (click)="addRadioStream()">Add Stream</button>
+    </td>
+  </tr>
+</table>
 
 
-<h4>List of available radio stream</h4>  
+<button (click)="saveSettings()">Save settings</button>

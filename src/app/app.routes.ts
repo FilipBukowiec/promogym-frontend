@@ -12,7 +12,8 @@ import { UserAnnouncementsComponent } from "./components/user-announcements/user
 import { MainAppComponent } from "./components/main-app/main-app.component";
 import { AdminSettingsComponent } from "./components/admin-settings/admin-settings.component";
 import { AdminComponent } from "./components/admin/admin.component";
-import { AdvertisementComponent } from "./components/advertisement/advertisement.component";
+import { AdvertisementsComponent } from "./components/advertisements/advertisements.component";
+import { Component } from "@angular/core";
 
 export const routes: Routes = [
   {
@@ -40,7 +41,18 @@ export const routes: Routes = [
 
       { path: "news", component: NewsComponent },
 
-      {path: "admin", component: AdvertisementComponent},
+      {
+        path: "admin",
+        component: AdminComponent,
+        children: [
+          {
+            path: "admin-settings",
+            component: AdminSettingsComponent,
+          },
+          { path: "advertisements", component: AdvertisementsComponent },
+          { path: "", redirectTo: "admin-settings", pathMatch: "full" },
+        ],
+      },
       {
         path: "management",
         component: ManagementComponent,

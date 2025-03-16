@@ -6,39 +6,40 @@ import { Observable, throwError } from "rxjs";
 import { Advertisement } from "../models/advertisement.model";
 import { catchError, switchMap } from "rxjs/operators";
 
+
 @Injectable({
   providedIn: "root",
 })
-export class AdvertisementService {
+export class AdvertisementsService {
   private apiUrl = `${environment.apiUrl}advertisement`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   // 📌 Przesyłanie ogłoszenia
   uploadFile(file: File, countries: string[]): Observable<Advertisement> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (countries && countries.length >0){
-          formData.append("countries", JSON.stringify(countries));
-        }
-        
+  return this.auth.getAuthHeaders().pipe(
+    switchMap((headers) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (countries && countries.length > 0) {
+        formData.append("countries", JSON.stringify(countries)); // Zapisujemy kraje w formie JSON
+      }
 
-        return this.http.post<Advertisement>(
-          `${this.apiUrl}/upload`,
-          formData,
-          { headers }
-        );
-      }),
-      catchError((error) => {
-        console.error("Wystąpił błąd podczas przesyłania ogłoszenia: ", error);
-        return throwError(
-          "Nie udało się przesłać ogłoszenia. Spróbuj ponownie."
-        );
-      })
-    );
-  }
+      return this.http.post<Advertisement>(
+        `${this.apiUrl}/upload`,
+        formData,
+        { headers }
+      );
+    }),
+    catchError((error) => {
+      console.error("Wystąpił błąd podczas przesyłania ogłoszenia: ", error);
+      return throwError(
+        "Nie udało się przesłać ogłoszenia. Spróbuj ponownie."
+      );
+    })
+  );
+}
+
 
   // 📌 Pobieranie ogłoszeń
   getAdvertisements(language?: string): Observable<Advertisement[]> {
@@ -134,6 +135,21 @@ export class AdvertisementService {
       )
     );
   }
+
+  updateAdvertisement(id: string, updateData: Partial<{ countries: string[] }>): Observable<any> {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) =>        
+    this.http.patch(`${this.apiUrl}/${id}`, updateData, {headers})
+    ),
+    catchError((error) => {
+      console.error("Wystąpił błąd podczas aktualizacji ogłoszenia: ", error);
+      return throwError("Nie udało się zaktualizować ogłoszenia. Spróbuj ponownie.");
+    })
+  );
+
+}
+
+
 
   // 📌 Obsługuje błędy
   private handleError(error: any) {

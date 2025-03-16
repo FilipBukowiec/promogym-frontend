@@ -30,7 +30,8 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   private isVideoPlaying: boolean = false;
   pictureSlideDuration: number = 5; // Domyślna wartość
   private combinedSubscription: Subscription | null = null;
-
+  
+  
   constructor(
     private mediaService: MediaService,
     private userSettingsService: UserSettingsService
@@ -38,7 +39,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.combinedSubscription = combineLatest([
-      this.mediaService.getFiles(),
+      this.mediaService.getFilesForSwiper(),
       this.userSettingsService.getSettings(),
     ]).subscribe({
       next: ([media, settings]) => {

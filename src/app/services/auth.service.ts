@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
@@ -42,4 +42,19 @@ export class AuthService {
       })
     );
   }
+
+
+
+  getUser(): Observable<{roles: string[]; country:string}> {
+    return this.auth0.getAccessTokenSilently().pipe(
+      map((token) => {
+        const decodedToken: any = jwtDecode(token);
+        return {
+          roles: decodedToken['https://promogym.com/roles'] || [],
+          country: decodedToken.country || '',
+        }
+      })
+    )}
+
+
 }
