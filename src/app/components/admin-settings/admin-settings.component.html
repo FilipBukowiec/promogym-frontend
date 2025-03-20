@@ -2,6 +2,58 @@
 
 <table>
   <tr>
+    <th>Available countries for avertisements</th>
+  </tr>
+
+  <tr
+    *ngFor="
+      let country of adminSettings.countries;
+      let i = index;
+      trackBy: trackByCountry
+    "
+  >
+    <td colspan="2">
+      <ng-container *ngIf="editCountryIndex === i; else displayCountry">
+        <input type="text" [(ngModel)]="adminSettings.countries[i]" />
+      </ng-container>
+      <ng-template #displayCountry>
+        {{ country }}
+      </ng-template>
+    </td>
+    <td>
+      <div class="icon-container">
+        <i
+          class="bi bi-pencil-fill"
+          *ngIf="editCountryIndex !== i"
+          (click)="editCountry(i)"
+        ></i>
+        <i
+          class="bi bi-floppy-fill"
+          *ngIf="editCountryIndex === i"
+          (click)="saveCountry(i)"
+        ></i>
+        <i class="bi bi-trash3-fill" (click)="deleteCountry(i)"></i>
+      </div>
+    </td>
+  </tr>
+
+  <tr>
+    <td>Add new country</td>
+  </tr>
+
+  <tr>
+    <td colspan="2">
+      <input
+        type="text"
+        [(ngModel)]="newCountry"
+        placeholder="Add new country"
+        [value]="newCountry"
+      />
+    </td>
+    <td><button (click)="addNewCountry()">Add new country</button></td>
+  </tr>
+
+  <tr>
     <th colspan="3">Available radio streams:</th>
   </tr>
   <tr>
@@ -10,7 +62,7 @@
     <th>Action</th>
   </tr>
   <tr *ngFor="let radio of adminSettings.radioStreamList; let i = index">
-    <td>
+    <td colspan="">
       <ng-container *ngIf="editRadioStreamIndex === i; else displayDescription">
         <input type="text" [(ngModel)]="radio.description" />
       </ng-container>
@@ -28,7 +80,7 @@
       </ng-template>
     </td>
     <td>
-      <div class="icons">
+      <div class="icon-container">
         <i
           class="bi bi-pencil-fill"
           *ngIf="editRadioStreamIndex !== i"
@@ -40,7 +92,28 @@
           (click)="saveRadioStream(i)"
         ></i>
         <i class="bi bi-trash3-fill" (click)="deleteRadioStream(i)"></i>
-        <i class="bi bi-play-fill"></i>
+
+        <i
+          *ngIf="
+            !(radioStreamService.adminSettingsAudioState$ | async) ||
+            currentPlayingStreamIndex !== i
+          "
+          class="bi bi-play-fill"
+          (click)="playRadioStream(i, radio.url)"
+        ></i>
+
+        <i
+          *ngIf="
+            (radioStreamService.adminSettingsAudioState$ | async) &&
+            currentPlayingStreamIndex === i
+          "
+          class="bi bi-stop-fill"
+          (click)="
+            radioStreamService.stopRadioStream(
+              this.radioStreamService.adminSettingsAudio$
+            )
+          "
+        ></i>
       </div>
     </td>
   </tr>
@@ -66,6 +139,5 @@
     </td>
   </tr>
 </table>
-
 
 <button (click)="saveSettings()">Save settings</button>

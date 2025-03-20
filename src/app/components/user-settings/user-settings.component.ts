@@ -1,9 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { UserSettingsService } from "../../services/user-settings.service";
 import { UserSettings } from "../../models/user-settings.model";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { AdminSettingsService } from "../../services/admin-settings.service";
+import { RadioStreamService } from "../../services/radio-stream.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-user-settings",
@@ -11,7 +13,7 @@ import { AdminSettingsService } from "../../services/admin-settings.service";
   templateUrl: "./user-settings.component.html",
   styleUrl: "./user-settings.component.scss",
 })
-export class UserSettingsComponent {
+export class UserSettingsComponent implements OnInit, OnDestroy {
   userSettings: UserSettings = {
     tenant_id: "",
     language: "",
@@ -22,27 +24,34 @@ export class UserSettingsComponent {
     pictureSlideDuration: 15,
   };
 
+  isStreamPlaying: boolean = false;
   editUserName: boolean = false;
-
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
   languages: string[] = [];
   newStartMinute: number | null = null;
   newEndMinute: number | null = null;
-  newRadioUrl: string = "";
-  editRadioStreamIndex: number | null = null;
-  editFooterVisibilityIndex: number | null = null;
+  radioStreamList: { url: string; description: string }[] = [];
+  currentPlayingStreamIndex: number | null = null;
+  currentPlayingStreamUrl: string | null = null; // Poprawka - dodana zmienna
 
-  loading: boolean = false; // Dodano stan ładowania
-  error: string | null = null; // Dodano stan błędu
+  editFooterVisibilityIndex: number | null = null;
+  loading: boolean = false;
+  error: string | null = null;
+  private streamSubscription: Subscription = new Subscription(); // Zmienna do subskrypcji
 
   constructor(
     private userSettingsService: UserSettingsService,
-    private adminSettingsService: AdminSettingsService
+    private adminSettingsService: AdminSettingsService,
+    private radioStreamService: RadioStreamService
   ) {}
 
   ngOnInit(): void {
     this.loadSettings();
-    this.getAvailableLanguages();
+    this.getAdminSettings();
+  }
+
+  ngOnDestroy(): void {
+    this.streamSubscription.unsubscribe(); // Odsubskrybowanie przy usunięciu komponentu
   }
 
   loadSettings(): void {
@@ -51,26 +60,34 @@ export class UserSettingsComponent {
       next: (response) => {
         this.userSettings = response;
         this.loading = false;
-        console.log(this.userSettings.language)
       },
       error: (error) => {
         this.loading = false;
-        this.error =
-          "Błąd podczas ładowania ustawień. Spróbuj ponownie później.";
+        this.error = "Błąd podczas ładowania ustawień. Spróbuj ponownie później.";
         console.error("Błąd podczas ładowania", error);
       },
     });
   }
 
-  getAvailableLanguages(): void {
+  
+
+  getAdminSettings(): void {
     this.adminSettingsService.settings$.subscribe({
       next: (adminSettings) => {
         if (adminSettings?.languages) {
           this.languages = adminSettings.languages;
         }
+        if (adminSettings?.radioStreamList) {
+          this.radioStreamList = adminSettings.radioStreamList;
+        }
       },
     });
   }
+
+
+
+
+
 
   editUserNameField(): void {
     this.editUserName = true;
@@ -80,19 +97,21 @@ export class UserSettingsComponent {
     this.editUserName = false;
   }
 
-  addFooterVisibilityRule() {
+  addFooterVisibilityRule(): void {
     if (this.newStartMinute === null || this.newEndMinute === null) {
       alert("Please select both start and end minutes.");
       return;
-    } else if (this.newStartMinute >= this.newEndMinute) {
+    }
+    if (this.newStartMinute >= this.newEndMinute) {
       alert("Start time must be less than end time.");
       return;
     }
+
     this.userSettings.footerVisibilityRules.push({
       startMinute: this.newStartMinute,
       endMinute: this.newEndMinute,
     });
-    console.log(this.userSettings.footerVisibilityRules);
+
     this.newStartMinute = null;
     this.newEndMinute = null;
   }
@@ -117,9 +136,7 @@ export class UserSettingsComponent {
   }
 
   deleteFooterVisibilityRule(index: number): void {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this Footer Visibility Rule?"
-    );
+    const confirmDelete = confirm("Are you sure you want to delete this Footer Visibility Rule?");
     if (confirmDelete) {
       this.userSettings.footerVisibilityRules.splice(index, 1);
     }
@@ -129,7 +146,6 @@ export class UserSettingsComponent {
     this.userSettingsService.updateSettings(this.userSettings).subscribe({
       next: (response) => {
         alert("Settings saved successfully");
-        console.log(response);
         this.loadSettings();
       },
       error: (error) => {

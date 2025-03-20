@@ -2,14 +2,16 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { FullscreenService } from '../../services/fullscreen.service';
 import { DataService } from '../../services/data.service';
-// import { RadioStreamService } from '../../services/radio-stream.service';
-// import { AnnouncementService } from '../../services/announcement.service'; 
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import {jwtDecode} from "jwt-decode";
+import { RadioStreamService } from '../../services/radio-stream.service';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { UserSettings } from '../../models/user-settings.model';
+// import { AnnouncementService } from '../../services/announcement.service'; 
 
 @Component({
   selector: 'app-side-menu',
@@ -23,23 +25,28 @@ export class SideMenuComponent implements AfterViewInit {
   shouldRefresh$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false); // <-- Zmienione na BehaviorSubject
   isFullscreen$: Observable<boolean>;
   isAdmin = false;
+  isStreamPlaying$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  userSettings$: Observable<UserSettings | null>
+  // isAnnouncementPlaying$: Observable<boolean>;  
 
-
-
-  // isAnnouncementPlaying$: Observable<boolean>; 
-  // isStreamPlaying$: Observable<boolean>;
-
+  
   constructor(
     private fullscreenService: FullscreenService,
     private router: Router,
     private dataService: DataService,
-    // public radioStreamService: RadioStreamService,
-    // private announcementService: AnnouncementService,
+    public radioStreamService: RadioStreamService,
+    private userSettingsService: UserSettingsService,
     private auth:AuthService,
   ) {
+    
     this.isFullscreen$ = this.fullscreenService.isFullscreen$;
+this.userSettings$ = this.userSettingsService.settings$;
+
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
     // this.isAnnouncementPlaying$ = this.announcementService.isPlaying$; 
+
+
+
 
     this.auth.getAccessTokenSilently().subscribe(
       (token) => {
@@ -56,9 +63,7 @@ export class SideMenuComponent implements AfterViewInit {
     );
   }
   
-
-
-  
+ 
 
   ngOnInit(): void {
     this.isOnStartPage$.next(this.router.url === '/dashboard/start');
@@ -121,13 +126,23 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
   // toggleStream(): void {
-  //   this.radioStreamService.toggleStream();
+  //   this.userSettings$.subscribe(settings => {
+  //     if (settings && settings.selectedRadioStream) {
+  //       if (this.isStreamPlaying$.value) {
+  //         this.radioStreamService.stopStream(); 
+  //         this.isStreamPlaying$.next(false);
+  //       } else {
+  //         this.radioStreamService.playStream(settings.selectedRadioStream);
+  //         this.isStreamPlaying$.next(true); 
+  //       }
+  //     } else {
+  //       console.error('Brak ustawionego strumienia radiowego w ustawieniach użytkownika');
+  //     }
+  //   });
   // }
 
 
-  // toggleAnnouncement(): void {
-  //     this.announcementService.toggleIsPlaying(); 
-  // }
+
 
   logout(): void {
     this.auth.logout({ logoutParams: { returnTo: document.location.origin} }); 

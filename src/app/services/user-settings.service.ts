@@ -29,9 +29,6 @@ export class UserSettingsService {
           })
           .pipe(
             tap((settings) => {
-              // console.log("settings.country:", settings.country); // Sprawdź wartość settings.country
-              // console.log("authCountry:", authCountry); // Sprawdź wartość authCountry
-              // Sprawdzamy, czy country w ustawieniach jest różne od authCountry
               if (settings.country !== (authCountry || "")) {
                 console.log(
                   `Zmiana kraju: ${settings.country} -> ${authCountry}`
@@ -61,7 +58,7 @@ export class UserSettingsService {
       catchError((error) => {
         if (error.status === 404) {
           // Jeśli nie znaleziono ustawień, tworzę domyślne.
-         
+
           return this.createDefaultSettings(); // Tworzymy domyślne ustawienia
         }
         return throwError(() => error); // W przeciwnym razie przekazujemy błąd
@@ -81,7 +78,6 @@ export class UserSettingsService {
           language: "ENG",
           country: country || "",
           selectedRadioStream: "",
-          radioStreamList: [],
           footerVisibilityRules: [],
           pictureSlideDuration: 15,
           location: { type: "Point", coordinates: [0, 0] },

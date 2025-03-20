@@ -1,10 +1,6 @@
 <div class="side-menu">
-    <button class="navbar-toggler menu-btn" 
-    
-    [class.opacity-0]="isOnStartPage$ | async"
-        [class.pointer-events-none]="isOnStartPage$ | async" type="button" 
-        
-        data-bs-toggle="offcanvas"
+    <button class="navbar-toggler menu-btn" [class.opacity-0]="isOnStartPage$ | async"
+        [class.pointer-events-none]="isOnStartPage$ | async" type="button" data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>
     </button>
@@ -53,17 +49,17 @@
                         </span>
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
-                    data-bs-dismiss="offcanvas">
-                    <i class="bi bi-kanban"></i>Management</a>
+                        data-bs-dismiss="offcanvas">
+                        <i class="bi bi-kanban"></i>Management</a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a href="" class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
-                    data-bs-dismiss="offcanvas">
-                    <i class="bi bi-question-diamond-fill"></i>FAQ</a>
+                        data-bs-dismiss="offcanvas">
+                        <i class="bi bi-question-diamond-fill"></i>FAQ</a>
                 </li>
                 <li class="nav-item">
 
@@ -73,15 +69,15 @@
                 </li>
                 <li *ngIf="isAdmin" class="nav-item">
                     <a href="" class="nav-link" [routerLink]="['admin']" routerLinkActive="router-link-active"
-                    data-bs-dismiss="offcanvas">
-                    <i class="bi bi-person-fill"></i>Admin</a>
+                        data-bs-dismiss="offcanvas">
+                        <i class="bi bi-person-fill"></i>Admin</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" [routerLink]="['about']" routerLinkActive="rout er-link-active"
-                    data-bs-dismiss="offcanvas"><i class="bi bi-chat-dots-fill"></i>
-                    Contact</a>
+                        data-bs-dismiss="offcanvas"><i class="bi bi-chat-dots-fill"></i>
+                        Contact</a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleFullscreen()">
                         <span *ngIf="isFullscreen$ | async"><i class="bi bi-fullscreen-exit"></i>Exit FullScreen</span>
@@ -89,23 +85,18 @@
                             FullScreen</span>
                     </a>
                 </li>
-                <!--
+
                 <li>
-                    <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleStream()">
-                        <span *ngIf="isStreamPlaying$ | async"><i class="bi bi-volume-mute-fill"></i>Stop stream</span>
-                        <span *ngIf="!(isStreamPlaying$ | async)"><i class="bi bi-volume-up-fill"></i>Start
-                            stream</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleAnnouncement()">
-                            <span *ngIf="isAnnouncementPlaying$ | async"><i class="bi bi-mic-mute-fill"></i>Stop
-                                Announcement</span>
-                                <span *ngIf="!(isAnnouncementPlaying$ | async)"><i class="bi bi-mic-fill"></i>Play
-                                    Announcement</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
+                    <!-- <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleStream()">
+                        <ng-container *ngIf="isStreamPlaying$ | async; else startStream">
+                            <span><i class="bi bi-volume-mute-fill"></i> Stop stream</span>
+                        </ng-container>
+                        <ng-template #startStream>
+                            <span><i class="bi bi-volume-up-fill"></i> Start stream</span>
+                        </ng-template>
+                    </a> -->
+                </li>
+                <!--    <li class="nav-item">
                                 <a class="nav-link" [routerLink]="['/dashboard','contact']" routerLinkActive="router-link-active"
                                 data-bs-dismiss="offcanvas">
                                 <i class="bi bi-chat-dots"></i>Contact</a>

@@ -39,14 +39,6 @@ li:hover {
 
 .box {
   width: 100%;
-  // height: calc(100% - 5rem);
-  // height: 2000px;
-  // background-color: #040b26;
-  // background-color: #130f40;
-  // background-image: linear-gradient(180deg, $primaryColor 0%, #0d0d0d 74%);
-  // background-color: $primaryColor;
-  // background-color: rgba($color: #000, $alpha: 0.4);
-
   display: flex;
   justify-content: center;
   padding: 50px;
@@ -56,9 +48,8 @@ li:hover {
   text-align: center;
   background-color: rgba($color: $primaryColor, $alpha: 1);
   width: 700px;
-  border-radius: 10px;
+  // border-radius: 10px;
   padding: 30px;
-  // box-shadow: 8px 8px 12px 0px rgb(1, 12, 35);
   color: #fff;
   display: flex;
   justify-content: center;

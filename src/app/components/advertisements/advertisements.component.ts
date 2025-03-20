@@ -89,12 +89,19 @@ export class AdvertisementsComponent implements OnInit {
 
 
   saveChanges(advertisement: Advertisement): void {
-    this.advertisementsService.updateAdvertisement(advertisement._id, { countries: this.editedCountries }).subscribe(
+    // Sortowanie krajów przed wysłaniem
+    const sortedCountries = [...this.editedCountries].sort();
+  
+    // Wywołanie metody aktualizacji na backendzie
+    this.advertisementsService.updateAdvertisement(advertisement._id, { countries: sortedCountries }).subscribe(
       () => {
-        advertisement.countries = [...this.editedCountries]; // Lokalna aktualizacja
+        // Aktualizacja lokalnie po zapisaniu
+        advertisement.countries = sortedCountries;
         this.editingAdvertisementId = null; // Zakończ edycję
       },
-      (error) => console.error("Błąd podczas aktualizacji krajów reklamy:", error)
+      (error) => {
+        console.error("Błąd podczas aktualizacji krajów reklamy:", error);
+      }
     );
   }
 

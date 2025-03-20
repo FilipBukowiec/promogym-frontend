@@ -1,16 +1,18 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AdminSettingsService } from "../../services/admin-settings.service";
-import { FormsModule } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import { RadioStreamService } from "../../services/radio-stream.service";
 import { AdminSettings } from "../../models/admin-settings.model";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { BehaviorSubject, Observable } from "rxjs";
 
 @Component({
+  imports: [CommonModule, FormsModule],
   selector: "app-admin-settings",
-  imports: [FormsModule, CommonModule],
   templateUrl: "./admin-settings.component.html",
-  styleUrl: "./admin-settings.component.scss",
+  styleUrls: ["./admin-settings.component.scss"],
 })
-export class AdminSettingsComponent {
+export class AdminSettingsComponent implements OnInit {
   adminSettings: AdminSettings = {
     languages: [],
     countries: [],
@@ -20,9 +22,16 @@ export class AdminSettingsComponent {
   newRadioDescription: string = "";
   newRadioUrl: string = "";
   editRadioStreamIndex: number | null = null;
- 
+  editCountryIndex: number | null = null;
+  newCountry: string = "";
+  currentPlayingStreamIndex: number | null = null;
+  isPlaying$ = new BehaviorSubject<boolean>(false);
+  
 
-  constructor(private adminSettingsService: AdminSettingsService) {}
+  constructor(public adminSettingsService: AdminSettingsService, public radioStreamService: RadioStreamService) {
+    
+  }
+
 
   ngOnInit(): void {
     this.loadAdminSettings();
@@ -31,58 +40,114 @@ export class AdminSettingsComponent {
   loadAdminSettings(): void {
     this.adminSettingsService.getSettings().subscribe({
       next: (adminSettings) => {
-        if (adminSettings?.radioStreamList) {
-          this.adminSettings.radioStreamList = adminSettings.radioStreamList;
+        if (adminSettings) {
+          this.adminSettings = adminSettings;
+          console.log("Admin settings loaded", adminSettings);
         }
+      },
+      error: (err) => {
+        console.error("Error loading admin settings", err);
       },
     });
   }
 
-  addRadioStream() {
-    if (
-      this.newRadioDescription.trim() === "" ||
-      this.newRadioUrl.trim() === ""
-    ) {
+  playRadioStream(index: number, url: string): void {
+    // Zresetowanie indeksu przed rozpoczęciem odtwarzania nowego strumienia
+    this.currentPlayingStreamIndex = null;
+  
+    // Uruchamiamy strumień, ponieważ indeks został zresetowany, a obecny strumień jest zatrzymany
+    this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, index);  // Odtwarzanie nowego strumienia
+    
+    // Ustawiamy nowy indeks strumienia po rozpoczęciu odtwarzania
+    this.currentPlayingStreamIndex = index;
+  }
+  
+  
+
+
+
+
+
+
+  /** Dodanie nowego radia */
+  addRadioStream(): void {
+    if (this.newRadioDescription.trim() === "" || this.newRadioUrl.trim() === "") {
       alert("Please fill in both fields.");
       return;
     }
+
     this.adminSettings.radioStreamList.push({
-      url: this.newRadioUrl,
       description: this.newRadioDescription,
+      url: this.newRadioUrl,
     });
 
     this.newRadioDescription = "";
     this.newRadioUrl = "";
   }
 
+  /** Usuwanie radia */
   deleteRadioStream(index: number): void {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this radio stream?"
-    );
+    const confirmDelete = confirm("Are you sure you want to delete this radio stream?");
     if (confirmDelete) {
-      const deletedUrl = this.adminSettings.radioStreamList[index]?.url;
       this.adminSettings.radioStreamList.splice(index, 1);
     }
   }
 
+  /** Edycja radia */
   editRadioStream(index: number): void {
     this.editRadioStreamIndex = index;
   }
 
+  /** Zapisanie edytowanego radia */
   saveRadioStream(index: number): void {
     this.editRadioStreamIndex = null;
   }
 
-  saveSettings(){
+  /** Zapisanie wszystkich ustawień */
+  saveSettings(): void {
     this.adminSettingsService.updateSettings(this.adminSettings).subscribe({
       next: (response) => {
-        alert('Settings saved successfully');
+        alert("Settings saved successfully");
         console.log(response);
+        this.loadAdminSettings();
       },
       error: (error) => {
-        console.error('Błąd podczas zapisywania', error);
-        alert('Błąd podczas zapisywania ustawień. Spróbuj ponownie później.');
+        console.error("Error saving settings", error);
+        alert("Error saving settings. Please try again later.");
       },
     });
+  }
+
+  /** Dodanie nowego kraju */
+  addNewCountry(): void {
+    if (this.newCountry.trim() === "") {
+      alert("Please enter a country name");
+      return;
+    }
+    this.adminSettings.countries.push(this.newCountry);
+    this.newCountry = "";
+  }
+
+  /** Usunięcie kraju */
+  deleteCountry(index: number): void {
+    const confirmDelete = confirm("Are you sure you want to delete this country?");
+    if (confirmDelete) {
+      this.adminSettings.countries.splice(index, 1);
+    }
+  }
+
+  /** Edycja kraju */
+  editCountry(index: number): void {
+    this.editCountryIndex = index;
+  }
+
+  /** Zapisanie edytowanego kraju */
+  saveCountry(index: number): void {
+    this.editCountryIndex = null;
+  }
+
+  /** Track by dla krajów */
+  trackByCountry(index: number, country: string): number {
+    return index;
   }
 }

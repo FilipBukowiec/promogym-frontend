@@ -34,7 +34,7 @@
   <tbody>
 
     <tr class="table-row" *ngFor="let advertisement of advertisementList; let i = index">
-      <td>{{advertisement.order}}</td>
+      <td class="td-left">{{advertisement.order}}</td>
       <td class="media-name">{{advertisement.fileName}}</td>
       <td class="photo-container">
         <img *ngIf="advertisement.fileType.startsWith('image')" class="media"

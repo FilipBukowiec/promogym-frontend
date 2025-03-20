@@ -2,7 +2,7 @@
 <table>
   <tr>
     <td>
-      User name: 
+      User name:
       <span *ngIf="!editUserName">{{userSettings.name}}</span>
       <input *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text">
     </td>
@@ -10,18 +10,35 @@
       <div class="icon-container">
         <i class="bi bi-pencil-fill" *ngIf="!editUserName" (click)="editUserNameField()"></i>
         <i class="bi bi-floppy-fill" *ngIf="editUserName" (click)="saveUserName()"></i>
-          </div>
+      </div>
     </td>
   </tr>
 
   <tr>
-    <td>Select language: 
+    <td>Select language:
       <select name="" id="" [(ngModel)]="userSettings.language">
         <option *ngFor="let language of languages" [value]="language">{{language}}</option>
-      </select></td>
+      </select>
+    </td>
   </tr>
-  <tr>   
-    <td>Select radio stream <select name="" id=""></select></td>
+  <tr>
+    <td>Select radio stream: <select name="" id="" [(ngModel)]="userSettings.selectedRadioStream">
+        <option value="" *ngFor="let radio of radioStreamList" [value]="radio.url">{{radio.description}}
+        </option>
+      </select></td>
+
+      <!-- <td> <div class="icon-container"><i
+        *ngIf="!isStreamPlaying && userSettings.selectedRadioStream"
+        class="bi bi-play-fill"
+        (click)="playRadioStream(userSettings.selectedRadioStream)"
+      ></i>
+    
+            <i
+        *ngIf="isStreamPlaying"
+        class="bi bi-stop-fill"
+        (click)="stopRadioStream()"
+      ></i></div>
+    </td> -->
   </tr>
 
 
@@ -65,27 +82,27 @@
       </div>
     </td>
   </tr>
-<br>
- 
-    <tr>
-      <td class="new-rule" colspan="2">Add new visibility footer rules</td>
-    </tr>
-    <tr>
-      <td>
-        Footer visible from minute
-        <select [(ngModel)]="newStartMinute">
-          <option *ngFor="let minute of time" [value]="minute">
-            {{ minute }}
-          </option>
-        </select>to minute
-        <select select [(ngModel)]="newEndMinute">
-          <option *ngFor="let minute of time" [value]="minute">
-            {{ minute }}
-          </option>
-        </select>
-      </td>
-      <td><button (click)="addFooterVisibilityRule()">Add rule</button></td>
-    </tr>
+  <br>
+
+  <tr>
+    <td class="new-rule" colspan="2">Add new visibility footer rules</td>
+  </tr>
+  <tr>
+    <td>
+      Footer visible from minute
+      <select [(ngModel)]="newStartMinute">
+        <option *ngFor="let minute of time" [value]="minute">
+          {{ minute }}
+        </option>
+      </select>to minute
+      <select select [(ngModel)]="newEndMinute">
+        <option *ngFor="let minute of time" [value]="minute">
+          {{ minute }}
+        </option>
+      </select>
+    </td>
+    <td><button (click)="addFooterVisibilityRule()">Add rule</button></td>
+  </tr>
 
 </table>
 <button (click)="saveSettings()">Save settings</button><button>Live update</button>

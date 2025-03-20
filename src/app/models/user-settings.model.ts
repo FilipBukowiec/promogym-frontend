@@ -3,10 +3,6 @@ export interface Location {
   coordinates: [number, number];
 }
 
-export interface RadioStream {
-  url: string;
-  description: string;
-}
 
 export interface FooterVisibilityRule {
   startMinute: number;
@@ -19,7 +15,6 @@ export interface UserSettings {
   country: string;
   name: string;
   selectedRadioStream?: string;
-  radioStreamList?: RadioStream[];
   footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
   location?: Location;
