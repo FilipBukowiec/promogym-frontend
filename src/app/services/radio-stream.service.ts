@@ -6,53 +6,55 @@ import { Observable, BehaviorSubject } from 'rxjs';
 })
 export class RadioStreamService {
   private audioPlayer: HTMLAudioElement = new Audio();
-  private currentPlayingStreamIndex: number | null = null;
+  private currentPlayingStreamIndex$ = new BehaviorSubject<number | null>(null);
 
-  // Stan audio dla różnych komponentów
-  private sideMenuAudio$ = new BehaviorSubject<boolean>(false);
+  // Stany audio dla różnych komponentów
+  public sideMenuAudio$ = new BehaviorSubject<boolean>(false);
   private userSettingsAudio$ = new BehaviorSubject<boolean>(false);
   public adminSettingsAudio$ = new BehaviorSubject<boolean>(false);
 
   constructor() {}
 
-  playRadioStream(url: string, trueObservable: BehaviorSubject<boolean>, index?: number): void {
-    // Zatrzymanie aktualnie odtwarzanego audio, bez względu na to, czy strumień jest ten sam czy inny
-    this.stopRadioStream(trueObservable);
-  
-    // Ustawiamy nowe źródło audio
+  // Getter do obserwowania aktualnie odtwarzanego strumienia
+  get currentPlayingStreamIndexState$(): Observable<number | null> {
+    return this.currentPlayingStreamIndex$.asObservable();
+  }
+
+  playRadioStream(url: string, trueObservable: BehaviorSubject<boolean>, falseObservable?:BehaviorSubject<boolean>[], index?: number): void {
+    this.stopRadioStream(trueObservable); // Zatrzymanie aktualnie odtwarzanego strumienia
+
     this.audioPlayer.src = url;
     this.audioPlayer.load();
-  
+
     this.audioPlayer
       .play()
       .then(() => {
-        this.currentPlayingStreamIndex = index ?? null; // Jeśli nie ma indeksu, ustawiamy null
+        this.currentPlayingStreamIndex$.next(index ?? null); // Aktualizacja obserwowalnej wartości
         console.log(`Playing stream ${index}: ${url}`);
-        
-        // Ustawiamy stan na 'true' dla aktualnie odtwarzanego strumienia
         trueObservable.next(true);
+        if(falseObservable&& falseObservable.length >0){
+          falseObservable.forEach(observable => observable.next(false))
+        }
+        
       })
       .catch((error) => {
         console.error('Error playing radio stream:', error);
         this.stopRadioStream(trueObservable);
       });
-  
-    // Obsługa błędów
+
     this.audioPlayer.onerror = () => {
       console.error('Stream error, stopping...');
       this.stopRadioStream(trueObservable);
     };
   }
-  
-  
+
   stopRadioStream(trueObservable: BehaviorSubject<boolean>): void {
     this.audioPlayer.pause();
-    this.currentPlayingStreamIndex = null;
-  
-    // Zatrzymanie audio i ustawienie stanu na 'false' w odpowiednim observable
-    trueObservable.next(false); // Ustawiamy stan na 'false' po zatrzymaniu strumienia
+    this.currentPlayingStreamIndex$.next(null); // Resetowanie indeksu
+    trueObservable.next(false);
   }
-  
+
+
 
   // Funkcja do subskrypcji stanu audio
   get sideMenuAudioState$() {

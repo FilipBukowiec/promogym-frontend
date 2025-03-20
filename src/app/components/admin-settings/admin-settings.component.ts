@@ -35,6 +35,9 @@ export class AdminSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAdminSettings();
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
+      this.currentPlayingStreamIndex = index;
+    });
   }
 
   loadAdminSettings(): void {
@@ -52,14 +55,10 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   playRadioStream(index: number, url: string): void {
-    // Zresetowanie indeksu przed rozpoczęciem odtwarzania nowego strumienia
     this.currentPlayingStreamIndex = null;
-  
-    // Uruchamiamy strumień, ponieważ indeks został zresetowany, a obecny strumień jest zatrzymany
-    this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, index);  // Odtwarzanie nowego strumienia
-    
-    // Ustawiamy nowy indeks strumienia po rozpoczęciu odtwarzania
+      this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, [this.radioStreamService.sideMenuAudio$], index);  // Odtwarzanie nowego strumienia
     this.currentPlayingStreamIndex = index;
+   
   }
   
   

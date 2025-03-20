@@ -4,7 +4,7 @@ import { FullscreenService } from '../../services/fullscreen.service';
 import { DataService } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import {jwtDecode} from "jwt-decode";
@@ -38,9 +38,9 @@ export class SideMenuComponent implements AfterViewInit {
     private userSettingsService: UserSettingsService,
     private auth:AuthService,
   ) {
-    
+    this.userSettings$ = this.userSettingsService.observeSettings();
     this.isFullscreen$ = this.fullscreenService.isFullscreen$;
-this.userSettings$ = this.userSettingsService.settings$;
+// this.userSettings$ = this.userSettingsService.settings$;
 
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
     // this.isAnnouncementPlaying$ = this.announcementService.isPlaying$; 
@@ -74,6 +74,11 @@ this.userSettings$ = this.userSettingsService.settings$;
     )
     .subscribe((isOnStart) => {
       this.isOnStartPage$.next(isOnStart);
+    });
+
+
+    this.userSettings$.pipe(take(1)).subscribe(settings => {
+      console.log("Załadowane ustawienia użytkownika:", settings);
     });
 }
 
@@ -125,21 +130,27 @@ this.userSettings$ = this.userSettingsService.settings$;
     }
   }
 
-  // toggleStream(): void {
-  //   this.userSettings$.subscribe(settings => {
-  //     if (settings && settings.selectedRadioStream) {
-  //       if (this.isStreamPlaying$.value) {
-  //         this.radioStreamService.stopStream(); 
-  //         this.isStreamPlaying$.next(false);
-  //       } else {
-  //         this.radioStreamService.playStream(settings.selectedRadioStream);
-  //         this.isStreamPlaying$.next(true); 
-  //       }
-  //     } else {
-  //       console.error('Brak ustawionego strumienia radiowego w ustawieniach użytkownika');
-  //     }
-  //   });
-  // }
+
+  toggleRadioStream(): void {
+    this.userSettings$.pipe(take(1)).subscribe(settings => {
+      if (settings?.selectedRadioStream) {
+        if (this.radioStreamService.sideMenuAudio$.value) {
+          // Jeśli radio gra → zatrzymujemy
+          this.radioStreamService.stopRadioStream(this.radioStreamService.sideMenuAudio$);
+        } else {
+          // Jeśli nie gra → uruchamiamy
+          this.radioStreamService.playRadioStream(settings.selectedRadioStream, this.radioStreamService.sideMenuAudio$);
+          console.log("Radyjko startuje:", settings.selectedRadioStream);
+        }
+      } else {
+        console.error('❌ Brak ustawionego strumienia radiowego w ustawieniach użytkownika');
+      }
+    });
+  }
+
+
+
+
 
 
 

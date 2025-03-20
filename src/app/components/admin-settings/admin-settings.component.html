@@ -5,13 +5,11 @@
     <th>Available countries for avertisements</th>
   </tr>
 
-  <tr
-    *ngFor="
+  <tr *ngFor="
       let country of adminSettings.countries;
       let i = index;
       trackBy: trackByCountry
-    "
-  >
+    ">
     <td colspan="2">
       <ng-container *ngIf="editCountryIndex === i; else displayCountry">
         <input type="text" [(ngModel)]="adminSettings.countries[i]" />
@@ -22,16 +20,8 @@
     </td>
     <td>
       <div class="icon-container">
-        <i
-          class="bi bi-pencil-fill"
-          *ngIf="editCountryIndex !== i"
-          (click)="editCountry(i)"
-        ></i>
-        <i
-          class="bi bi-floppy-fill"
-          *ngIf="editCountryIndex === i"
-          (click)="saveCountry(i)"
-        ></i>
+        <i class="bi bi-pencil-fill" *ngIf="editCountryIndex !== i" (click)="editCountry(i)"></i>
+        <i class="bi bi-floppy-fill" *ngIf="editCountryIndex === i" (click)="saveCountry(i)"></i>
         <i class="bi bi-trash3-fill" (click)="deleteCountry(i)"></i>
       </div>
     </td>
@@ -43,12 +33,7 @@
 
   <tr>
     <td colspan="2">
-      <input
-        type="text"
-        [(ngModel)]="newCountry"
-        placeholder="Add new country"
-        [value]="newCountry"
-      />
+      <input type="text" [(ngModel)]="newCountry" placeholder="Add new country" [value]="newCountry" />
     </td>
     <td><button (click)="addNewCountry()">Add new country</button></td>
   </tr>
@@ -81,58 +66,33 @@
     </td>
     <td>
       <div class="icon-container">
-        <i
-          class="bi bi-pencil-fill"
-          *ngIf="editRadioStreamIndex !== i"
-          (click)="editRadioStream(i)"
-        ></i>
-        <i
-          class="bi bi-floppy-fill"
-          *ngIf="editRadioStreamIndex == i"
-          (click)="saveRadioStream(i)"
-        ></i>
+        <i class="bi bi-pencil-fill" *ngIf="editRadioStreamIndex !== i" (click)="editRadioStream(i)"></i>
+        <i class="bi bi-floppy-fill" *ngIf="editRadioStreamIndex == i" (click)="saveRadioStream(i)"></i>
         <i class="bi bi-trash3-fill" (click)="deleteRadioStream(i)"></i>
 
-        <i
-          *ngIf="
+        <i *ngIf="
             !(radioStreamService.adminSettingsAudioState$ | async) ||
             currentPlayingStreamIndex !== i
-          "
-          class="bi bi-play-fill"
-          (click)="playRadioStream(i, radio.url)"
-        ></i>
+          " class="bi bi-play-fill" (click)="playRadioStream(i, radio.url)"></i>
 
-        <i
-          *ngIf="
+        <i *ngIf="
             (radioStreamService.adminSettingsAudioState$ | async) &&
             currentPlayingStreamIndex === i
-          "
-          class="bi bi-stop-fill"
-          (click)="
+          " class="bi bi-stop-fill" (click)="
             radioStreamService.stopRadioStream(
               this.radioStreamService.adminSettingsAudio$
             )
-          "
-        ></i>
+          "></i>
       </div>
     </td>
   </tr>
   <tr class="new-record">
     <td>
-      <input
-        [(ngModel)]="newRadioDescription"
-        type="text"
-        placeholder="Enter radio description"
-        [value]="newRadioDescription"
-      />
+      <input [(ngModel)]="newRadioDescription" type="text" placeholder="Enter radio description"
+        [value]="newRadioDescription" />
     </td>
     <td>
-      <input
-        [(ngModel)]="newRadioUrl"
-        type="text"
-        placeholder="Enter stream URL"
-        [value]="newRadioUrl"
-      />
+      <input [(ngModel)]="newRadioUrl" type="text" placeholder="Enter stream URL" [value]="newRadioUrl" />
     </td>
     <td>
       <button (click)="addRadioStream()">Add Stream</button>
