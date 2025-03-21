@@ -56,7 +56,7 @@ export class AdminSettingsComponent implements OnInit {
 
   playRadioStream(index: number, url: string): void {
     this.currentPlayingStreamIndex = null;
-      this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, [this.radioStreamService.sideMenuAudio$], index);  // Odtwarzanie nowego strumienia
+      this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, [this.radioStreamService.sideMenuAudio$, this.radioStreamService.userSettingsAudio$], index);  // Odtwarzanie nowego strumienia
     this.currentPlayingStreamIndex = index;
    
   }

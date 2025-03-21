@@ -23,9 +23,8 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     footerVisibilityRules: [],
     pictureSlideDuration: 15,
   };
-
-  isStreamPlaying: boolean = false;
-  editUserName: boolean = false;
+  selectedRadioIndex: number | null = null;
+   editUserName: boolean = false;
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
   languages: string[] = [];
   newStartMinute: number | null = null;
@@ -42,12 +41,15 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   constructor(
     private userSettingsService: UserSettingsService,
     private adminSettingsService: AdminSettingsService,
-    private radioStreamService: RadioStreamService
+    public radioStreamService: RadioStreamService
   ) {}
 
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
+      this.currentPlayingStreamIndex = index;
+  })
   }
 
   ngOnDestroy(): void {
@@ -154,4 +156,16 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
       },
     });
   }
+
+
+
+updateSelectedIndex(event: Event): void {
+  const selectedElement = event.target as HTMLSelectElement;
+  this.selectedRadioIndex = selectedElement.selectedIndex;
 }
+
+  playRadioStream(): void {
+
+    }
+  }
+

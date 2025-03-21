@@ -10,7 +10,7 @@ export class RadioStreamService {
 
   // Stany audio dla różnych komponentów
   public sideMenuAudio$ = new BehaviorSubject<boolean>(false);
-  private userSettingsAudio$ = new BehaviorSubject<boolean>(false);
+  public userSettingsAudio$ = new BehaviorSubject<boolean>(false);
   public adminSettingsAudio$ = new BehaviorSubject<boolean>(false);
 
   constructor() {}
@@ -55,7 +55,7 @@ export class RadioStreamService {
   }
 
 
-
+ 
   // Funkcja do subskrypcji stanu audio
   get sideMenuAudioState$() {
     return this.sideMenuAudio$.asObservable();

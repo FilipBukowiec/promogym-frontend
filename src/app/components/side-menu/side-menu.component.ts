@@ -139,7 +139,7 @@ export class SideMenuComponent implements AfterViewInit {
           this.radioStreamService.stopRadioStream(this.radioStreamService.sideMenuAudio$);
         } else {
           // Jeśli nie gra → uruchamiamy
-          this.radioStreamService.playRadioStream(settings.selectedRadioStream, this.radioStreamService.sideMenuAudio$);
+          this.radioStreamService.playRadioStream(settings.selectedRadioStream, this.radioStreamService.sideMenuAudio$, [this.radioStreamService.userSettingsAudio$, this.radioStreamService.adminSettingsAudio$]);
           console.log("Radyjko startuje:", settings.selectedRadioStream);
         }
       } else {

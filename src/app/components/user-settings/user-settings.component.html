@@ -22,23 +22,30 @@
     </td>
   </tr>
   <tr>
-    <td>Select radio stream: <select name="" id="" [(ngModel)]="userSettings.selectedRadioStream">
-        <option value="" *ngFor="let radio of radioStreamList" [value]="radio.url">{{radio.description}}
-        </option>
-      </select></td>
-
-      <!-- <td> <div class="icon-container"><i
-        *ngIf="!isStreamPlaying && userSettings.selectedRadioStream"
-        class="bi bi-play-fill"
-        (click)="playRadioStream(userSettings.selectedRadioStream)"
-      ></i>
-    
-            <i
-        *ngIf="isStreamPlaying"
-        class="bi bi-stop-fill"
-        (click)="stopRadioStream()"
-      ></i></div>
-    </td> -->
+    <td>Selected radio stream:
+    <select [(ngModel)]="userSettings.selectedRadioStream" (change)="updateSelectedIndex($event)" >
+      <option *ngFor="let radio of radioStreamList; let i = index" [value]="radio.url">
+        {{ radio.description }}
+      </option>
+    </select>
+  </td>
+ 
+      <td> <div class="icon-container">
+        <i 
+        *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex !== selectedRadioIndex" 
+        class="bi bi-play-fill" 
+        (click)="radioStreamService.playRadioStream(userSettings.selectedRadioStream || '', radioStreamService.userSettingsAudio$, [radioStreamService.adminSettingsAudio$, radioStreamService.sideMenuAudio$], selectedRadioIndex ?? undefined)">
+      </i>
+      
+      <!-- Przycisk Stop -->
+      <i 
+        *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex === selectedRadioIndex" 
+        class="bi bi-stop-fill" 
+        (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)">
+      </i>
+      
+  </div>
+    </td>
   </tr>
 
 
