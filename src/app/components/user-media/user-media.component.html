@@ -7,9 +7,9 @@
         <th class="add" colspan="3">
           <input type="file" id="fileInput" (change)="onFileSelected($event)" />
         </th>
-        <th class="add">
+        <th class="add add-box">
           <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
-        </th>
+        <button (click)="liveUpdate()">Live update</button></th>
       </tr>
     </thead>
   

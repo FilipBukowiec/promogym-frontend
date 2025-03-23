@@ -5,6 +5,7 @@ import { SideMenuComponent } from "../side-menu/side-menu.component";
 import { AuthService } from "@auth0/auth0-angular";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { AdminSettings } from "../../models/admin-settings.model";
+import { WebSocketService } from "../../services/websocket.service";
 
 @Component({
   selector: "app-dashboard",
@@ -15,15 +16,20 @@ import { AdminSettings } from "../../models/admin-settings.model";
 export class DashboardComponent implements OnInit {
   constructor(
     private auth: AuthService,
-    private adminSettings: AdminSettingsService
+    private adminSettings: AdminSettingsService,
+    private websocketService: WebSocketService,
   ) {}
 
   ngOnInit(): void {
     this.auth.getAccessTokenSilently().subscribe((token) => {});
     this.adminSettings.getSettings().subscribe({
       next: (settings: AdminSettings) => {
-        console.log("fdsfsdf",settings)
+        console.log("ustawienia",settings)
       },
     });
+
+    this.websocketService.connectSocket();
   }
+
+
 }

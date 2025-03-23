@@ -3,6 +3,7 @@ import { NewsService } from '../../services/news.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { News } from '../../models/news.model';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-user-news',
@@ -16,10 +17,11 @@ export class UserNewsComponent  implements OnInit {
   editedContent: string = '';
   editingNewsId: string | null = null;
 
-  constructor(private newsService: NewsService) {}
+  constructor(private newsService: NewsService, private webSocketService: WebSocketService) {}
 
   ngOnInit(): void {
     this.loadNews();
+   
   }
 
   loadNews(): void {
@@ -87,6 +89,11 @@ export class UserNewsComponent  implements OnInit {
       this.loadNews();  // Reload the list after movement
     });
   }
+
+liveUpdate():void{
+  this.webSocketService.requestNewsUpdate()
+}
+
 }
  
 

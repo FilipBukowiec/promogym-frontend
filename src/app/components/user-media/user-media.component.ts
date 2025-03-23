@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
 import { Media } from '../../models/media.model';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   standalone:true,
@@ -14,7 +15,7 @@ export class UserMediaComponent implements OnInit {
   mediaList: Media[] = [];
   selectedFile: File | null = null;
 
-  constructor(private mediaService: MediaService) {}
+  constructor(private mediaService: MediaService, private webSocketService: WebSocketService) {}
 
   ngOnInit(): void {
     this.loadMedia();
@@ -93,4 +94,8 @@ export class UserMediaComponent implements OnInit {
   getFullFilePath(filePath: string): string {
     return `http://localhost:3000/${filePath}`;
   }
+
+  liveUpdate():void{
+    this.webSocketService.requestMediaUpdate();
+      }
 }

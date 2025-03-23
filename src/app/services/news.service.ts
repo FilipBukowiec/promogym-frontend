@@ -18,7 +18,7 @@ export class NewsService {
   }
 
   // Pobiera newsy i aktualizuje newsSubject
-  private refreshNews(): void {
+  public refreshNews(): void {
     this.getNewsByTenant().subscribe({
       next: (news) => this.newsSubject.next(news),
       error: (error) => console.error('❌ Błąd pobierania newsów:', error),

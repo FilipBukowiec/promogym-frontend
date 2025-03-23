@@ -14,18 +14,27 @@ td{
     object-fit: cover;
   }
   
-
+  .add-box {
+    display: flex;
+    // padding: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
   
   .photo-container{
     display: flex;
     justify-content: center;
   }
   
-//   table{
-//     width: 700px;
-//   }
 
 
-  .action{
-    display: flex;
+  button {
+    border-radius: 6px;
+    background-color: $accentColor;
+    color: $secondaryColor;
+    cursor: pointer;
+  }
+  button:hover {
+    color: $primaryColor;
   }
