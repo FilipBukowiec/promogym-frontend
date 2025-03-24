@@ -1,23 +1,67 @@
 @use "../../../styles/variables.scss" as *;
 
-
-:host{
-    display: grid;
-    grid-template-columns: 4fr 2fr;
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: $secondaryColor;
 }
 
-th{
-    text-align: center
+table {
+  max-width: 650px;
+  text-align: center;
 }
 
-:host{
-    display: grid
+h2 {
+  text-align: center;
+  color: $secondaryColor;
 }
 
-div:nth-child(2){
-    width:100%;
-    height: 100%;
-    background-image: url('/assets/images/admin_bg.jpg');
-    background-size: cover;
+button {
+  border: 1px solid $accentColor;
+  border-radius: 2px;
+  color: $secondaryColor;
+  padding: 10px;
 }
 
+button:hover {
+  background-color: $accentColor;
+}
+
+.active:hover td {
+  background-color: $accentColor;
+  color: #fff;
+}
+
+section {
+  width: 750px;
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+//   border: 1px solid white;
+  align-items: flex-start;
+}
+
+section:nth-child(1) {
+  width: 100%;
+}
+
+th {
+  text-align: center;
+}
+
+td {
+  text-align: center;
+}
+
+
+
+
+
+.td-left{
+    text-align: left;
+}
+td{
+    // max-width: 100px;
+    word-break:break-all;
+}
