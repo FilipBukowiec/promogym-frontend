@@ -1,5 +1,23 @@
 @use "../../../styles/variables.scss" as *;
 
+
+:host{
+    display: grid;
+    grid-template-columns: 4fr 2fr;
+}
+
 th{
     text-align: center
 }
+
+:host{
+    display: grid
+}
+
+div:nth-child(2){
+    width:100%;
+    height: 100%;
+    background-image: url('/assets/images/admin_bg.jpg');
+    background-size: cover;
+}
+
