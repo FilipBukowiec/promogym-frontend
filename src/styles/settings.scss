@@ -20,7 +20,7 @@
 }
 
 table {
-  max-width: 600px;
+  max-width: 740px;
   text-align: center;
 }
 
@@ -34,6 +34,7 @@ button {
   border-radius: 2px;
   color: $secondaryColor;
   padding: 10px;
+  cursor: pointer;
 }
 
 button:hover {
@@ -46,7 +47,8 @@ button:hover {
 }
 
 section {
-  width: 700px;
+  width: 750px;
+ 
   display: flex;
   justify-content: center;
   padding-top: 2rem;
@@ -72,7 +74,7 @@ th {
 
 td {
   text-align: center;
-  }
+}
 
 .td-left {
   text-align: left;
@@ -84,36 +86,107 @@ td {
   margin-bottom: 30px;
 }
 
-table:nth-child(1) {
+table{
   padding: 10px;
   background-color: rgba($color: #fff, $alpha: 0.1);
 }
 
-@media screen and (max-width: 619px) {
-
-  table{
+@media screen and (max-width: 767px) {
+  table {
     max-width: 90%;
   }
 
   td {
     display: flex;
     justify-content: center;
-    word-wrap:break-all;
-   
+    word-wrap: break-all;
+  }
+  tr td:last-child {
+    border-bottom: 1px solid rgb(99, 99, 99);
   }
 
-  tr{
-    border-bottom: 1px solid rgb(243, 0, 0);
-  }
-
-
-  th{
+  th {
     display: none;
+  }
+
+  caption {
+    caption-side: top;
+    color: white;
+    font-size: 1.7rem;
+    text-align: center;
+  }
+
+  .new-box {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .new-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 
-@media screen and (min-width: 620px) {
+@media screen and (min-width: 768px) {
   td {
     display: table-cell;
   }
+
+  caption {
+    caption-side: top;
+    color: white;
+    font-size: 1.7rem;
+    text-align: center;
+  }
+
+  .new-box {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .new-content {
+    width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
+
+@media screen and (max-width: 750px) {
+  .adv tr > td {
+    display: flex;
+    justify-content: center;
+  }
+
+.adv tr>td:last-child{
+  border-bottom: 1px solid rgb(99, 99, 99);
+}
+
+  .adv th{
+    display: none;
+  }
+
+  
+}
+
+.new-content {
+  gap: 20px;
+}
+
+input {
+  height: 25px;
+}
+
+button {
+  white-space: nowrap;
+}
+

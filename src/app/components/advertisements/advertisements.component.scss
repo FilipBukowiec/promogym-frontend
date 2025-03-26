@@ -2,20 +2,13 @@
 
 
 
-
-// .check{
-//   display: flex;
-//   justify-content: left;
-//   text-align: left;
-// }
-
-
-
 .countries{
   display: flex;
   flex-direction: column;
- 
 }
+// .country{
+//   width: 200px;
+// }
 
 .media {
   width: 192px;
@@ -23,19 +16,13 @@
   object-fit: cover;
 }
 
-.photo-container {
+
+.list{
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  white-space: nowrap;
 }
-
-
-
-
-.country {
- 
-  display: flex;
-  align-items: center; /* Wyrównanie w pionie */
-  gap: 1px; /* Odstęp między checkboxem a tekstem */}
 
 .check {
   width: 16px; /* Możesz dostosować szerokość */
@@ -46,11 +33,6 @@
 
 
 
-.media-name{
-  max-width: 150px;
-}
 
-table{
-    padding: 5px!important;
-}
+
 
