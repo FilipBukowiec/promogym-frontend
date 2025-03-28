@@ -1,43 +1,16 @@
 @use "../../../styles/variables.scss" as *;
+@use "../../../styles/admin.scss" as*;
 
-
-:host{
-    width: 100%;
-}
-
-button:hover {
-    background-color: $accentColor;
-  }
-  
-
-// td{
-//     border: 1px solid red
-// }
-.new-rule{
-    
-    background-color:$accentColor;
-    border-radius: 6px;
-    text-align: center;
-    color: $secondaryColor;
-}
-
-button{
-    margin: 10px;
-    background-color: $accentColor;
-    border-radius: 6px;
-    color: $secondaryColor;
-    padding: 10px
+iframe{
+    width: 90%;
+    aspect-ratio: 16/9;
 }
 
 
-button:hover{
-    color: $primaryColor;
+td{
+    text-align: left;
+    color: white;
 }
-
-table{
-    padding: 0!important;
-    margin:0!important;
-};
 
 
 

@@ -1,3 +1,7 @@
 // @use "../../../styles/variables.scss" as *;
-@use "../../../styles/settings.scss" as *;
+@use "../../../styles/admin.scss" as *;
+
+.word-wrap{
+    word-break: break-all;
+}
 

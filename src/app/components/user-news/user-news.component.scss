@@ -1,28 +1,12 @@
 @use "../../../styles/variables.scss" as *;
+@use "../../../styles/admin.scss" as *;
 
-.news {
-  width: 100%;
+
+
+table{
+background-color: rgba($color: #fff, $alpha: 0.2);
 }
 
-.add-box {
-  display: flex;
-  // padding: 10px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
 
-.input-box {
-  vertical-align: bottom;
-  padding-right: 10px;
-}
 
-button {
-  border-radius: 6px;
-  background-color: $accentColor;
-  color: $secondaryColor;
-}
 
-button:hover {
-  color: $primaryColor;
-}

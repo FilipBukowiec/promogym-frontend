@@ -14,12 +14,6 @@ body {
   width: 8px; /* szerokość paska przewijania */
 }
 
-thead > tr {
-  background-color: transparent;
-  text-align: center;
-  color: #fff;
-}
-
 
 
 table {
@@ -35,10 +29,9 @@ tr {
   color: #a8a8a8;
   // border-radius: 100px;
   color: $accentColor;
-
 }
 
-.table-row:hover{
+.table-row:hover {
   background-color: $accentColor;
   color: $secondaryColor;
 }
@@ -53,10 +46,8 @@ tr {
   border-bottom-right-radius: 6px;
 }
 
-
 td {
   padding: 10px;
- 
 }
 
 .icon-container {
@@ -88,18 +79,18 @@ a:hover {
 
 button {
   background-color: transparent;
-  // border: 1px solid $accentColor;
-  border:none;
+  border: none;
   color: $accentColor;
   padding: 3px;
+  white-space: nowrap;
+  padding: 10px;
+ 
 }
 
-button:hover{
-  color:$secondaryColor;
+button:hover {
+  color: $secondaryColor;
+ 
 }
-
-
-
 
 i {
   cursor: pointer;
@@ -111,17 +102,17 @@ i:hover {
   color: $primaryColor;
 }
 
-
-input{
+input {
   width: 100%;
 }
 
-// th{
-//   vertical-align: middle!important;
-
-// }
 
 
 thead tr.special-row th {
   padding-bottom: 60px;
+}
+
+.check {
+  width: 16px;
+  height: 16px;
 }

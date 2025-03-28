@@ -7,7 +7,7 @@
   <div class="actions"><button (click)="saveSettings()">Save settings</button><button>Live update</button></div>
 </section>
 <section>
-  <img class="image" src="assets/images/globe.svg" alt="" />
+  <img class="image" src="assets/images/globe.svg" alt="globe languages" />
 
   <div class="new-box">
 
@@ -20,7 +20,7 @@
 </section>
 <section>
   <table>
-    <caption>List of countries for advertising:</caption>
+    <caption>List of countries for advertisements:</caption>
     <tr>
       <th>Country</th>
       <th>Action</th>
@@ -49,8 +49,10 @@
     </tr>
   </table>
 </section>
+
+
 <section>
-  <img class="image" src="assets/images/radio.svg" alt="" />
+  <img class="image" src="assets/images/radio.svg" alt="Radio stream list for app" />
   <div class="new-box">
 
 
@@ -85,11 +87,11 @@
         </ng-template>
       </td>
 
-      <td>
+      <td class="word-wrap">
         <ng-container *ngIf="editRadioStreamIndex === i; else displayUrl">
           <input type="text" [(ngModel)]="radio.url" />
         </ng-container>
-        <ng-template #displayUrl>
+        <ng-template #displayUrl >
           {{ radio.url }}
         </ng-template>
       </td>

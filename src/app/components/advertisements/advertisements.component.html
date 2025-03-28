@@ -7,25 +7,22 @@
 
 <section>
   <img src="assets/images/ads.svg" alt="" class="image">
-
-  <div class="new-box">
-
-    <span>Add new advertisement and optional country</span>
-    <input type="file" (change)="onFileSelected($event)" id="fileInput" />
-
-
-
-    <div class="lista">
-      <span class="country" *ngFor="let country of availableCountries">
+      <span>Add new advertisement and optional country</span>
+         <input type="file" (change)="onFileSelected($event)" id="fileInput" />
+  
+    <div class="countries-container">
+      <div class="country" *ngFor="let country of availableCountries">
         <input class="check" type="checkbox" [value]="country" (change)="toggleRegionSelection(country)"
           [checked]="selectedCountry.includes(country)" />
         <span class="country-name">{{ country }}</span>
-      </span>
-    </div>
-
-
+      </div>
+    </div> 
     <button (click)="addAdvertisement()" [disabled]="!selectedFile">Add media</button>
-  </div>
+
+
+
+
+
 </section>
 
 <section>
@@ -45,7 +42,7 @@
 
     <tr class="active" *ngFor="let advertisement of advertisementList; let i = index">
       <td>{{advertisement.order}}</td>
-      <td>{{advertisement.fileName}}</td>
+      <td class="word-wrap left">{{advertisement.fileName}}</td>
       <td class="photo-container">
         <img *ngIf="advertisement.fileType.startsWith('image')" class="media"
           [src]="getFullFilePath(advertisement.filePath)" alt="{{ advertisement.fileName }}" />
@@ -54,7 +51,7 @@
       </td>
 
 
-      <td>
+      <td class="left">
 
         <div *ngIf="editingAdvertisementId !== advertisement._id" class="countries">
           <span *ngFor="let country of advertisement.countries">{{ country }}</span>
@@ -62,11 +59,11 @@
         </div>
 
         <div class="list" *ngIf="editingAdvertisementId === advertisement._id">
-          <span class="country" *ngFor="let country of availableCountries">
+          <div class="country" *ngFor="let country of availableCountries">
             <input class="check" type="checkbox" [value]="country" (change)="toggleEditRegionSelection(country)"
               [checked]="editedCountries.includes(country)" />
             {{ country }}
-          </span>
+          </div>
 
         </div>
       </td>

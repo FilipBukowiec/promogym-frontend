@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import {  Component, OnInit } from "@angular/core";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { RadioStreamService } from "../../services/radio-stream.service";
 import { AdminSettings } from "../../models/admin-settings.model";
@@ -11,6 +11,7 @@ import { BehaviorSubject, Observable } from "rxjs";
   selector: "app-admin-settings",
   templateUrl: "./admin-settings.component.html",
   styleUrls: ["./admin-settings.component.scss"],
+  
 })
 export class AdminSettingsComponent implements OnInit {
   adminSettings: AdminSettings = {

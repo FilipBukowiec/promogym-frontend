@@ -8,6 +8,7 @@ import { AuthService } from '@auth0/auth0-angular';
   imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
+  
 })
 
  

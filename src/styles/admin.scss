@@ -1,0 +1,202 @@
+@use "../../src/styles/variables.scss" as *;
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: $secondaryColor;
+  gap: 2rem;
+  padding-bottom: 30px;
+}
+
+.check {
+  width: 16px;
+  height: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.description {
+  max-width: 650px;
+  text-align: justify;
+  padding: 1rem;
+}
+
+table {
+  max-width: 740px;
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+  color: $secondaryColor;
+}
+
+button {
+  border: 1px solid $accentColor;
+  border-radius: 2px;
+  color: $secondaryColor;
+  padding: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: $accentColor;
+}
+
+.active:hover td {
+  background-color: $accentColor;
+  color: #fff;
+}
+
+section {
+  width: 750px;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  align-items: center;
+  flex-direction: column;
+}
+
+section:nth-child(1) {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+section:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+select, input{
+  border:none;
+}
+
+td, th {
+  text-align: center;
+  color: $secondaryColor;
+
+}
+
+.td-left {
+  text-align: left;
+}
+
+.image {
+  width: 50%;
+  opacity: 0.85;
+  margin-bottom: 30px;
+}
+
+table {
+  padding: 10px;
+  background-color: rgba($color: #fff, $alpha: 0.1);
+      // background-color: rgba($color: #fff, $alpha: 0.2);
+   
+}
+
+@media screen and (max-width: 767px) {
+  table,
+  .countries-container {
+    max-width: 90%;
+  }
+
+  td {
+    display: flex;
+    justify-content: center;
+    word-wrap: break-all;
+    padding: 10px;
+  }
+  tr td:last-child {
+    border-bottom: 1px solid rgb(99, 99, 99);
+  }
+
+  th {
+    display: none;
+  }
+
+  caption {
+    caption-side: top;
+    color: white;
+    font-size: 1.7rem;
+    text-align: center;
+  }
+
+  .new-box {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .new-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+}
+
+@media screen and (min-width: 768px) {
+  td {
+    display: table-cell;
+  }
+
+  caption {
+    caption-side: top;
+    color: white;
+    font-size: 1.7rem;
+    text-align: center;
+  }
+
+  .new-box {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .new-content {
+    width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .adv tr > td {
+    display: flex;
+    justify-content: center;
+  }
+
+  .adv tr > td:last-child {
+    border-bottom: 1px solid rgb(99, 99, 99);
+  }
+
+  .adv th {
+    display: none;
+  }
+}
+
+.new-content {
+  gap: 20px;
+}
+
+input {
+  height: 25px;
+}
+
+button {
+  white-space: nowrap;
+}

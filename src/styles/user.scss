@@ -1,11 +1,33 @@
 @use "../../src/styles/variables.scss" as *;
 
+
+// :host{
+//     display: flex;
+//     flex-wrap: wrap;
+//     height: 100%;
+// }
+
+
+caption {
+  caption-side: top;
+  color: white;
+  font-size: 1.7rem;
+  text-align: center;
+}
+
 :host {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   color: $secondaryColor;
   gap: 2rem;
+  height: 100%;
+  
+}
+
+.check {
+  width: 16px;
+  height: 16px;
 }
 
 .actions {
@@ -13,20 +35,25 @@
   gap: 10px;
 }
 
-.description {
-  max-width: 650px;
-  text-align: justify;
-  padding: 1rem;
-}
+//   .description {
+//     max-width: 650px;
+//     text-align: justify;
+//     padding: 1rem;
+//   }
 
 table {
   max-width: 740px;
-  text-align: center;
 }
 
 h2 {
   text-align: center;
   color: $secondaryColor;
+}
+
+
+iframe{
+  width: 600px;
+  aspect-ratio: 16/9;
 }
 
 button {
@@ -48,7 +75,6 @@ button:hover {
 
 section {
   width: 750px;
- 
   display: flex;
   justify-content: center;
   padding-top: 2rem;
@@ -56,24 +82,25 @@ section {
   flex-direction: column;
 }
 
-section:nth-child(1) {
-  width: 100%;
-  display: flex;
-  gap: 10px;
-}
+//   section:nth-child(1) {
+//     width: 100%;
+//     display: flex;
+//     gap: 10px;
+//   }
 
-section:nth-child(2) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+//   section:nth-child(2) {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//   }
 
 th {
   text-align: center;
 }
 
 td {
-  text-align: center;
+  text-align: left;
+
 }
 
 .td-left {
@@ -86,13 +113,15 @@ td {
   margin-bottom: 30px;
 }
 
-table{
+table {
   padding: 10px;
   background-color: rgba($color: #fff, $alpha: 0.1);
+
+
 }
 
 @media screen and (max-width: 767px) {
-  table {
+  table{
     max-width: 90%;
   }
 
@@ -100,6 +129,7 @@ table{
     display: flex;
     justify-content: center;
     word-wrap: break-all;
+    padding: 10px;
   }
   tr td:last-child {
     border-bottom: 1px solid rgb(99, 99, 99);
@@ -109,12 +139,10 @@ table{
     display: none;
   }
 
-  caption {
-    caption-side: top;
-    color: white;
-    font-size: 1.7rem;
-    text-align: center;
+  iframe{
+      width: 90%;
   }
+
 
   .new-box {
     width: 90%;
@@ -138,13 +166,7 @@ table{
     display: table-cell;
   }
 
-  caption {
-    caption-side: top;
-    color: white;
-    font-size: 1.7rem;
-    text-align: center;
-  }
-
+ 
   .new-box {
     width: 600px;
     display: flex;
@@ -167,15 +189,13 @@ table{
     justify-content: center;
   }
 
-.adv tr>td:last-child{
-  border-bottom: 1px solid rgb(99, 99, 99);
-}
-
-  .adv th{
-    display: none;
+  .adv tr > td:last-child {
+    border-bottom: 1px solid rgb(99, 99, 99);
   }
 
-  
+  .adv th {
+    display: none;
+  }
 }
 
 .new-content {
@@ -189,4 +209,3 @@ input {
 button {
   white-space: nowrap;
 }
-
