@@ -1,8 +1,8 @@
-<h1>Media</h1>
-
-
+<section><h1>Media</h1></section>
+<section></section>
+<section>
 <table> 
-    <thead>
+  
       <tr class="special-row">
         <th class="add" colspan="3">
           <input type="file" id="fileInput" (change)="onFileSelected($event)" />
@@ -11,19 +11,19 @@
           <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
         <button (click)="liveUpdate()">Live update</button></th>
       </tr>
-    </thead>
+   
   
-    <thead>
+   
       <tr>
         <th>Order</th>
         <th>File name</th>
         <th>Preview</th>
         <th>Action</th>
       </tr>
-    </thead>
+
   
-    <tbody>
-      <tr class="table-row" *ngFor="let media of mediaList; let i = index">
+
+      <tr class="active" *ngFor="let media of mediaList; let i = index">
         <td class="td-left">{{ media.order }}</td>
         <td>{{ media.fileName }}</td>
         <td class="photo-container">
@@ -41,6 +41,6 @@
           </div>
         </td>
       </tr>
-    </tbody>
-  </table>
   
+  </table>
+</section>

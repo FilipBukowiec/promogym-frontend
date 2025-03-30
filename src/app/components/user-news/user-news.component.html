@@ -3,7 +3,7 @@
   <button (click)="liveUpdate()">Live update</button></section>
 <section>
 
-    <img class="image" src="/assets/images/globe.svg" alt="">
+    <img class="image" src="/assets/images/breaking-news.gif" alt="">
     <div class="new-box">
       <span>Add new country to the list for advertisements</span>
     <div class="new-content"><input class="news" type="text" [(ngModel)]="newContent" placeholder="Write something and add news" />
@@ -13,7 +13,7 @@
 
 
 <section>
-  <table>
+  <table> 
     <caption>
       <h2>News</h2>
     </caption>
@@ -35,7 +35,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr class="table-row" *ngFor="let news of newsList; let i = index">
+      <tr class="active" *ngFor="let news of newsList; let i = index">
         <td>{{ i + 1 }}</td>
         <td class="news" *ngIf="editingNewsId !== news._id">
           {{ news.content }}

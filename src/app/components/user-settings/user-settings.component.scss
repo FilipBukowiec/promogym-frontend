@@ -9,8 +9,12 @@ iframe{
 
 td{
     text-align: left;
-    color: white;
+    // color: white;
+    
 }
 
+tr > td:last-child{
+    border:none;
+}
 
 
