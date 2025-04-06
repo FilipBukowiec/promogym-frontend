@@ -1,22 +1,27 @@
-<section><h1>Media</h1></section>
-<section></section>
+<section><h1>Media</h1>
+  <span class="description">Remember, after adding new settings, you must press the 'Save settings' button. From that
+    moment, each device will be activated with the new settings. However, if you want to change the settings on devices
+    that are currently in use, click the 'Live update' button. This will reload the application on those devices.</span>
+
+
+  <button (click)="liveUpdate()">Live update</button>
+</section>
+<section>
+  <img class="image" src="/assets/images/breaking-news.gif" alt="">
+  <div class="new-box">
+    <span>Add new media to the list. Prefer format JPG, PNG, MP4</span>
+  <div class="new-content"> <input type="file" id="fileInput" (change)="onFileSelected($event)" />
+    <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
+</div></div>
+</section>
 <section>
 <table> 
-  
-      <tr class="special-row">
-        <th class="add" colspan="3">
-          <input type="file" id="fileInput" (change)="onFileSelected($event)" />
-        </th>
-        <th class="add add-box">
-          <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
-        <button (click)="liveUpdate()">Live update</button></th>
-      </tr>
-   
-  
+  <caption><h2>Media</h2></caption>
+    
    
       <tr>
         <th>Order</th>
-        <th>File name</th>
+        <th>File name</th> 
         <th>Preview</th>
         <th>Action</th>
       </tr>

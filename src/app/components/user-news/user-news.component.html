@@ -1,11 +1,16 @@
 
-<section><h1>dfsdfsdf</h1>
+<section><h1>News</h1>
+  <span class="description">Remember, after adding new news, you must press the 'Save settings' button. From that
+    moment, each device will be activated with the new settings. However, if you want to change the settings on devices
+    that are currently in use, click the 'Live update' button. This will reload the application on those devices.</span>
+
+
   <button (click)="liveUpdate()">Live update</button></section>
 <section>
 
-    <img class="image" src="/assets/images/breaking-news.gif" alt="">
+    <img class="image" src="/assets/images/cfb_background.jpg" alt="">
     <div class="new-box">
-      <span>Add new country to the list for advertisements</span>
+      <span>Add new content to the news list</span>
     <div class="new-content"><input class="news" type="text" [(ngModel)]="newContent" placeholder="Write something and add news" />
     <button (click)="addNews()">Add news</button>
   </div></div>
