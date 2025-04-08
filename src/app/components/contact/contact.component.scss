@@ -1,0 +1,34 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/admin.scss" as *;
+
+:host {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(143deg, #0c1826 21.58%, #162b45 55.51%, #0c1826 83.59%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.contact-form {
+
+  background-color: rgba($color: $secondaryColor, $alpha: 0.2);
+  border-radius: 5px;
+  padding: 10px;
+  z-index: 10;
+}
+
+.video{
+    position: absolute;
+opacity: 0.1;
+    z-index: 0;
+    object-fit: cover;
+width: 100%;
+height: 100%;
+
+}
+
+input{
+    min-height: 150px;
+}

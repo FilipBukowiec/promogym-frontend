@@ -14,6 +14,7 @@ import { AdminSettingsComponent } from "./components/admin-settings/admin-settin
 import { AdminComponent } from "./components/admin/admin.component";
 import { AdvertisementsComponent } from "./components/advertisements/advertisements.component";
 import { Component } from "@angular/core";
+import { ContactComponent } from "./components/contact/contact.component";
 
 export const routes: Routes = [
   {
@@ -38,6 +39,7 @@ export const routes: Routes = [
         component: WelcomeComponent,
       },
       { path: "start", component: MainAppComponent },
+      {path: "contact", component: ContactComponent},
 
       { path: "news", component: NewsComponent },
 
