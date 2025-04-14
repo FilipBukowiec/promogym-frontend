@@ -8,13 +8,12 @@ import { ManagementComponent } from "./components/management/management.componen
 import { UserSettingsComponent } from "./components/user-settings/user-settings.component";
 import { UserNewsComponent } from "./components/user-news/user-news.component";
 import { UserMediaComponent } from "./components/user-media/user-media.component";
-import { UserAnnouncementsComponent } from "./components/user-announcements/user-announcements.component";
 import { MainAppComponent } from "./components/main-app/main-app.component";
 import { AdminSettingsComponent } from "./components/admin-settings/admin-settings.component";
 import { AdminComponent } from "./components/admin/admin.component";
 import { AdvertisementsComponent } from "./components/advertisements/advertisements.component";
-import { Component } from "@angular/core";
 import { ContactComponent } from "./components/contact/contact.component";
+import { AnnouncementsComponent } from "./components/announcements/announcements.component";
 
 export const routes: Routes = [
   {
@@ -52,6 +51,7 @@ export const routes: Routes = [
             component: AdminSettingsComponent,
           },
           { path: "advertisements", component: AdvertisementsComponent },
+          { path: "announcements", component: AnnouncementsComponent },
           { path: "", redirectTo: "admin-settings", pathMatch: "full" },
         ],
       },
@@ -62,7 +62,7 @@ export const routes: Routes = [
           { path: "user-settings", component: UserSettingsComponent },
           { path: "user-news", component: UserNewsComponent },
           { path: "user-media", component: UserMediaComponent },
-          { path: "user-announcements", component: UserAnnouncementsComponent },
+    
           { path: "admin-settings", component: AdminSettingsComponent },
           { path: "", redirectTo: "user-settings", pathMatch: "full" },
         ],

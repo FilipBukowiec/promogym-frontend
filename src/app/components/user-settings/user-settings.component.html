@@ -1,21 +1,20 @@
 <section>
   <h1>General settings</h1>
-  <span class="description">Remember, after adding new settings, you must press the 'Save settings' button. From that
-    moment, each device will be activated with the new settings. However, if you want to change the settings on devices
-    that are currently in use, click the 'Live update' button. This will reload the application on those devices.</span>
-
-
+  <span class="description">Remember, after adding new settings, you must press the 'Save settings'
+    button. From that moment, each device will be activated with the new
+    settings. However, if you want to change the settings on devices that are
+    currently in use, click the 'Live update' button. This will reload the
+    application on those devices.</span>
 
   <button>Live update</button>
 </section>
 <section>
-<h2>Settings guide tutorial</h2>
-<br>
+  <h2>Settings guide tutorial</h2>
+  <br />
   <iframe src="https://www.youtube.com/embed/ZFQkb26UD1Y?si=XJkRKKF8R5upXzfs" title="YouTube video player"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
 </section>
 <section>
   <table>
@@ -23,10 +22,10 @@
       <h2>General settings</h2>
     </caption>
     <tr>
-      <td>
+      <td colspan="2">
         User name:
-        <span *ngIf="!editUserName">{{userSettings.name}}</span>
-        <input *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text">
+        <span *ngIf="!editUserName">{{ userSettings.name }}</span>
+        <input *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text" />
       </td>
       <td>
         <div class="icon-container">
@@ -37,14 +36,18 @@
     </tr>
 
     <tr>
-      <td>Select language:
+      <td colspan="3">
+        Select language:
         <select name="" id="" [(ngModel)]="userSettings.language">
-          <option *ngFor="let language of languages" [value]="language">{{language}}</option>
+          <option *ngFor="let language of languages" [value]="language">
+            {{ language }}
+          </option>
         </select>
       </td>
     </tr>
     <tr>
-      <td>Selected radio stream:
+      <td colspan="2">
+        Selected radio stream:
         <select [(ngModel)]="userSettings.selectedRadioStream" (change)="updateSelectedIndex($event)">
           <option *ngFor="let radio of radioStreamList; let i = index" [value]="radio.url">
             {{ radio.description }}
@@ -54,24 +57,38 @@
 
       <td>
         <div class="icon-container">
-          <i *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex !== selectedRadioIndex"
-            class="bi bi-play-fill"
-            (click)="radioStreamService.playRadioStream(userSettings.selectedRadioStream || '', radioStreamService.userSettingsAudio$, [radioStreamService.adminSettingsAudio$, radioStreamService.sideMenuAudio$], selectedRadioIndex ?? undefined)">
+          <i *ngIf="
+              !(radioStreamService.userSettingsAudioState$ | async) ||
+              currentPlayingStreamIndex !== selectedRadioIndex
+            " class="bi bi-play-fill" (click)="
+              radioStreamService.playRadioStream(
+                userSettings.selectedRadioStream || '',
+                radioStreamService.userSettingsAudio$,
+                [
+                  radioStreamService.adminSettingsAudio$,
+                  radioStreamService.sideMenuAudio$
+                ],
+                selectedRadioIndex ?? undefined
+              )
+            ">
           </i>
 
-          <!-- Przycisk Stop -->
-          <i *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex === selectedRadioIndex"
-            class="bi bi-stop-fill" (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)">
+        
+          <i *ngIf="
+              (radioStreamService.userSettingsAudioState$ | async) &&
+              currentPlayingStreamIndex === selectedRadioIndex
+            " class="bi bi-stop-fill" (click)="
+              radioStreamService.stopRadioStream(
+                radioStreamService.userSettingsAudio$
+              )
+            ">
           </i>
-
         </div>
       </td>
     </tr>
 
-
-
     <tr>
-      <td colspan="2">
+      <td colspan="3">
         Set picture slide duration:
         <select name="" id="" [(ngModel)]="userSettings.pictureSlideDuration">
           <option *ngFor="let seconds of time" [value]="seconds">
@@ -81,14 +98,24 @@
         seconds per slide
       </td>
     </tr>
-  <br>
-<br>
+    <br />
+    <br />
+    <tr>
+      <td class="newsbar" colspan="3">Footer newsbar option</td>
+    </tr>
+ <tr>
+  <td>Main footer logo</td>
+  <td></td>
+  <td><input type="file"></td>
+   </tr>
 <tr>
-  <td class="newsbar" colspan="2">Footer newsbar option</td>
+  <td>Separator logo(remember that background is white)</td> 
+  <td></td>
+  <td><input type="file"></td>
 </tr>
-
-    <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
-      <td>
+  
+   <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
+      <td colspan="2">
         <ng-container *ngIf="editFooterVisibilityIndex === i; else displayRule">
           Footer visible from minute
           <select [(ngModel)]="rule.startMinute" id="">
@@ -118,10 +145,10 @@
     </tr>
 
     <tr>
-      <td class="new-rule" colspan="2">Add new visibility footer rules</td>
+      <td class="new-rule center newsbar" colspan="3">Add new visibility footer rules</td>
     </tr>
     <tr>
-      <td>
+      <td colspan="2">
         Footer visible from minute
         <select [(ngModel)]="newStartMinute">
           <option *ngFor="let minute of time" [value]="minute">
@@ -134,10 +161,8 @@
           </option>
         </select>
       </td>
-      <td><button (click)="addFooterVisibilityRule()">Add rule</button></td>
+      <td class="center"><button (click)="addFooterVisibilityRule()">Add rule</button></td>
     </tr>
-
   </table>
   <button (click)="saveSettings()">Save settings</button>
-
 </section>

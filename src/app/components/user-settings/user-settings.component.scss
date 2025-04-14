@@ -10,7 +10,7 @@ iframe{
 td{
     text-align: left;
     // color: white;
-    
+
 }
 
 tr > td:last-child{
@@ -23,4 +23,8 @@ tr > td:last-child{
     background-color: $accentColor;
     color: white;
     border-radius: 2px;
+}
+
+.center{
+    text-align: center;
 }

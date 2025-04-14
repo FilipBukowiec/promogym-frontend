@@ -1,21 +1,26 @@
-<video class="video" src="/assets/images/contact.mp4" autoplay loop></video>
-<section><h1>contact form</h1></section>
+
+
+<section>
+    <h1>Contact</h1>
+    <span class="descrption">Chcesz zgłosić swoją.....</span>
+</section>
 
 <section><img class="image" src="/assets/images/promogym_logo.svg" alt=""></section>
 <section>
 
-<form class="contact-form">
+    <form class="contact-form">
+<h4>Formularz kontaktowy</h4>
+        <span>Subject:
 
-    <span>Topic: 
-        
-        <select name="" id="">
-            <option [disabled]="true" value="">Choose topic</option>
-          <option *ngFor="let topic of topics" value="">{{topic}}</option>
-        </select>
+            <select name="" id="">
+                <option [disabled]="true" value="">Choose a subject</option>
+                <option *ngFor="let topic of topics" value="">{{ topic}}</option>
+            </select>
         </span>
         <span>Message:
             <input type="text">
         </span>
-        <button type="submit">Send message</button>
     </form>
+    <button type="submit">Send message</button>
 </section>
+
