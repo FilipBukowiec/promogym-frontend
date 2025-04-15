@@ -14,6 +14,7 @@ import { AdminComponent } from "./components/admin/admin.component";
 import { AdvertisementsComponent } from "./components/advertisements/advertisements.component";
 import { ContactComponent } from "./components/contact/contact.component";
 import { AnnouncementsComponent } from "./components/announcements/announcements.component";
+import { AdminAnnouncementsComponent } from "./components/admin-announcements/admin-announcements.component";
 
 export const routes: Routes = [
   {
@@ -51,7 +52,7 @@ export const routes: Routes = [
             component: AdminSettingsComponent,
           },
           { path: "advertisements", component: AdvertisementsComponent },
-          { path: "announcements", component: AnnouncementsComponent },
+          { path: "admin-announcements", component: AdminAnnouncementsComponent },
           { path: "", redirectTo: "admin-settings", pathMatch: "full" },
         ],
       },
