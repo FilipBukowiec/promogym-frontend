@@ -18,5 +18,7 @@ export interface UserSettings {
   footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
   location?: Location;
+  mainLogoUrl?: string;
+  separatorLogoUrl?: string;
 
 }

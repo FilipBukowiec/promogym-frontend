@@ -1,30 +1,31 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { UserSettingsService } from "../../services/user-settings.service";
-import { UserSettings } from "../../models/user-settings.model";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { AdminSettingsService } from "../../services/admin-settings.service";
-import { RadioStreamService } from "../../services/radio-stream.service";
-import { Subscription } from "rxjs";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { UserSettings } from '../../models/user-settings.model';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AdminSettingsService } from '../../services/admin-settings.service';
+import { RadioStreamService } from '../../services/radio-stream.service';
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: "app-user-settings",
+  selector: 'app-user-settings',
   imports: [CommonModule, FormsModule],
-  templateUrl: "./user-settings.component.html",
-  styleUrl: "./user-settings.component.scss",
+  templateUrl: './user-settings.component.html',
+  styleUrl: './user-settings.component.scss',
 })
 export class UserSettingsComponent implements OnInit, OnDestroy {
   userSettings: UserSettings = {
-    tenant_id: "",
-    language: "",
-    country: "",
-    name: "",
-    selectedRadioStream: "",
+    tenant_id: '',
+    language: '',
+    country: '',
+    name: '',
+    selectedRadioStream: '',
     footerVisibilityRules: [],
     pictureSlideDuration: 15,
+
   };
   selectedRadioIndex: number | null = null;
-   editUserName: boolean = false;
+  editUserName: boolean = false;
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
   languages: string[] = [];
   newStartMinute: number | null = null;
@@ -47,9 +48,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
-      this.currentPlayingStreamIndex = index;
-  })
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
+      (index) => {
+        this.currentPlayingStreamIndex = index;
+      }
+    );
   }
 
   ngOnDestroy(): void {
@@ -65,13 +68,12 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.loading = false;
-        this.error = "Błąd podczas ładowania ustawień. Spróbuj ponownie później.";
-        console.error("Błąd podczas ładowania", error);
+        this.error =
+          'Błąd podczas ładowania ustawień. Spróbuj ponownie później.';
+        console.error('Błąd podczas ładowania', error);
       },
     });
   }
-
-  
 
   getAdminSettings(): void {
     this.adminSettingsService.settings$.subscribe({
@@ -86,11 +88,6 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
-
-
-
   editUserNameField(): void {
     this.editUserName = true;
   }
@@ -101,11 +98,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   addFooterVisibilityRule(): void {
     if (this.newStartMinute === null || this.newEndMinute === null) {
-      alert("Please select both start and end minutes.");
+      alert('Please select both start and end minutes.');
       return;
     }
     if (this.newStartMinute >= this.newEndMinute) {
-      alert("Start time must be less than end time.");
+      alert('Start time must be less than end time.');
       return;
     }
 
@@ -126,11 +123,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     const rule = this.userSettings.footerVisibilityRules[index];
 
     if (rule.startMinute === null || rule.endMinute === null) {
-      alert("Both start and end minutes must be selected.");
+      alert('Both start and end minutes must be selected.');
       return;
     }
     if (rule.startMinute >= rule.endMinute) {
-      alert("Start minute must be less than end minute.");
+      alert('Start minute must be less than end minute.');
       return;
     }
 
@@ -138,7 +135,9 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   }
 
   deleteFooterVisibilityRule(index: number): void {
-    const confirmDelete = confirm("Are you sure you want to delete this Footer Visibility Rule?");
+    const confirmDelete = confirm(
+      'Are you sure you want to delete this Footer Visibility Rule?'
+    );
     if (confirmDelete) {
       this.userSettings.footerVisibilityRules.splice(index, 1);
     }
@@ -147,25 +146,54 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   saveSettings(): void {
     this.userSettingsService.updateSettings(this.userSettings).subscribe({
       next: (response) => {
-        alert("Settings saved successfully");
+        alert('Settings saved successfully');
         this.loadSettings();
       },
       error: (error) => {
-        console.error("Błąd podczas zapisywania", error);
-        alert("Błąd podczas zapisywania ustawień. Spróbuj ponownie później.");
+        console.error('Błąd podczas zapisywania', error);
+        alert('Błąd podczas zapisywania ustawień. Spróbuj ponownie później.');
       },
     });
   }
 
+  updateSelectedIndex(event: Event): void {
+    const selectedElement = event.target as HTMLSelectElement;
+    this.selectedRadioIndex = selectedElement.selectedIndex;
+  }
 
+  playRadioStream(): void {}
 
-updateSelectedIndex(event: Event): void {
-  const selectedElement = event.target as HTMLSelectElement;
-  this.selectedRadioIndex = selectedElement.selectedIndex;
-}
-
-  playRadioStream(): void {
-
+  onFileSelected(event: Event, type: 'mainlogo' | 'separator'): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.userSettingsService.uploadLogo(file, type).subscribe({
+        next: (updatedSettings) => {
+          this.userSettings = updatedSettings;
+        },
+        error: (err) => {
+          alert(`Error uploading ${type} logo`);
+          console.error(err);
+        },
+      });
     }
   }
 
+  deleteLogo(type: 'mainlogo' | 'separator'): void {
+    const confirmed = confirm(
+      `Are you sure you want to delete the ${type} logo?`
+    );
+    if (!confirmed) return;
+
+    this.userSettingsService.deleteLogo(type).subscribe({
+      next: () => {
+        if (type === 'mainlogo') this.userSettings.mainLogoUrl = '';
+        if (type === 'separator') this.userSettings.separatorLogoUrl = '';
+      },
+      error: (err) => {
+        alert(`Error deleting ${type} logo`);
+        console.error(err);
+      },
+    });
+  }
+}

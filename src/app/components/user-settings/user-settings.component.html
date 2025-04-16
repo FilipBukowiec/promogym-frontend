@@ -103,16 +103,33 @@
     <tr>
       <td class="newsbar" colspan="3">Footer newsbar option</td>
     </tr>
- <tr>
-  <td>Main footer logo</td>
-  <td></td>
-  <td><input type="file"></td>
-   </tr>
-<tr>
-  <td>Separator logo(remember that background is white)</td> 
-  <td></td>
-  <td><input type="file"></td>
-</tr>
+ 
+
+   <tr>
+    <td>Main footer logo</td>
+    <td>
+      <span *ngIf="userSettings.mainLogoUrl">
+        <img [src]="userSettings.mainLogoUrl" alt="Main logo" class="logo-preview" />
+      </span>
+    </td>
+    <td>
+      <input type="file" (change)="onFileSelected($event, 'mainlogo')" />
+      <button  *ngIf="userSettings?.mainLogoUrl" (click)="deleteLogo('mainlogo')">Delete</button>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>Separator logo (white background)</td>
+    <td>
+      <span *ngIf="userSettings.separatorLogoUrl">
+        <img [src]="userSettings.separatorLogoUrl" alt="Separator logo" class="logo-preview" />
+      </span>
+    </td>
+    <td>
+      <input type="file" (change)="onFileSelected($event, 'separator')" />
+      <button *ngIf="userSettings.separatorLogoUrl" (click)="deleteLogo('separator')">Delete</button>
+    </td>
+  </tr>
   
    <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
       <td colspan="2">
