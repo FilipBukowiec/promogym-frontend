@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { UserSettingsService } from './services/user-settings.service';
 
 
 @Component({
@@ -15,4 +16,9 @@ import { AuthService } from '@auth0/auth0-angular';
   export class AppComponent {
     title = 'promogym'; 
   
-      }
+
+
+  
+  }
+
+      

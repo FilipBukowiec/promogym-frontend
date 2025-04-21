@@ -6,6 +6,7 @@ import { UserSettings } from '../models/user-settings.model';
 import { AuthService } from './auth.service';
 import { switchMap, catchError, tap } from 'rxjs/operators';
 
+
 @Injectable({
   providedIn: 'root',
 })
@@ -80,7 +81,9 @@ export class UserSettingsService {
           selectedRadioStream: '',
           footerVisibilityRules: [],
           pictureSlideDuration: 15,
-          location: { type: 'Point', coordinates: [0, 0] },
+          // location: { type: 'Point', coordinates: [0, 0] },
+          logoFilePath: "",
+          separatorFilePath: ""
         };
 
         return this.http
@@ -169,4 +172,16 @@ export class UserSettingsService {
       })
     );
   }
+
+  getAllTenants(): Observable<string[]>{
+return this.auth.getAuthHeaders().pipe(
+  switchMap((headers)=> {
+    return this.http.get<string[]>(`${this.apiUrl}/tenants`, {headers});
+  }),
+  catchError((error) => {
+    console.error('Błąd pobierania listy tenantów:', error);
+    return throwError(() => error);
+  })
+);
+}
 }

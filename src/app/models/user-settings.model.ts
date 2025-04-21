@@ -17,8 +17,7 @@ export interface UserSettings {
   selectedRadioStream?: string;
   footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
-  location?: Location;
-  mainLogoUrl?: string;
-  separatorLogoUrl?: string;
-
+  // location?: Location;
+logoFilePath: string;
+separatorFilePath: string;
 }

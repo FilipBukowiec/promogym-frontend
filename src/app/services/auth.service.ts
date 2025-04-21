@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 
@@ -9,6 +9,11 @@ import { jwtDecode } from 'jwt-decode';
   providedIn: 'root',
 })
 export class AuthService {
+
+  private isAdminSubject = new BehaviorSubject<boolean>(false);
+public isAdmin$ = this.isAdminSubject.asObservable();
+
+
   constructor(private auth0: Auth0Service) {}
 
   // 📌 Pobranie nagłówków z tokena
@@ -56,5 +61,20 @@ export class AuthService {
       })
     )}
 
+    
+    checkIfAdmin(): void {
+      this.auth0.getAccessTokenSilently().subscribe({
+        next: (token) => {
+          const decodedToken: any = jwtDecode(token);
+          const roles = decodedToken["https://promogym.com/roles"] || [];
+          const isAdmin = roles.includes("admin");
+          this.isAdminSubject.next(isAdmin);
+        },
+        error: (err) => {
+          console.error("Błąd podczas sprawdzania roli admina:", err);
+          this.isAdminSubject.next(false);
+        }
+      });
+    }
 
-}
+  }

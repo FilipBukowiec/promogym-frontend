@@ -17,6 +17,10 @@ export class FooterComponent implements OnInit, OnDestroy {
   isVisible: boolean = false;
   private subscription: Subscription | undefined;
 
+  logoPath: string = '/assets/images/promogym_logo1.svg';
+
+
+  
   constructor(
     private clockService: ClockService,
     private userSettingsService: UserSettingsService
@@ -28,9 +32,13 @@ export class FooterComponent implements OnInit, OnDestroy {
       this.userSettingsService.observeSettings(),
     ]).subscribe({
       next: ([currentTime, settings]) => {
+
         console.log('⏳ Otrzymane settings w FooterComponent:', settings);
         this.currentTime = currentTime;
         this.evaluateVisibility(settings);
+        this.logoPath = settings?.logoFilePath?.trim()
+      ? `http://localhost:3000/${settings.logoFilePath}`
+      : '/assets/images/promogym_logo1.svg';
       },
       error: (error) => console.error('❌ Błąd w subscribe:', error),
     });

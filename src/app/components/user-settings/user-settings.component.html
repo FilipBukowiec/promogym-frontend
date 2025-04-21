@@ -1,3 +1,7 @@
+<ng-container *ngIf="loading">
+  <app-loader></app-loader> <!-- twój loader -->
+</ng-container>
+<ng-container *ngIf="!loading">
 <section>
   <h1>General settings</h1>
   <span class="description">Remember, after adding new settings, you must press the 'Save settings'
@@ -6,7 +10,7 @@
     currently in use, click the 'Live update' button. This will reload the
     application on those devices.</span>
 
-  <button>Live update</button>
+  <button (click)="refreshPage()">Live update</button>
 </section>
 <section>
   <h2>Settings guide tutorial</h2>
@@ -49,6 +53,7 @@
       <td colspan="2">
         Selected radio stream:
         <select [(ngModel)]="userSettings.selectedRadioStream" (change)="updateSelectedIndex($event)">
+          <option [disabled]="true" value="">Select radio stream</option>
           <option *ngFor="let radio of radioStreamList; let i = index" [value]="radio.url">
             {{ radio.description }}
           </option>
@@ -108,27 +113,35 @@
    <tr>
     <td>Main footer logo</td>
     <td>
-      <span *ngIf="userSettings.mainLogoUrl">
-        <img [src]="userSettings.mainLogoUrl" alt="Main logo" class="logo-preview" />
+      <span *ngIf="tempLogoPreviewUrl || userSettings.logoFilePath">
+        <img
+  [src]="tempLogoPreviewUrl || ('http://localhost:3000/' + userSettings.logoFilePath)"
+  alt="Main logo"
+  class="logo-preview"
+/>
       </span>
     </td>
     <td>
-      <input type="file" (change)="onFileSelected($event, 'mainlogo')" />
-      <button  *ngIf="userSettings?.mainLogoUrl" (click)="deleteLogo('mainlogo')">Delete</button>
-    </td>
+    <div class="icon-container">  <input type="file" (change)="onFileSelected($event, 'mainlogo')" />
+      <i class="bi bi-trash3-fill"  *ngIf="userSettings.logoFilePath" (click)="deleteLogo('mainlogo')"></i>
+    </div></td>
   </tr>
   
   <tr>
     <td>Separator logo (white background)</td>
     <td>
-      <span *ngIf="userSettings.separatorLogoUrl">
-        <img [src]="userSettings.separatorLogoUrl" alt="Separator logo" class="logo-preview" />
+      <span *ngIf="tempSeparatorPreviewUrl || userSettings.separatorFilePath">
+        <img
+        [src]="tempSeparatorPreviewUrl || ('http://localhost:3000/' + userSettings.separatorFilePath)"
+        alt="Separator logo"
+        class="logo-preview"
+      />
       </span>
     </td>
-    <td>
+    <td><div class="icon-contaiener">
       <input type="file" (change)="onFileSelected($event, 'separator')" />
-      <button *ngIf="userSettings.separatorLogoUrl" (click)="deleteLogo('separator')">Delete</button>
-    </td>
+      <i class="bi bi-trash3-fill" *ngIf="userSettings.separatorFilePath" (click)="deleteLogo('separator')"></i>
+    </div></td>
   </tr>
   
    <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
@@ -183,3 +196,5 @@
   </table>
   <button (click)="saveSettings()">Save settings</button>
 </section>
+
+</ng-container>
