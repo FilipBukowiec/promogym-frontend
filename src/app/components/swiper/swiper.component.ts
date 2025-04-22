@@ -11,10 +11,11 @@ import { MediaService } from '../../services/media.service';
 import { Media } from '../../models/media.model';
 import { LoaderComponent } from '../loader/loader.component';
 import { CommonModule } from '@angular/common';
-import { combineLatest, of, Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
+import { TenantChangeService } from '../../services/tenant-change.service';
 
 Swiper.use([Autoplay]);
 
@@ -33,17 +34,24 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   pictureSlideDuration: number = 5;
   private combinedSubscription: Subscription | null = null;
   private mediaUpdateSubscription!: Subscription;
+  private tenantChangeSubscription!: Subscription;
 
   constructor(
     private mediaService: MediaService,
     private userSettingsService: UserSettingsService,
     private webSocketService: WebSocketService,
-    private retryHelper: RetryHelperService
+    private retryHelper: RetryHelperService,
+    private tenantChangeService: TenantChangeService,
   ) {}
 
   ngOnInit(): void {
     this.mediaUpdateSubscription = this.webSocketService.mediaUpdate$.subscribe(() => {
       console.log('🔄 Otrzymano event mediaUpdate – odświeżam Swiper!');
+      this.loadSwiperData();
+    });
+
+    this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(() => {
+      console.log('🏢 Zmiana tenant\'a – odświeżam media Swipera!');
       this.loadSwiperData();
     });
 
@@ -61,7 +69,6 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mediaService.getFilesForSwiper(),
           this.userSettingsService.getSettings(),
         ]),
-      
       )
       .subscribe({
         next: ([media, settings]) => {
@@ -198,6 +205,30 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
           },
         },
       });
+
+      // ⬇️ Sprawdzenie pierwszego slajdu po inicjalizacji
+      const firstSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
+      const video = firstSlide.querySelector('video') as HTMLVideoElement;
+
+      if (video) {
+        this.mySwiper.autoplay.stop();
+        video.currentTime = 0;
+        video
+          .play()
+          .then(() => {
+            this.isVideoPlaying = true;
+          })
+          .catch((err) => console.error('Błąd odtwarzania pierwszego wideo:', err));
+
+        video.addEventListener(
+          'ended',
+          () => {
+            this.mySwiper.slideNext();
+            this.isVideoPlaying = false;
+          },
+          { once: true }
+        );
+      }
     }
   }
 
@@ -207,14 +238,9 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.combinedSubscription) {
-      this.combinedSubscription.unsubscribe();
-    }
-    if (this.mediaUpdateSubscription) {
-      this.mediaUpdateSubscription.unsubscribe();
-    }
-    if (this.mySwiper) {
-      this.mySwiper.destroy(true, true);
-    }
+    this.combinedSubscription?.unsubscribe();
+    this.mediaUpdateSubscription?.unsubscribe();
+    this.tenantChangeSubscription?.unsubscribe();
+    this.mySwiper?.destroy(true, true);
   }
 }

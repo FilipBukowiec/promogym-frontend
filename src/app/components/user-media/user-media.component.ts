@@ -3,10 +3,12 @@ import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
 import { Media } from '../../models/media.model';
 import { WebSocketService } from '../../services/websocket.service';
+import { RetryHelperService } from '../../services/retry-helper.service';
+import { LoaderComponent } from '../loader/loader.component';
 
 @Component({
   standalone:true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent],
   selector: 'app-user-media',
   templateUrl: './user-media.component.html',
   styleUrls: ['./user-media.component.scss'],
@@ -14,23 +16,36 @@ import { WebSocketService } from '../../services/websocket.service';
 export class UserMediaComponent implements OnInit {
   mediaList: Media[] = [];
   selectedFile: File | null = null;
+  loading:boolean = true;
+  error: string | null = null;
 
-  constructor(private mediaService: MediaService, private webSocketService: WebSocketService) {}
+  constructor(private mediaService: MediaService,   private retryHelper: RetryHelperService, private webSocketService: WebSocketService) {}
 
   ngOnInit(): void {
     this.loadMedia();
   }
 
+  onTenantChange(){
+    this.loadMedia();
+  }
+
   // 📌 Pobieranie listy plików
   loadMedia(): void {
-    // this.mediaService.getFilesForSwiper().subscribe(
-    this.mediaService.getFiles().subscribe(
-      (data) => {
-        this.mediaList = data;
-      },
-      (error) => console.error('Błąd podczas pobierania mediów:', error)
-    );
-  }
+    this.loading = true;
+
+    this.retryHelper.withRetry(this.mediaService.getFiles()).subscribe({
+      next: (data) => {
+    
+          this.mediaList = data;
+          this.loading = false
+        },
+        error: (err) => {
+          console.error('❌ Błąd ładowania mediów:', err);
+          this.error = 'Nie udało się załadować mediów.';
+          this.loading = false;
+        },
+      });
+    }
 
   // 📌 Obsługa wyboru pliku
   onFileSelected(event: Event): void {

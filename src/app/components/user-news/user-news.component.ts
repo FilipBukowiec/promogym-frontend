@@ -4,29 +4,50 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { News } from '../../models/news.model';
 import { WebSocketService } from '../../services/websocket.service';
+import { LoaderComponent } from '../loader/loader.component';
+import { RetryHelperService } from '../../services/retry-helper.service';
 
 @Component({
   selector: 'app-user-news',
-  imports: [CommonModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule, LoaderComponent],
   templateUrl: './user-news.component.html',
   styleUrl: './user-news.component.scss'
 })
-export class UserNewsComponent  implements OnInit {
+export class UserNewsComponent implements OnInit {
   newsList: News[] = [];
   newContent: string = '';
   editedContent: string = '';
   editingNewsId: string | null = null;
+  loading: boolean = false;
+  error: string | null = null;
 
-  constructor(private newsService: NewsService, private webSocketService: WebSocketService) {}
+  constructor(
+    private newsService: NewsService,
+    private webSocketService: WebSocketService,
+    private retryHelper: RetryHelperService
+  ) {}
 
   ngOnInit(): void {
     this.loadNews();
-   
+  }
+
+  onTenantChange() {
+    this.loadNews();
   }
 
   loadNews(): void {
-    this.newsService.getNewsByTenant().subscribe((data) => {
-      this.newsList = data;
+    this.loading = true;
+    this.retryHelper.withRetry(this.newsService.getNewsByTenant()).subscribe({
+      next: (data) => {
+        this.newsList = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Błąd ładowania newsów:', err);
+        this.error = 'Nie udało się załadować newsów.';
+        this.loading = false;
+      },
     });
   }
 
@@ -34,15 +55,12 @@ export class UserNewsComponent  implements OnInit {
     if (this.newContent.trim()) {
       this.newsService.addNews(this.newContent).subscribe((newNews) => {
         this.newsList.unshift(newNews);
-        this.newContent = ''; // Reset the input field
-        
+        this.newContent = '';
       });
     }
-
-    
   }
 
-  startEditing(news: any): void {
+  startEditing(news: News): void {
     this.editingNewsId = news._id;
     this.editedContent = news.content;
   }
@@ -54,7 +72,7 @@ export class UserNewsComponent  implements OnInit {
         if (index !== -1) {
           this.newsList[index] = updatedNews;
         }
-        this.editingNewsId = null; // Reset editing state
+        this.editingNewsId = null;
       });
     }
   }
@@ -64,38 +82,29 @@ export class UserNewsComponent  implements OnInit {
     if (confirmed) {
       this.newsService.deleteNews(newsId).subscribe(
         () => {
-          // Usuwanie newsa z listy po pomyślnym usunięciu
           this.newsList = this.newsList.filter(news => news._id !== newsId);
         },
         (error) => {
-          // Obsługa błędów
           console.error('Error deleting news:', error);
           alert('Failed to delete news.');
         }
       );
     }
   }
-  
-
 
   moveUp(newsId: string): void {
     this.newsService.moveNewsUp(newsId).subscribe(() => {
-      this.loadNews();  // Reload the list after movement
+      this.loadNews();
     });
   }
 
   moveDown(newsId: string): void {
     this.newsService.moveNewsDown(newsId).subscribe(() => {
-      this.loadNews();  // Reload the list after movement
+      this.loadNews();
     });
   }
 
-liveUpdate():void{
-  this.webSocketService.requestNewsUpdate()
+  liveUpdate(): void {
+    this.webSocketService.requestNewsUpdate();
+  }
 }
-
-}
- 
-
-
-

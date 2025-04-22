@@ -20,53 +20,52 @@ export class UserSettingsService {
 
   // Pobranie ustawień użytkownika
   getSettings(): Observable<UserSettings> {
-    return this.auth.getAuthHeaders().pipe(
+    return this.auth.getAuthHeaders().pipe( // Pobierz nagłówki, które są już ustawione w AuthService
       switchMap((headers) => {
-        const tenant_id = headers.get('tenant-id');
-        const authCountry = headers.get('country');
-
+        // Teraz nagłówki są już poprawnie ustawione, więc nie musimy ich ponownie wyciągać
         return this.http
-          .get<UserSettings>(`${this.apiUrl}?tenant_id=${tenant_id}`, {
-            headers,
+          .get<UserSettings>(`${this.apiUrl}`, {
+            headers, // Przekazujemy nagłówki, które już zawierają tenant-id i country
           })
           .pipe(
             tap((settings) => {
-              if (settings.country !== (authCountry || '')) {
+              // Aktualizacja ustawień tylko jeśli country się zmieniło
+              if (settings.country !== headers.get('country')) {
                 console.log(
-                  `Zmiana kraju: ${settings.country} -> ${authCountry}`
+                  `Zmiana kraju: ${settings.country} -> ${headers.get('country')}`
                 );
-                settings.country = authCountry ? authCountry : ''; // Zaktualizuj country na authCountry lub pusty ciąg
-
-                // Teraz wywołujemy aktualizację ustawień
+                settings.country = headers.get('country') || ''; // Zaktualizuj country
+  
+                // Wywołanie aktualizacji ustawień na serwerze
                 this.updateSettings(settings).subscribe({
                   next: (updatedSettings) => {
                     console.log(
                       'Ustawienia zaktualizowane na serwerze:',
                       updatedSettings
                     );
-                    this.settingsSubject.next(updatedSettings); // Uaktualniając Subject po zapisaniu
+                    this.settingsSubject.next(updatedSettings); // Zaktualizuj lokalny cache
                   },
                   error: (error) => {
                     console.error('Błąd podczas aktualizacji ustawień:', error);
                   },
                 });
               }
-
-              // console.log("Pobrane ustawienia usera:", settings);
-              this.settingsSubject.next(settings); // Upewnij się, że aktualizujesz Subject
+  
+              // Zaktualizuj lokalny cache z ustawieniami
+              this.settingsSubject.next(settings);
             })
           );
       }),
       catchError((error) => {
         if (error.status === 404) {
           // Jeśli nie znaleziono ustawień, tworzę domyślne.
-
           return this.createDefaultSettings(); // Tworzymy domyślne ustawienia
         }
         return throwError(() => error); // W przeciwnym razie przekazujemy błąd
       })
     );
   }
+  
 
   // Funkcja tworzenia domyślnych ustawień
   private createDefaultSettings(): Observable<UserSettings> {

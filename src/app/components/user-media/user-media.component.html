@@ -1,3 +1,8 @@
+
+<ng-container *ngIf="loading">
+  <app-loader></app-loader> <!-- twój loader -->
+</ng-container>
+<ng-container *ngIf="!loading">
 <section><h1>Media</h1>
   <span class="description">Remember, after adding new settings, you must press the 'Save settings' button. From that
     moment, each device will be activated with the new settings. However, if you want to change the settings on devices
@@ -49,3 +54,4 @@
   
   </table>
 </section>
+</ng-container>

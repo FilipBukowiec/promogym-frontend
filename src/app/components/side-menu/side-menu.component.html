@@ -23,7 +23,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <li *ngFor="let tenant of tenants">
-                    <a class="dropdown-item" (click)="selectTenant(tenant)">
+                    <a class="dropdown-item" (click)="onTenantChange(tenant)">
                       {{ tenant.tenant_id }} ({{ tenant.country }})
                     </a>
                   </li>

@@ -128,4 +128,22 @@ a {
 
 .dropdown-item{
   color: red!important;
+
+}
+
+.dropdown {
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  position: relative; /* Ustawiamy relative, żeby child elementy mogły być pozycjonowane absolutnie względem niego */
+}
+
+/* Styl dla menu dropdown */
+.dropdown-menu {
+  background-color: rgb(255, 255, 255);
+  position: absolute;  /* Pozycjonujemy menu absolutnie względem dropdown */
+  top: 100%!important;   /* Ustawiamy menu bezpośrednio poniżej przycisku */
+  left: 50%!important; /* Ustawiamy lewy brzeg menu na 50% szerokości kontenera */
+  transform: translateX(-50%)!important;  /* Przesuwamy menu o połowę jego szerokości w lewo, aby je wyśrodkować */
+  width: auto; /* Możesz ustawić konkretną szerokość, jeśli to konieczne */
 }

@@ -76,6 +76,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     );
   }
 
+  onTenantChange() {
+    console.log("🔄 Tenant zmieniony – przeładowuję dane...");
+    this.loadSettings(); // albo inna metoda
+  }
+
   ngOnDestroy(): void {
     this.streamSubscription.unsubscribe();
   }

@@ -12,6 +12,9 @@ import { UserSettings } from "../../models/user-settings.model";
 import { AuthService } from "../../services/auth.service";
 import { AuthService as Auth0Service } from "@auth0/auth0-angular";
 import { Tenant } from "../../models/tenant.model";
+import { TenantChangeService } from "../../services/tenant-change.service";
+import { RetryHelperService } from "../../services/retry-helper.service";
+import { WebSocketService } from "../../services/websocket.service";
 
 @Component({
   selector: "app-side-menu",
@@ -45,10 +48,14 @@ export class SideMenuComponent implements AfterViewInit {
     public radioStreamService: RadioStreamService,
     private userSettingsService: UserSettingsService,
     private authService: AuthService,
-    private auth0Service: Auth0Service
+    private auth0Service: Auth0Service,
+    private tenantChangeService: TenantChangeService,
+    private retryHelperService: RetryHelperService,
+    private webSocketService: WebSocketService
   ) {
     this.userSettings$ = this.userSettingsService.observeSettings();
     this.isFullscreen$ = this.fullscreenService.isFullscreen$;
+
     // this.userSettings$ = this.userSettingsService.settings$;
 
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
@@ -59,16 +66,41 @@ export class SideMenuComponent implements AfterViewInit {
     this.authService.checkIfAdmin();
     this.authService.isAdmin$.subscribe((isAdmin) => {
       this.isAdmin = isAdmin;
-    })
+    });
 
+    this.retryHelperService
+      .withRetry(this.userSettingsService.getAllTenants())
+      .subscribe({
+        next: (tenants) => {
+          this.tenants = tenants;
+          console.log("🔧 Lista tenantów:", this.tenants);
 
+          // Po załadowaniu tenantów sprawdzamy, czy ustawienia użytkownika zawierają tenantId
+          this.userSettings$.pipe(take(1)).subscribe((settings) => {
+            if (settings?.tenant_id) {
+              const matchingTenant = this.tenants.find(
+                (tenant) => tenant.tenant_id === settings.tenant_id
+              );
+
+              if (matchingTenant) {
+                this.selectedTenant = matchingTenant;
+                this.authService.setSelectedTenant(matchingTenant);
+                console.log("✅ Domyślny tenant ustawiony:", matchingTenant.tenant_id);
+              } else {
+                console.warn("⚠️ Tenant z ustawień nie znaleziony na liście");
+              }
+            }
+          });
+        },
+        error: (err) => {
+          console.error("🚨 Błąd pobierania tenantów:", err);
+        },
+      });
 
     this.isOnStartPage$.next(this.router.url === "/dashboard/start");
     this.router.events
       .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd
-        ),
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         map((event: NavigationEnd) => event.url === "/dashboard/start")
       )
       .subscribe((isOnStart) => {
@@ -78,23 +110,19 @@ export class SideMenuComponent implements AfterViewInit {
     this.userSettings$.pipe(take(1)).subscribe((settings) => {
       console.log("Załadowane ustawienia użytkownika:", settings);
     });
-
-    this.userSettingsService.getAllTenants().subscribe({
-      next: (tenants) => {
-        this.tenants = tenants
-        console.log("🔧 Lista tenantów:", this.tenants);
-      },
-      error: (err) => {
-        console.error("🚨 Błąd pobierania tenantów:", err);
-      },
-    });
   }
 
-  selectTenant(tenant: Tenant):void {
-    this.selectedTenant = tenant;
-    this.authService.setSelectedTenant(tenant); // <-- przekazujemy do serwisu
+  // selectTenant(tenant: Tenant):void {
+  //   this.selectedTenant = tenant;
+  //   this.authService.setSelectedTenant(tenant); // <-- przekazujemy do serwisu
+  // }
+
+  onTenantChange(newTenant: Tenant) {
+    this.selectedTenant = newTenant;
+    this.authService.setSelectedTenant(newTenant);
+    this.webSocketService.changeRoomForTenant(newTenant);
+    this.tenantChangeService.notifyTenantChanged();
   }
-  
 
   ngAfterViewInit(): void {}
 
@@ -169,6 +197,8 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
   logout(): void {
-    this.auth0Service.logout({ logoutParams: { returnTo: document.location.origin } });
+    this.auth0Service.logout({
+      logoutParams: { returnTo: document.location.origin },
+    });
   }
 }

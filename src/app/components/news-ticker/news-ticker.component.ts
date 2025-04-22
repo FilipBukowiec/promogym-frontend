@@ -12,6 +12,7 @@ import { Subscription } from "rxjs";
 import { UserSettingsService } from "../../services/user-settings.service";
 import { UserSettings } from "../../models/user-settings.model";
 import { RetryHelperService } from "../../services/retry-helper.service";
+import { TenantChangeService } from "../../services/tenant-change.service"; // Dodajemy serwis do zmian tenant'a
 
 @Component({
   selector: "app-news-ticker",
@@ -28,14 +29,17 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
 
   private newsSubscription?: Subscription;
   private settingsSubscription?: Subscription;
+  private tenantChangeSubscription?: Subscription; // Subskrypcja na zmiany tenant'a
 
   constructor(
     private newsService: NewsService,
     private userSettingsService: UserSettingsService,
-    private retryHelper: RetryHelperService
+    private retryHelper: RetryHelperService,
+    private tenantChangeService: TenantChangeService // Iniekcja serwisu do zmian tenant'a
   ) {}
 
   ngAfterViewInit(): void {
+    // Pobieranie ustawień użytkownika
     this.settingsSubscription = this.retryHelper
       .withRetry(this.userSettingsService.getSettings())
       .subscribe({
@@ -49,6 +53,26 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
           this.subscribeToNewsUpdates();
         },
       });
+
+    // Subskrypcja na zmiany tenant'a
+    this.tenantChangeSubscription =
+      this.tenantChangeService.tenantChanged$.subscribe(() => {
+        this.retryHelper
+          .withRetry(this.userSettingsService.getSettings())
+          .subscribe({
+            next: (settings) => {
+              this.userSettings = settings;
+              this.loadNews();
+            },
+            error: (err) => {
+              console.error(
+                "❌ Błąd przy pobieraniu ustawień po zmianie tenant'a:",
+                err
+              );
+              this.loadNews(); // fallback
+            },
+          });
+      });
   }
 
   subscribeToNewsUpdates(): void {
@@ -56,7 +80,12 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
       this.newsSubscription.unsubscribe();
     }
 
-    this.newsSubscription = this.newsService.news$.subscribe((news: News[]) => {
+    this.loadNews(); // Początkowe załadowanie newsów
+  }
+
+  loadNews(): void {
+    // Pobieranie newsów na podstawie tenant'a
+    this.newsService.getNewsByTenant().subscribe((news: News[]) => {
       if (!news || news.length === 0) {
         console.warn("⚠️ Brak newsów do wyświetlenia.");
         return;
@@ -85,14 +114,18 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   }
 
   initializeMarquee(): void {
-    if (!this.marqueeElement?.nativeElement || this.newsList.length === 0) return;
+    if (!this.marqueeElement?.nativeElement || this.newsList.length === 0)
+      return;
 
     const $marquee = this.marqueeElement.nativeElement;
     this.marqueeInstance = new Marquee($marquee, {
       rate: -110,
     });
 
-    console.log("📰 Tworzenie marquee z logo:", this.userSettings?.logoFilePath);
+    console.log(
+      "📰 Tworzenie marquee z logo:",
+      this.userSettings?.logoFilePath
+    );
 
     this.loopInstance = loop(
       this.marqueeInstance,
@@ -116,6 +149,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.newsSubscription?.unsubscribe();
     this.settingsSubscription?.unsubscribe();
+    this.tenantChangeSubscription?.unsubscribe(); // Usuwamy subskrypcję tenant'a
     this.marqueeInstance = undefined;
   }
 }

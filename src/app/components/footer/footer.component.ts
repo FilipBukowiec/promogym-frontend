@@ -4,6 +4,7 @@ import { UserSettingsService } from '../../services/user-settings.service';
 import { combineLatest, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NewsTickerComponent } from '../news-ticker/news-ticker.component';
+import { TenantChangeService } from '../../services/tenant-change.service';
 
 @Component({
   selector: 'app-footer',
@@ -18,15 +19,29 @@ export class FooterComponent implements OnInit, OnDestroy {
   private subscription: Subscription | undefined;
 
   logoPath: string = '/assets/images/promogym_logo1.svg';
+  private tenantChangeSubscription: Subscription | undefined;
 
 
   
   constructor(
     private clockService: ClockService,
-    private userSettingsService: UserSettingsService
+    private userSettingsService: UserSettingsService,
+     private tenantChangeService: TenantChangeService,
   ) {}
 
   ngOnInit(): void {
+    this.loadedFooterData();
+    this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(()=>{
+      this.loadedFooterData()
+    })
+  }
+
+
+  private loadedFooterData():void{
+    if (this.subscription){
+      this.subscription.unsubscribe()
+    }
+
     this.subscription = combineLatest([
       this.clockService.currentTime$,
       this.userSettingsService.observeSettings(),

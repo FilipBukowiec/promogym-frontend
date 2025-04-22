@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from "rxjs";
 import { AuthService } from "./auth.service";
 import { NewsService } from "./news.service";
 import { MediaService } from "./media.service";
+import { Tenant } from "../models/tenant.model";
 
 @Injectable({
   providedIn: "root",
@@ -77,4 +78,11 @@ export class WebSocketService {
       }
     });
   }
+  changeRoomForTenant(tenantId: Tenant): void {
+    // Wyjście z poprzedniego pokoju
+    this.socket.emit("leaveTenant", tenantId);
+    // Dołączenie do nowego pokoju
+    this.socket.emit("joinTenant", tenantId);
+  }
+
 }
