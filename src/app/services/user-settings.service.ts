@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { UserSettings } from '../models/user-settings.model';
 import { AuthService } from './auth.service';
 import { switchMap, catchError, tap } from 'rxjs/operators';
+import { Tenant } from '../models/tenant.model';
 
 
 @Injectable({
@@ -173,10 +174,10 @@ export class UserSettingsService {
     );
   }
 
-  getAllTenants(): Observable<string[]>{
+  getAllTenants(): Observable<Tenant[]>{
 return this.auth.getAuthHeaders().pipe(
   switchMap((headers)=> {
-    return this.http.get<string[]>(`${this.apiUrl}/tenants`, {headers});
+    return this.http.get<Tenant[]>(`${this.apiUrl}/tenants`, {headers});
   }),
   catchError((error) => {
     console.error('Błąd pobierania listy tenantów:', error);

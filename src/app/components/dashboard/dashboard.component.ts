@@ -21,6 +21,8 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    
     this.auth.getAccessTokenSilently().subscribe((token) => {});
     this.adminSettings.getSettings().subscribe({
       next: (settings: AdminSettings) => {

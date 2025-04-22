@@ -11,7 +11,7 @@ import { UserSettingsService } from "../../services/user-settings.service";
 import { UserSettings } from "../../models/user-settings.model";
 import { AuthService } from "../../services/auth.service";
 import { AuthService as Auth0Service } from "@auth0/auth0-angular";
-// import { AnnouncementService } from '../../services/announcement.service';
+import { Tenant } from "../../models/tenant.model";
 
 @Component({
   selector: "app-side-menu",
@@ -35,8 +35,8 @@ export class SideMenuComponent implements AfterViewInit {
   userSettings$: Observable<UserSettings | null>;
   // isAnnouncementPlaying$: Observable<boolean>;
 
-  tenants: string[] = [];
-  selectedTenant: string | null = null;
+  tenants: Tenant[] = [];
+  selectedTenant: Tenant | null = null;
 
   constructor(
     private fullscreenService: FullscreenService,
@@ -90,9 +90,11 @@ export class SideMenuComponent implements AfterViewInit {
     });
   }
 
-  selectTenant(tenant: string) {
+  selectTenant(tenant: Tenant):void {
     this.selectedTenant = tenant;
+    this.authService.setSelectedTenant(tenant); // <-- przekazujemy do serwisu
   }
+  
 
   ngAfterViewInit(): void {}
 

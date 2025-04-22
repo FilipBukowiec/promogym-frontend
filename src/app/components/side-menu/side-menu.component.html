@@ -19,11 +19,13 @@
             <div *ngIf="isAdmin" class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                   data-bs-toggle="dropdown" aria-expanded="false">
-                  {{ selectedTenant || 'Choose user' }}
+                  {{ selectedTenant?.tenant_id || 'Choose tenant' }}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <li *ngFor="let tenant of tenants">
-                    <a class="dropdown-item" (click)="selectTenant(tenant)">{{ tenant }}</a>
+                    <a class="dropdown-item" (click)="selectTenant(tenant)">
+                      {{ tenant.tenant_id }} ({{ tenant.country }})
+                    </a>
                   </li>
                 </ul>
               </div>
