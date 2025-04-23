@@ -45,7 +45,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.mediaUpdateSubscription = this.webSocketService.mediaUpdate$.subscribe(() => {
+    this.mediaUpdateSubscription = this.mediaService.media$.subscribe(() => {
       console.log('🔄 Otrzymano event mediaUpdate – odświeżam Swiper!');
       this.loadSwiperData();
     });

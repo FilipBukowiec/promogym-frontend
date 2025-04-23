@@ -30,6 +30,7 @@ export class UserNewsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNews();
+    
   }
 
   onTenantChange() {

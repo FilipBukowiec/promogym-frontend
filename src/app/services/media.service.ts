@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { switchMap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -13,9 +13,17 @@ import { Advertisement } from '../models/advertisement.model';
 export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
+
+  private mediaUpdateSubject = new BehaviorSubject<Media[]>([]);
+  media$ = this.mediaUpdateSubject.asObservable();
+  
   
 
   constructor(private http: HttpClient, private auth: AuthService, ) {}
+
+refreshMedia(){
+      this.mediaUpdateSubject.next();
+}
 
   // 📌 Przesyłanie pliku
   uploadFile(file: File): Observable<Media> {

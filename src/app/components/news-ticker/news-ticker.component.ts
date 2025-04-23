@@ -79,8 +79,13 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
     if (this.newsSubscription) {
       this.newsSubscription.unsubscribe();
     }
-
-    this.loadNews(); // Początkowe załadowanie newsów
+  
+    this.newsSubscription = this.newsService.news$.subscribe((news: News[]) => {
+      this.newsList = news;
+      if (this.marqueeElement?.nativeElement) {
+        this.resetMarquee();
+      }
+    });
   }
 
   loadNews(): void {

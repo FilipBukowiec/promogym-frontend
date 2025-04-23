@@ -112,15 +112,17 @@ export class SideMenuComponent implements AfterViewInit {
     });
   }
 
-  // selectTenant(tenant: Tenant):void {
-  //   this.selectedTenant = tenant;
-  //   this.authService.setSelectedTenant(tenant); // <-- przekazujemy do serwisu
-  // }
+  
 
   onTenantChange(newTenant: Tenant) {
+    const previousTenant = this.selectedTenant;
+    console.log("🟡 Poprzedni tenant:", previousTenant);
+    console.log("🟢 Nowy tenant:", newTenant);
+  
     this.selectedTenant = newTenant;
     this.authService.setSelectedTenant(newTenant);
-    this.webSocketService.changeRoomForTenant(newTenant);
+  
+    this.webSocketService.changeRoomForTenant(previousTenant, newTenant);
     this.tenantChangeService.notifyTenantChanged();
   }
 
