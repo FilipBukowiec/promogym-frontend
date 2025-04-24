@@ -14,16 +14,20 @@ export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
 
-  private mediaUpdateSubject = new BehaviorSubject<Media[]>([]);
-  media$ = this.mediaUpdateSubject.asObservable();
+  private mediaSubject = new BehaviorSubject<Media[]>([]);
+  media$ = this.mediaSubject.asObservable();
   
   
 
   constructor(private http: HttpClient, private auth: AuthService, ) {}
 
-refreshMedia(){
-      this.mediaUpdateSubject.next();
-}
+  refreshMedia(){
+    this.getFilesForSwiper().subscribe({
+      next: (media) => this.mediaSubject.next(media),
+      error: (error) => console.error('❌ Błąd pobierania mediów:', error),
+  
+    })}
+    
 
   // 📌 Przesyłanie pliku
   uploadFile(file: File): Observable<Media> {
@@ -44,47 +48,37 @@ refreshMedia(){
     );
   }
 
-  getFilesForSwiper(): Observable<Media[]> {
-    return this.auth.getUser().pipe(
-      switchMap(({roles, country}) => {
-        const isPremium = roles.includes('premium_user');
-        console.log("kraj usera:", country)
-          return this.auth.getAuthHeaders().pipe(
-          switchMap((headers) => {
-            if (isPremium) {
-              // Dla premium usera, zwracamy tylko media
-              return this.http.get<Media[]>(this.apiUrl, { headers });
-            } else {
-              // Zwykły użytkownik – pobieramy zarówno media, jak i reklamy
-              return forkJoin({
-                media: this.http.get<Media[]>(this.apiUrl, { headers }),
-                ads: this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`, { headers }),
-              }).pipe(
-                map(({ media, ads }) => {
-                  // Jeśli media są dostępne, pobieramy ostatni 'order'
-                  const lastOrder = media.length > 0 ? Math.max(...media.map(item => item.order)) : 0;
-  
-                  // Mapujemy reklamy na Media, ustawiając order na ostatni media + 1
-                  const adsAsMedia = ads.map((ad, index) => ({
-                    ...ad,
-                    tenant_id: 'default_tenant',  // Ustalamy domyślną wartość dla 'tenant_id'
-                    order: lastOrder + index + 1,  // Ustalamy order dla reklamy, aby były na końcu
-                  }));
-  
-                  // Łączymy tablicę media i ads
-                  const combined = [...media, ...adsAsMedia];
-  
-                  // Sortujemy po 'order', aby zachować poprawną kolejność
-                  return combined.sort((a, b) => a.order - b.order);
-                })
-              );
-            }
-          })
-        );
-      }),
-      catchError(this.handleError)
-    );
-  }
+getFilesForSwiper(): Observable<Media[]> {
+  return this.auth.getUser().pipe(
+    switchMap(({ roles, country }) => {
+      const isPremium = roles.includes('premium_user');
+      return this.auth.getAuthHeaders().pipe(
+        switchMap((headers) => {
+          if (isPremium) {
+            return this.http.get<Media[]>(this.apiUrl, { headers });
+          } else {
+            return forkJoin({
+              media: this.http.get<Media[]>(this.apiUrl, { headers }),
+              ads: this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`, { headers }),
+            }).pipe(
+              map(({ media, ads }) => {
+                const lastOrder = media.length > 0 ? Math.max(...media.map(item => item.order)) : 0;
+                const adsAsMedia = ads.map((ad, index) => ({
+                  ...ad,
+                  tenant_id: 'default_tenant',
+                  order: lastOrder + index + 1,
+                }));
+                return [...media, ...adsAsMedia].sort((a, b) => a.order - b.order);
+              })
+            );
+          }
+        })
+      );
+    })
+    // 👇 NIE dawaj tutaj catchError – bo RetryHelper nie zadziała!
+  );
+}
+
   
 
   // 📌 Usuwanie pliku

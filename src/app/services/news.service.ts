@@ -14,7 +14,7 @@ export class NewsService {
   news$ = this.newsSubject.asObservable(); // Eksponujemy strumień newsów
 
   constructor(private http: HttpClient, private auth: AuthService) {
-    this.refreshNews(); // Pobierz newsy od razu po starcie
+    // this.refreshNews(); // Pobierz newsy od razu po starcie
   }
 
   // Pobiera newsy i aktualizuje newsSubject
@@ -30,7 +30,7 @@ export class NewsService {
   getNewsByTenant(): Observable<News[]> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => this.http.get<News[]>(this.apiUrl, { headers })),
-      tap((news) => this.newsSubject.next(news)), // Aktualizacja newsSubject
+      // tap((news) => this.newsSubject.next(news)), // Aktualizacja newsSubject
       catchError(this.handleError)
     );
   }

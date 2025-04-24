@@ -11,14 +11,23 @@ import { retryWhen, scan, delayWhen } from 'rxjs/operators';
       return obs$.pipe(
         retryWhen(errors =>
           errors.pipe(
-            scan((retryCount, error) => {
-              if (retryCount >= maxRetries) {
-                throw error;
+            scan((acc, error) => {
+              if (acc.retryCount >= maxRetries) {
+                acc.shouldThrow = true;
               }
-              console.warn(`🔁 Retry #${retryCount + 1} za ${delayMs}ms`, error);
-              return retryCount + 1;
-            }, 0),
-            delayWhen(() => timer(delayMs))
+              return {
+                error,
+                retryCount: acc.retryCount + 1,
+                shouldThrow: acc.shouldThrow,
+              };
+            }, { retryCount: 0, error: null, shouldThrow: false }),
+            delayWhen(acc => {
+              if (acc.shouldThrow) {
+                return throwError(() => acc.error);
+              }
+              console.warn(`🔁 Retry #${acc.retryCount} za ${delayMs}ms`, acc.error);
+              return timer(delayMs);
+            })
           )
         )
       );

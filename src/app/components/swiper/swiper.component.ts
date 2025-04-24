@@ -13,7 +13,6 @@ import { LoaderComponent } from '../loader/loader.component';
 import { CommonModule } from '@angular/common';
 import { combineLatest, Subscription } from 'rxjs';
 import { UserSettingsService } from '../../services/user-settings.service';
-import { WebSocketService } from '../../services/websocket.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { TenantChangeService } from '../../services/tenant-change.service';
 
@@ -32,60 +31,56 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = true;
   private isVideoPlaying: boolean = false;
   pictureSlideDuration: number = 5;
-  private combinedSubscription: Subscription | null = null;
+  private dataLoadSubscription: Subscription | null = null;
   private mediaUpdateSubscription!: Subscription;
   private tenantChangeSubscription!: Subscription;
 
   constructor(
     private mediaService: MediaService,
     private userSettingsService: UserSettingsService,
-    private webSocketService: WebSocketService,
     private retryHelper: RetryHelperService,
     private tenantChangeService: TenantChangeService,
   ) {}
 
   ngOnInit(): void {
+    this.userSettingsService.getSettings().subscribe((settings) => {
+      if (settings?.pictureSlideDuration) {
+        this.pictureSlideDuration = settings.pictureSlideDuration;
+      }
+    });
+
     this.mediaUpdateSubscription = this.mediaService.media$.subscribe(() => {
-      console.log('🔄 Otrzymano event mediaUpdate – odświeżam Swiper!');
-      this.loadSwiperData();
+      this.loadMediaData();
     });
 
     this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(() => {
-      console.log('🏢 Zmiana tenant\'a – odświeżam media Swipera!');
-      this.loadSwiperData();
+      this.loadMediaData();
     });
 
-    this.loadSwiperData();
+    this.loadMediaData();
   }
 
-  private loadSwiperData(): void {
-    if (this.combinedSubscription) {
-      this.combinedSubscription.unsubscribe();
+  private loadMediaData(): void {
+    if (this.dataLoadSubscription) {
+      this.dataLoadSubscription.unsubscribe();
     }
 
-    this.combinedSubscription = this.retryHelper
+    this.dataLoadSubscription = this.retryHelper
       .withRetry(
-        combineLatest([
-          this.mediaService.getFilesForSwiper(),
-          this.userSettingsService.getSettings(),
-        ]),
+        this.mediaService.getFilesForSwiper(),
       )
       .subscribe({
-        next: ([media, settings]) => {
+        next: (media) => {
           if (!media || media.length === 0) {
             throw new Error('Brak mediów do załadowania.');
           }
 
           this.media = media.sort((a, b) => a.order - b.order);
-          if (settings?.pictureSlideDuration) {
-            this.pictureSlideDuration = settings.pictureSlideDuration;
-          }
-
           this.destroySwiper();
           this.initializeSwiper();
         },
         error: (error) => {
-          console.error('❌ Błąd podczas pobierania danych po ponowieniach:', error);
+          console.error('❌ Błąd podczas pobierania mediów:', error);
           this.isLoading = false;
         },
       });
@@ -206,7 +201,6 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
         },
       });
 
-      // ⬇️ Sprawdzenie pierwszego slajdu po inicjalizacji
       const firstSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
       const video = firstSlide.querySelector('video') as HTMLVideoElement;
 
@@ -233,12 +227,11 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   refreshSwiper(): void {
-    console.log('🔁 Ręczne odświeżanie Swipera...');
-    this.loadSwiperData();
+    this.loadMediaData(); 
   }
 
   ngOnDestroy(): void {
-    this.combinedSubscription?.unsubscribe();
+    this.dataLoadSubscription?.unsubscribe();
     this.mediaUpdateSubscription?.unsubscribe();
     this.tenantChangeSubscription?.unsubscribe();
     this.mySwiper?.destroy(true, true);

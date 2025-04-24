@@ -4,7 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { NewsService } from './news.service';
 import { MediaService } from './media.service';
-import { Tenant } from '../models/tenant.model
+import { Tenant } from '../models/tenant.model';
+
 
 @Injectable({
   providedIn: 'root',

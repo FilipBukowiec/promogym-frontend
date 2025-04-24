@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
 export class ContactComponent {
 
 
-topics:string[] = ["Problems", "ulepszenia"];
+topics:string[] = ["Problems", "Improvement", "Support"];
 
 
 
