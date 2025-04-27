@@ -89,7 +89,6 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   }
 
   loadNews(): void {
-    // Pobieranie newsów na podstawie tenant'a
     this.newsService.getNewsByTenant().subscribe((news: News[]) => {
       if (!news || news.length === 0) {
         console.warn("⚠️ Brak newsów do wyświetlenia.");

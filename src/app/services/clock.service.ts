@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ClockService {
-  private currentTimeSubject = new BehaviorSubject<string>('');
+  private currentTimeSubject = new BehaviorSubject<string>("");
   currentTime$ = this.currentTimeSubject.asObservable();
   private intervalId: any;
   private lastMinute: number | null = null;
@@ -25,7 +25,7 @@ export class ClockService {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
-    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
 
     if (this.lastMinute !== minutes) {
       // Emitujemy TYLKO jeśli zmieniła się minuta
@@ -33,7 +33,7 @@ export class ClockService {
       this.lastMinute = minutes;
     }
   }
-  
+
   ngOnDestroy(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);

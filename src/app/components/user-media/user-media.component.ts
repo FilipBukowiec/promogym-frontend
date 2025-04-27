@@ -112,5 +112,6 @@ export class UserMediaComponent implements OnInit {
 
   liveUpdate():void{
     this.webSocketService.requestMediaUpdate();
+  
       }
 }

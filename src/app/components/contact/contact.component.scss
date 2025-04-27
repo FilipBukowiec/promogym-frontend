@@ -14,7 +14,7 @@
 
 
 .contact-form {
-  //
+
   background-color: rgba($color: $secondaryColor, $alpha: 0.2);
   border-radius: 5px;
   padding: 10px;
@@ -22,6 +22,10 @@
   flex-direction: column;
   gap: 10px;
   width: 90%;
+}
+
+h4{
+  text-align: center;
 }
 
 input {

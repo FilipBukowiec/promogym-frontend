@@ -4,12 +4,13 @@ import { Observable, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Announcement } from '../models/announcement.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnnouncementService {
-  private apiUrl = 'http://localhost:3000/announcements';
+  private apiUrl = `${environment.apiUrl}announcements`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

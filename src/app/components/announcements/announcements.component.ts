@@ -39,7 +39,7 @@ export class AnnouncementsComponent implements OnInit {
   constructor(
     private announcementService: AnnouncementService, 
     private fb: FormBuilder,
-    private authService: AuthService // Inicjalizacja AuthService
+    private authService: AuthService 
   ) {
     this.announcementForm = this.fb.group({
       description: [''],

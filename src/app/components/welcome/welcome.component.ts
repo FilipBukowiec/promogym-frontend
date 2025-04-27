@@ -4,6 +4,7 @@ import { LoaderComponent } from "../loader/loader.component";
 import { CommonModule } from "@angular/common";
 import { TenantChangeService } from "../../services/tenant-change.service";
 import { Subject, takeUntil } from "rxjs";
+import { AuthService } from "../../services/auth.service";
 
 @Component({
   imports: [LoaderComponent, CommonModule],
@@ -16,9 +17,12 @@ export class WelcomeComponent {
   isLoading: boolean = true;
   isStarting: boolean = false;
   private destroy$ = new Subject<void>();
-  
-  constructor(private userSettingsService: UserSettingsService,
-    private tenantChangeService: TenantChangeService
+  email: string = "";
+
+  constructor(
+    private userSettingsService: UserSettingsService,
+    private tenantChangeService: TenantChangeService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -32,7 +36,9 @@ export class WelcomeComponent {
         this.isStarting = false;
         this.loadSettings(); // <-- ponownie pobierz dane
       });
-  }
+    
+  };
+
 
   private loadSettings() {
     this.userSettingsService.getSettings().subscribe((settings) => {

@@ -1,5 +1,3 @@
-
-
 <section>
     <h1>Contact</h1>
     <span class="descrption">Chcesz zgłosić swoją.....</span>
@@ -8,19 +6,25 @@
 <section><img class="image" src="/assets/images/promogym_logo.svg" alt=""></section>
 <section>
 
-    <form class="contact-form">
-<h4>Formularz kontaktowy</h4>
+    <form *ngIf="!succes" class="contact-form" (ngSubmit)="onSubmit()">
+        <h4>Contact form</h4>
         <span>Subject:
 
-            <select name="" id="">
+            <select [(ngModel)]="subject" name="subject" required>
                 <option [disabled]="true" value="">Choose a subject</option>
-                <option *ngFor="let topic of topics" value="">{{ topic}}</option>
+                <option *ngFor="let s of subjects" [value]="s">{{s}}</option>
             </select>
         </span>
         <span>Message:
-            <input type="text">
-        </span>
-    </form>
-    <button type="submit">Send message</button>
-</section>
+            <input type="text" [(ngModel)]="message" name="message" required/>
 
+
+        </span>
+   
+    </form>
+    <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button>
+<button (click)="newMessage()" *ngIf="succes" >Write new message</button>
+    <!-- <p *ngIf="succes">jest good</p> -->
+
+    <p *ngIf="error">{{error}}</p>
+</section>

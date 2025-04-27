@@ -8,20 +8,18 @@ export class RadioStreamService {
   private audioPlayer: HTMLAudioElement = new Audio();
   private currentPlayingStreamIndex$ = new BehaviorSubject<number | null>(null);
 
-  // Stany audio dla różnych komponentów
   public sideMenuAudio$ = new BehaviorSubject<boolean>(false);
   public userSettingsAudio$ = new BehaviorSubject<boolean>(false);
   public adminSettingsAudio$ = new BehaviorSubject<boolean>(false);
 
   constructor() {}
 
-  // Getter do obserwowania aktualnie odtwarzanego strumienia
   get currentPlayingStreamIndexState$(): Observable<number | null> {
     return this.currentPlayingStreamIndex$.asObservable();
   }
 
   playRadioStream(url: string, trueObservable: BehaviorSubject<boolean>, falseObservable?:BehaviorSubject<boolean>[], index?: number): void {
-    this.stopRadioStream(trueObservable); // Zatrzymanie aktualnie odtwarzanego strumienia
+    this.stopRadioStream(trueObservable); 
 
     this.audioPlayer.src = url;
     this.audioPlayer.load();
@@ -29,7 +27,7 @@ export class RadioStreamService {
     this.audioPlayer
       .play()
       .then(() => {
-        this.currentPlayingStreamIndex$.next(index ?? null); // Aktualizacja obserwowalnej wartości
+        this.currentPlayingStreamIndex$.next(index ?? null); 
         console.log(`Playing stream ${index}: ${url}`);
         trueObservable.next(true);
         if(falseObservable&& falseObservable.length >0){
@@ -50,13 +48,12 @@ export class RadioStreamService {
 
   stopRadioStream(trueObservable: BehaviorSubject<boolean>): void {
     this.audioPlayer.pause();
-    this.currentPlayingStreamIndex$.next(null); // Resetowanie indeksu
+    this.currentPlayingStreamIndex$.next(null); 
     trueObservable.next(false);
   }
 
 
  
-  // Funkcja do subskrypcji stanu audio
   get sideMenuAudioState$() {
     return this.sideMenuAudio$.asObservable();
   }

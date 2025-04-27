@@ -145,7 +145,7 @@ export class AdvertisementsComponent implements OnInit {
 
   // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
-    return `http://localhost:3000/${filePath}`;
+    return `https://app.promogym.pl/backend/${filePath}`;
   }
 
   toggleRegionSelection(country: string): void {
