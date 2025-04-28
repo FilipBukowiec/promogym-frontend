@@ -3,6 +3,8 @@ import { CommonModule } from "@angular/common";
 import { AdvertisementsService } from "../../services/advertisements.service";
 import { Advertisement } from "../../models/advertisement.model";
 import { AdminSettingsService } from "../../services/admin-settings.service";
+import { environment } from "../../../environments/environment";
+
 
 @Component({
   standalone: true,
@@ -145,7 +147,7 @@ export class AdvertisementsComponent implements OnInit {
 
   // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
-    return `https://app.promogym.pl/backend/${filePath}`;
+    return `${environment.apiUrl}${filePath}`;
   }
 
   toggleRegionSelection(country: string): void {
