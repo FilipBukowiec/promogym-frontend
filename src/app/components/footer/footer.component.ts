@@ -5,6 +5,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { NewsTickerComponent } from '../news-ticker/news-ticker.component';
 import { TenantChangeService } from '../../services/tenant-change.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-footer',
@@ -52,7 +53,7 @@ export class FooterComponent implements OnInit, OnDestroy {
         this.currentTime = currentTime;
         this.evaluateVisibility(settings);
         this.logoPath = settings?.logoFilePath?.trim()
-      ? `http://localhost:3000/${settings.logoFilePath}`
+      ? `${environment.publicUrl}${settings.logoFilePath}`
       : '/assets/images/promogym_logo1.svg';
       },
       error: (error) => console.error('❌ Błąd w subscribe:', error),

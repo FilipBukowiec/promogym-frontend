@@ -5,11 +5,10 @@ import { Advertisement } from "../../models/advertisement.model";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { environment } from "../../../environments/environment";
 
-
 @Component({
   standalone: true,
   imports: [CommonModule],
-  selector: "app-advertisement",
+  selector: "app-advertisements",
   templateUrl: "./advertisements.component.html",
   styleUrls: ["./advertisements.component.scss"],
 })
@@ -28,30 +27,31 @@ export class AdvertisementsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log("🔄 Inicjalizacja komponentu reklam");
     this.loadAdminSettings();
     this.loadAdvertisements();
   }
 
   loadAdminSettings(): void {
+    console.log("📥 Ładowanie ustawień administracyjnych...");
     this.adminSettingsService.getSettings().subscribe(
       (data) => {
         this.availableCountries = data.countries || [];
-        console.log(this.availableCountries);
+        console.log("✅ Dostępne kraje:", this.availableCountries);
       },
       (error) =>
-        console.error(
-          "Błąd podczas pobierania ustawień administracyjnych:",
-          error
-        )
+        console.error("❌ Błąd podczas pobierania ustawień administracyjnych:", error)
     );
   }
 
   loadAdvertisements(): void {
+    console.log("📥 Ładowanie reklam...");
     this.advertisementsService.getAdvertisements().subscribe(
       (data) => {
+        console.log("✅ Odebrane reklamy:", data);
         this.advertisementList = data;
       },
-      (error) => console.error("Błąd podczas pobierania reklam:", error)
+      (error) => console.error("❌ Błąd podczas pobierania reklam:", error)
     );
   }
 
@@ -59,129 +59,136 @@ export class AdvertisementsComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
+      console.log("📁 Wybrany plik:", this.selectedFile.name);
     }
   }
 
-  // 📌 Dodawanie reklamy
   addAdvertisement(): void {
     if (!this.selectedFile) {
-      console.error("Plik wymagany");
+      console.error("❌ Plik wymagany");
       return;
     }
+
+    console.log("📤 Dodawanie reklamy:");
+    console.log("➡️ Plik:", this.selectedFile.name);
+    console.log("➡️ Kraje:", this.selectedCountry);
 
     this.advertisementsService
       .uploadFile(this.selectedFile, this.selectedCountry)
       .subscribe(
         (response) => {
-          console.log("tak poszło do backendu", this.selectedCountry);
-          console.log("Reklama została dodana:", response);
+          console.log("✅ Reklama została dodana:", response);
           this.selectedFile = null;
           this.selectedCountry = [];
-          this.loadAdvertisements(); // Odświeżenie listy
+          this.loadAdvertisements();
         },
-        (error) => console.error("Błąd podczas dodawania reklamy:", error)
+        (error) => console.error("❌ Błąd podczas dodawania reklamy:", error)
       );
   }
 
-
-  startEditing(advertisement:Advertisement):void{
+  startEditing(advertisement: Advertisement): void {
+    console.log("✏️ Rozpoczęto edycję reklamy:", advertisement._id);
     this.editingAdvertisementId = advertisement._id;
-    this.editedCountries = [...(advertisement.countries || [])]
+    this.editedCountries = [...(advertisement.countries || [])];
+    console.log("➡️ Aktualne kraje reklamy:", this.editedCountries);
   }
 
-
   saveChanges(advertisement: Advertisement): void {
-    // Sortowanie krajów przed wysłaniem
     const sortedCountries = [...this.editedCountries].sort();
-  
-    // Wywołanie metody aktualizacji na backendzie
-    this.advertisementsService.updateAdvertisement(advertisement._id, { countries: sortedCountries }).subscribe(
+    console.log("💾 Zapisywanie zmian dla reklamy:", advertisement._id);
+    console.log("➡️ Nowe kraje:", sortedCountries);
+
+    this.advertisementsService
+      .updateAdvertisement(advertisement._id, { countries: sortedCountries })
+      .subscribe(
+        () => {
+          advertisement.countries = sortedCountries;
+          this.editingAdvertisementId = null;
+          console.log("✅ Zmiany zapisane.");
+        },
+        (error) => {
+          console.error("❌ Błąd podczas aktualizacji krajów reklamy:", error);
+        }
+      );
+  }
+
+  deleteAdvertisement(id: string): void {
+    const confirmed = window.confirm("Czy na pewno chcesz usunąć tę reklamę?");
+    if (confirmed) {
+      console.log("🗑️ Usuwanie reklamy:", id);
+      this.advertisementsService.delete(id).subscribe(
+        () => {
+          console.log("✅ Reklama usunięta:", id);
+          this.advertisementList = this.advertisementList.filter(
+            (ad) => ad._id !== id
+          );
+          this.loadAdvertisements();
+        },
+        (error) => {
+          console.error("❌ Błąd podczas usuwania reklamy:", error);
+          alert("Nie udało się usunąć reklamy.");
+        }
+      );
+    } else {
+      console.log("❎ Usunięcie anulowane przez użytkownika");
+    }
+  }
+
+  moveUp(id: string): void {
+    console.log("⬆️ Przesuwanie reklamy w górę:", id);
+    this.advertisementsService.moveUp(id).subscribe(
       () => {
-        // Aktualizacja lokalnie po zapisaniu
-        advertisement.countries = sortedCountries;
-        this.editingAdvertisementId = null; // Zakończ edycję
+        console.log("✅ Przesunięcie w górę zakończone");
+        this.loadAdvertisements();
       },
       (error) => {
-        console.error("Błąd podczas aktualizacji krajów reklamy:", error);
+        console.error("❌ Błąd podczas przesuwania reklamy w górę:", error);
       }
     );
   }
 
-  // 📌 Usuwanie reklamy
-  deleteAdvertisement(id: string): void {
-    const confirmed = window.confirm("Czy na pewno chcesz usunąć tę reklamę?");
-    if (confirmed) {
-      this.advertisementsService.delete(id).subscribe(
-        () => {
-          // Aktualizujemy lokalną listę lub odświeżamy ją z backendu
-          this.advertisementList = this.advertisementList.filter(
-            (ad) => ad._id !== id
-          );
-          // Alternatywnie, możesz odświeżyć całą listę:
-          this.loadAdvertisements();
-        },
-        (error) => {
-          console.error("Błąd podczas usuwania reklamy:", error);
-          alert("Nie udało się usunąć reklamy.");
-        }
-      );
-    }
-  }
-
-  // 📌 Przesunięcie reklamy w górę
-  moveUp(id: string): void {
-    this.advertisementsService.moveUp(id).subscribe(
-      () => this.loadAdvertisements(),
-      (error) =>
-        console.error("Błąd podczas przesuwania reklamy w górę:", error)
-    );
-  }
-
-  // 📌 Przesunięcie reklamy w dół
   moveDown(id: string): void {
+    console.log("⬇️ Przesuwanie reklamy w dół:", id);
     this.advertisementsService.moveDown(id).subscribe(
-      () => this.loadAdvertisements(),
-      (error) => console.error("Błąd podczas przesuwania reklamy w dół:", error)
+      () => {
+        console.log("✅ Przesunięcie w dół zakończone");
+        this.loadAdvertisements();
+      },
+      (error) => {
+        console.error("❌ Błąd podczas przesuwania reklamy w dół:", error);
+      }
     );
   }
 
-  // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
-    return `${environment.apiUrl}${filePath}`;
+    const fullPath = `${environment.publicUrl}${filePath}`;
+    console.log("🧭 Generowanie ścieżki do pliku:", fullPath);
+    return fullPath;
   }
 
   toggleRegionSelection(country: string): void {
+    console.log("🔁 Zmieniamy wybór kraju:", country);
     const index = this.selectedCountry.indexOf(country);
-
-    // Dodajemy logowanie, aby sprawdzić, co się dzieje z 'country'
-    console.log("Toggling selection for country:", country);
-
-    // Sprawdzamy, czy kraj jest już wybrany
     if (index > -1) {
-      // Jeśli kraj już jest wybrany, usuń go
-      console.log(`Usuwamy kraj: ${country}`);
+      console.log("➖ Usuwamy kraj:", country);
       this.selectedCountry.splice(index, 1);
     } else {
-      // Jeśli kraj nie jest wybrany, dodaj go
-      console.log(`Dodajemy kraj: ${country}`);
+      console.log("➕ Dodajemy kraj:", country);
       this.selectedCountry.push(country);
     }
-
-    // Logujemy aktualną zawartość selectedCountry
-    console.log("Aktualny stan selectedCountry:", this.selectedCountry);
+    console.log("📌 Aktualne selectedCountry:", this.selectedCountry);
   }
-
 
   toggleEditRegionSelection(country: string): void {
+    console.log("🔁 Zmieniamy wybór edytowanych krajów:", country);
     const index = this.editedCountries.indexOf(country);
-    
     if (index > -1) {
-      this.editedCountries.splice(index, 1); // Usuwa kraj, jeśli był już wybrany
+      console.log("➖ Usuwamy z edycji:", country);
+      this.editedCountries.splice(index, 1);
     } else {
-      this.editedCountries.push(country); // Dodaje kraj, jeśli nie był wybrany
+      console.log("➕ Dodajemy do edycji:", country);
+      this.editedCountries.push(country);
     }
+    console.log("📌 Aktualne editedCountries:", this.editedCountries);
   }
-  
-  
-
 }

@@ -15,6 +15,7 @@ import { RetryHelperService } from "../../services/retry-helper.service";
 
 import { UserSettings } from "../../models/user-settings.model";
 import { LoaderComponent } from "../loader/loader.component";
+import { environment } from "../../../environments/environment";
 
 @Component({
   selector: "app-user-settings",
@@ -57,6 +58,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   logoMarkedForDeletion: boolean = false;
   separatorMarkedForDeletion: boolean = false;
+  public environmentPublicUrl = environment.publicUrl;
 
   constructor(
     private userSettingsService: UserSettingsService,
@@ -201,7 +203,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `http://localhost:3000/${this.userSettings.logoFilePath}?t=${Date.now()}`;
+            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath}?t=${Date.now()}`;
           }
         }
 
@@ -222,7 +224,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `http://localhost:3000/${this.userSettings.separatorFilePath}?t=${Date.now()}`;
+            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath}?t=${Date.now()}`;
           }
         }
 

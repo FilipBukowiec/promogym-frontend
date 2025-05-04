@@ -15,6 +15,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { TenantChangeService } from '../../services/tenant-change.service';
+import { environment } from '../../../environments/environment';
 
 Swiper.use([Autoplay]);
 
@@ -114,7 +115,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     this.media.forEach((element) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
-      const filePath = `http://localhost:3000/${element.filePath}`;
+      const filePath = `${environment.publicUrl}${element.filePath}`;
 
       if (element.filePath.endsWith('.mp4')) {
         const videoElement = document.createElement('video');

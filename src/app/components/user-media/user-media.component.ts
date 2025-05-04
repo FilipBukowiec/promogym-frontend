@@ -5,6 +5,7 @@ import { Media } from '../../models/media.model';
 import { WebSocketService } from '../../services/websocket.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { LoaderComponent } from '../loader/loader.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone:true,
@@ -107,7 +108,7 @@ export class UserMediaComponent implements OnInit {
 
   // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
-    return `http://localhost:3000/${filePath}`;
+    return `${environment.publicUrl}${filePath}`;
   }
 
   liveUpdate():void{

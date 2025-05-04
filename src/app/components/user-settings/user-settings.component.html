@@ -115,7 +115,7 @@
     <td>
       <span *ngIf="tempLogoPreviewUrl || userSettings.logoFilePath">
         <img
-  [src]="tempLogoPreviewUrl || ('http://localhost:3000/' + userSettings.logoFilePath)"
+  [src]="tempLogoPreviewUrl || (environmentPublicUrl + userSettings.logoFilePath)"
   alt="Main logo"
   class="logo-preview"
 />
@@ -132,7 +132,7 @@
     <td>
       <span *ngIf="tempSeparatorPreviewUrl || userSettings.separatorFilePath">
         <img
-        [src]="tempSeparatorPreviewUrl || ('http://localhost:3000/' + userSettings.separatorFilePath)"
+        [src]="tempSeparatorPreviewUrl || (environmentPublicUrl + userSettings.separatorFilePath)"
         alt="Separator logo"
         class="logo-preview"
       />

@@ -13,6 +13,7 @@ import { UserSettingsService } from "../../services/user-settings.service";
 import { UserSettings } from "../../models/user-settings.model";
 import { RetryHelperService } from "../../services/retry-helper.service";
 import { TenantChangeService } from "../../services/tenant-change.service"; // Dodajemy serwis do zmian tenant'a
+import { environment } from "../../../environments/environment";
 
 @Component({
   selector: "app-news-ticker",
@@ -138,7 +139,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
         const $separator = document.createElement("img");
         const path = this.userSettings?.separatorFilePath?.trim();
         $separator.src = path
-          ? `http://localhost:3000/${path}`
+          ? `${environment.publicUrl}${path}`
           : "/assets/images/promogym_logo1.svg";
 
         $separator.style.height = "4.5rem";

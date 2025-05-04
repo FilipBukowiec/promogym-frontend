@@ -63,9 +63,7 @@ export const routes: Routes = [
           { path: "user-settings", component: UserSettingsComponent },
           { path: "user-news", component: UserNewsComponent },
           { path: "user-media", component: UserMediaComponent },
-    
-          { path: "admin-settings", component: AdminSettingsComponent },
-          { path: "", redirectTo: "user-settings", pathMatch: "full" },
+           { path: "", redirectTo: "user-settings", pathMatch: "full" },
         ],
       },
     ],
