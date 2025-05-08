@@ -121,8 +121,10 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
         const videoElement = document.createElement('video');
         videoElement.src = filePath;
         videoElement.muted = true;
+        videoElement.setAttribute('muted', '');
         videoElement.setAttribute('playsinline', '');
         videoElement.setAttribute('preload', 'metadata');
+        videoElement.setAttribute('autoplay', '');
         videoElement.style.width = '100vw';
         videoElement.style.height = '100%';
         videoElement.style.objectFit = 'cover';
