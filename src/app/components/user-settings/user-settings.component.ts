@@ -1,21 +1,15 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  ChangeDetectorRef,
-} from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Subscription } from "rxjs";
-
 import { UserSettingsService } from "../../services/user-settings.service";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { RadioStreamService } from "../../services/radio-stream.service";
 import { RetryHelperService } from "../../services/retry-helper.service";
-
 import { UserSettings } from "../../models/user-settings.model";
 import { LoaderComponent } from "../loader/loader.component";
 import { environment } from "../../../environments/environment";
+import { WebSocketService } from "../../services/websocket.service";
 
 @Component({
   selector: "app-user-settings",
@@ -65,7 +59,8 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     private adminSettingsService: AdminSettingsService,
     public radioStreamService: RadioStreamService,
     private cdr: ChangeDetectorRef,
-    private retryHelper: RetryHelperService
+    private retryHelper: RetryHelperService,
+    private webSocketService: WebSocketService
   ) {}
 
   ngOnInit(): void {
@@ -203,7 +198,9 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath}?t=${Date.now()}`;
+            this.tempLogoPreviewUrl = `${environment.publicUrl}${
+              this.userSettings.logoFilePath
+            }?t=${Date.now()}`;
           }
         }
 
@@ -212,9 +209,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
       if (this.tempSeparatorFile) {
         if (this.userSettings.separatorFilePath) {
-          await this.userSettingsService
-            .deleteLogo("separator")
-            .toPromise();
+          await this.userSettingsService.deleteLogo("separator").toPromise();
         }
 
         const res = await this.userSettingsService
@@ -224,7 +219,9 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath}?t=${Date.now()}`;
+            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${
+              this.userSettings.separatorFilePath
+            }?t=${Date.now()}`;
           }
         }
 
@@ -293,7 +290,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  refreshPage(): void {
-    window.location.reload();
+  liveUpdate(): void {
+    this.webSocketService.requestUserSettingsUpdate();
   }
 }

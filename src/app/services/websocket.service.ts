@@ -6,6 +6,8 @@ import { NewsService } from "./news.service";
 import { MediaService } from "./media.service";
 import { Tenant } from "../models/tenant.model";
 import { environment } from "../../environments/environment";
+import { UserSettingsService } from "./user-settings.service";
+import { AdminSettingsService } from "./admin-settings.service";
 
 @Injectable({
   providedIn: "root",
@@ -13,39 +15,34 @@ import { environment } from "../../environments/environment";
 export class WebSocketService {
   private socket: Socket;
 
-  private mediaUpdateSubject = new BehaviorSubject<void>(null!);
-  mediaUpdate$ = this.mediaUpdateSubject.asObservable();
+  // private mediaUpdateSubject = new BehaviorSubject<void>(null!);
+  // mediaUpdate$ = this.mediaUpdateSubject.asObservable();
 
   constructor(
     private authService: AuthService,
     private newsService: NewsService,
-    private mediaService: MediaService
+    private mediaService: MediaService,
+    private userSettingsService: UserSettingsService,
+    private adminSettingService: AdminSettingsService
   ) {
- this.socket = io(environment.socketUrl, {
-  path: environment.socketPath,
-  transports: ['websocket'],
-});
+    this.socket = io(environment.socketUrl, {
+      path: environment.socketPath,
+      transports: ["websocket"],
+    });
+    (window as any).socket = this.socket; // 👈 DODAJ TO 
   }
-
-
-  // this.socket = io('https://app.promogym.pl', {
-  //   path: '/backend/socket.io',
-  //   transports: ['websocket'],
-  // });
-  //   }
-  
 
   connectSocket(): void {
     console.log("👉 Próba połączenia z WebSocket:");
     console.log("🌍 Host:", this.socket.io.opts.hostname);
     console.log("🛣️ Path:", this.socket.io.opts.path);
     console.log("⚡ Transports:", this.socket.io.opts.transports);
-  
+
     this.socket.on("connect", () => {
       console.log("✅ Połączono z WebSocket!");
       console.log("🌐 Aktualny host:", this.socket.io.opts.hostname);
       console.log("🛣️ Aktualny path:", this.socket.io.opts.path);
-  
+
       this.authService.getAuthHeaders().subscribe((headers) => {
         const tenantId = headers.get("tenant-id");
         if (tenantId) {
@@ -53,12 +50,12 @@ export class WebSocketService {
           this.socket.emit("joinTenant", tenantId);
         }
       });
+      console.log("📥 Dołączanie do pokoju globalnego");
+      this.socket.emit("joinGlobalRoom");
     });
-  
+
     this.socket.on("connect_error", (err) => {
       console.error("❌ Błąd połączenia z WebSocket:", err);
-      console.log("🌐 Przy błędzie host:", this.socket.io.opts.hostname);
-      console.log("🛣️ Przy błędzie path:", this.socket.io.opts.path);
     });
 
     // Nasłuchiwanie na odpowiedź z backendu (aktualizacja newsów)
@@ -68,6 +65,14 @@ export class WebSocketService {
 
     this.socket.on("mediaUpdate", (mediaData) => {
       this.mediaService.refreshMedia();
+    });
+
+    this.socket.on("userSettingsUpdate", (settingsData) => {
+      this.userSettingsService.refreshUserSettings();
+    });
+
+    this.socket.on("globalSettingsUpdate", (settingsData) => {
+      this.adminSettingService.refreshAdminSettings();
     });
   }
 
@@ -102,5 +107,22 @@ export class WebSocketService {
 
     console.log("📥 Joining room:", newTenant.tenant_id);
     this.socket.emit("joinTenant", newTenant.tenant_id);
+  }
+
+  requestUserSettingsUpdate(): void {
+    this.authService.getAuthHeaders().subscribe((headers) => {
+      const tenantId = headers.get("tenant-id");
+      if (tenantId) {
+        this.socket.emit("userSettingsLiveUpdate", tenantId);
+      } else {
+        console.error("Brak tenant_id w nagłówkach");
+      }
+    });
+  }
+
+  requestGlobalSettingsUpdate(): void {
+    // Wysyłanie komunikatu globalnego
+    this.socket.emit("globalSettingsLiveUpdate");
+    console.log("Wysłano żądanie globalSettingsLiveUpdatefgfdgfdg");
   }
 }

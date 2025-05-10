@@ -1,17 +1,17 @@
-import {  Component, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { RadioStreamService } from "../../services/radio-stream.service";
 import { AdminSettings } from "../../models/admin-settings.model";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { BehaviorSubject, Observable } from "rxjs";
+import { WebSocketService } from "../../services/websocket.service";
 
 @Component({
   imports: [CommonModule, FormsModule],
   selector: "app-admin-settings",
   templateUrl: "./admin-settings.component.html",
   styleUrls: ["./admin-settings.component.scss"],
-  
 })
 export class AdminSettingsComponent implements OnInit {
   adminSettings: AdminSettings = {
@@ -27,18 +27,20 @@ export class AdminSettingsComponent implements OnInit {
   newCountry: string = "";
   currentPlayingStreamIndex: number | null = null;
   isPlaying$ = new BehaviorSubject<boolean>(false);
-  
 
-  constructor(public adminSettingsService: AdminSettingsService, public radioStreamService: RadioStreamService) {
-    
-  }
-
+  constructor(
+    public adminSettingsService: AdminSettingsService,
+    public radioStreamService: RadioStreamService,
+    private websocketService: WebSocketService
+  ) {}
 
   ngOnInit(): void {
     this.loadAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
-      this.currentPlayingStreamIndex = index;
-    });
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
+      (index) => {
+        this.currentPlayingStreamIndex = index;
+      }
+    );
   }
 
   loadAdminSettings(): void {
@@ -57,21 +59,24 @@ export class AdminSettingsComponent implements OnInit {
 
   playRadioStream(index: number, url: string): void {
     this.currentPlayingStreamIndex = null;
-      this.radioStreamService.playRadioStream(url, this.radioStreamService.adminSettingsAudio$, [this.radioStreamService.sideMenuAudio$, this.radioStreamService.userSettingsAudio$], index);  // Odtwarzanie nowego strumienia
+    this.radioStreamService.playRadioStream(
+      url,
+      this.radioStreamService.adminSettingsAudio$,
+      [
+        this.radioStreamService.sideMenuAudio$,
+        this.radioStreamService.userSettingsAudio$,
+      ],
+      index
+    ); // Odtwarzanie nowego strumienia
     this.currentPlayingStreamIndex = index;
-   
   }
-  
-  
-
-
-
-
-
 
   /** Dodanie nowego radia */
   addRadioStream(): void {
-    if (this.newRadioDescription.trim() === "" || this.newRadioUrl.trim() === "") {
+    if (
+      this.newRadioDescription.trim() === "" ||
+      this.newRadioUrl.trim() === ""
+    ) {
       alert("Please fill in both fields.");
       return;
     }
@@ -87,7 +92,9 @@ export class AdminSettingsComponent implements OnInit {
 
   /** Usuwanie radia */
   deleteRadioStream(index: number): void {
-    const confirmDelete = confirm("Are you sure you want to delete this radio stream?");
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this radio stream?"
+    );
     if (confirmDelete) {
       this.adminSettings.radioStreamList.splice(index, 1);
     }
@@ -130,7 +137,9 @@ export class AdminSettingsComponent implements OnInit {
 
   /** Usunięcie kraju */
   deleteCountry(index: number): void {
-    const confirmDelete = confirm("Are you sure you want to delete this country?");
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this country?"
+    );
     if (confirmDelete) {
       this.adminSettings.countries.splice(index, 1);
     }
@@ -149,5 +158,15 @@ export class AdminSettingsComponent implements OnInit {
   /** Track by dla krajów */
   trackByCountry(index: number, country: string): number {
     return index;
+  }
+
+  liveUpdate(): void {
+    const confirmed = window.confirm(
+      "Are you sure you want to reload devices in all users?"
+    );
+
+    if (confirmed) {
+      this.websocketService.requestGlobalSettingsUpdate();
+    }
   }
 }

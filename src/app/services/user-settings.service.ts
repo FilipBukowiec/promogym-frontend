@@ -16,32 +16,48 @@ export class UserSettingsService {
   private settingsSubject = new BehaviorSubject<UserSettings | null>(null);
   settings$ = this.settingsSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService, private retryHelper: RetryHelperService ) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+    private retryHelper: RetryHelperService
+  ) {}
 
   getSettings(): Observable<UserSettings> {
     return this.retryHelper.withRetry(
       this.auth.getAuthHeaders().pipe(
         switchMap((headers) => {
-          return this.http.get<UserSettings>(`${this.apiUrl}`, { headers }).pipe(
-            tap((settings) => {
-              if (settings.country !== headers.get("country")) {
-                console.log(`Zmiana kraju: ${settings.country} -> ${headers.get("country")}`);
-                settings.country = headers.get("country") || "";
-  
-                this.updateSettings(settings).subscribe({
-                  next: (updatedSettings) => {
-                    console.log("Ustawienia zaktualizowane na serwerze:", updatedSettings);
-                    this.settingsSubject.next(updatedSettings);
-                  },
-                  error: (error) => {
-                    console.error("Błąd podczas aktualizacji ustawień:", error);
-                  },
-                });
-              }
-  
-              this.settingsSubject.next(settings);
-            })
-          );
+          return this.http
+            .get<UserSettings>(`${this.apiUrl}`, { headers })
+            .pipe(
+              tap((settings) => {
+                if (settings.country !== headers.get("country")) {
+                  console.log(
+                    `Zmiana kraju: ${settings.country} -> ${headers.get(
+                      "country"
+                    )}`
+                  );
+                  settings.country = headers.get("country") || "";
+
+                  this.updateSettings(settings).subscribe({
+                    next: (updatedSettings) => {
+                      console.log(
+                        "Ustawienia zaktualizowane na serwerze:",
+                        updatedSettings
+                      );
+                      this.settingsSubject.next(updatedSettings);
+                    },
+                    error: (error) => {
+                      console.error(
+                        "Błąd podczas aktualizacji ustawień:",
+                        error
+                      );
+                    },
+                  });
+                }
+
+                this.settingsSubject.next(settings);
+              })
+            );
         }),
         catchError((error) => {
           if (error.status === 404) {
@@ -161,5 +177,9 @@ export class UserSettingsService {
         return throwError(() => error);
       })
     );
+  }
+
+  refreshUserSettings(): void {
+    window.location.reload();
   }
 }

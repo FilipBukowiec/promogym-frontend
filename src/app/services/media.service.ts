@@ -20,6 +20,7 @@ export class MediaService {
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   refreshMedia() {
+    console.log("wywołanomedia")
     this.getFilesForSwiper().subscribe({
       next: (media) => this.mediaSubject.next(media),
       error: (error) => console.error("❌ Błąd pobierania mediów:", error),
