@@ -292,5 +292,6 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
+    
   }
 }

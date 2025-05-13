@@ -153,7 +153,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
           $separator.style.padding = '0 2rem';
           $separator.style.paddingBottom = '0.2rem';
         } else if (width > 767) {
-          $separator.style.height = '4rem';
+          $separator.style.height = '4.5rem';
           $separator.style.padding = '0 3rem';
           $separator.style.paddingBottom = '0.5rem';
         }

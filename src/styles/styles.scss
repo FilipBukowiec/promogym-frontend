@@ -1,5 +1,12 @@
 @use "variables" as *;
 
+@font-face{
+  font-family: 'Impact';
+  src: url('/assets/fonts/impact.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body {
   height: 100%;
@@ -11,7 +18,7 @@ body {
 
 ::-webkit-scrollbar {
   background-color: #31343b;
-  width: 8px; /* szerokość paska przewijania */
+  width: 8px; 
 }
 
 
@@ -25,9 +32,9 @@ table {
 
 tr {
   text-align: justify;
-  // background-color: #000;
+
   color: #a8a8a8;
-  // border-radius: 100px;
+
   color: $accentColor;
 }
 
