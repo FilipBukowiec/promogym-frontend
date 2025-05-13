@@ -4,25 +4,25 @@ import {
   ElementRef,
   ViewChild,
   OnDestroy,
-} from "@angular/core";
-import { Marquee, loop, LoopReturn } from "dynamic-marquee";
-import { News } from "../../models/news.model";
-import { NewsService } from "../../services/news.service";
-import { Subscription } from "rxjs";
-import { UserSettingsService } from "../../services/user-settings.service";
-import { UserSettings } from "../../models/user-settings.model";
-import { RetryHelperService } from "../../services/retry-helper.service";
-import { TenantChangeService } from "../../services/tenant-change.service"; // Dodajemy serwis do zmian tenant'a
-import { environment } from "../../../environments/environment";
+} from '@angular/core';
+import { Marquee, loop, LoopReturn } from 'dynamic-marquee';
+import { News } from '../../models/news.model';
+import { NewsService } from '../../services/news.service';
+import { Subscription } from 'rxjs';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { UserSettings } from '../../models/user-settings.model';
+import { RetryHelperService } from '../../services/retry-helper.service';
+import { TenantChangeService } from '../../services/tenant-change.service'; // Dodajemy serwis do zmian tenant'a
+import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: "app-news-ticker",
+  selector: 'app-news-ticker',
   standalone: true,
-  templateUrl: "./news-ticker.component.html",
-  styleUrls: ["./news-ticker.component.scss"],
+  templateUrl: './news-ticker.component.html',
+  styleUrls: ['./news-ticker.component.scss'],
 })
 export class NewsTickerComponent implements AfterViewInit, OnDestroy {
-  @ViewChild("marquee") marqueeElement!: ElementRef<HTMLElement>;
+  @ViewChild('marquee') marqueeElement!: ElementRef<HTMLElement>;
   marqueeInstance?: Marquee;
   loopInstance?: LoopReturn;
   newsList: News[] = [];
@@ -49,7 +49,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
           this.subscribeToNewsUpdates();
         },
         error: (err) => {
-          console.error("❌ Błąd pobierania ustawień po ponowieniach:", err);
+          console.error('❌ Błąd pobierania ustawień po ponowieniach:', err);
           // Nawet jeśli się nie udało – pokażemy newsy
           this.subscribeToNewsUpdates();
         },
@@ -80,7 +80,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
     if (this.newsSubscription) {
       this.newsSubscription.unsubscribe();
     }
-  
+
     this.newsSubscription = this.newsService.news$.subscribe((news: News[]) => {
       this.newsList = news;
       if (this.marqueeElement?.nativeElement) {
@@ -92,7 +92,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   loadNews(): void {
     this.newsService.getNewsByTenant().subscribe((news: News[]) => {
       if (!news || news.length === 0) {
-        console.warn("⚠️ Brak newsów do wyświetlenia.");
+        console.warn('⚠️ Brak newsów do wyświetlenia.');
         return;
       }
 
@@ -104,7 +104,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   }
 
   resetMarquee(): void {
-    console.log("🔄 Resetowanie marquee");
+    console.log('🔄 Resetowanie marquee');
 
     if (this.marqueeInstance) {
       this.marqueeInstance = undefined;
@@ -128,7 +128,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
     });
 
     console.log(
-      "📰 Tworzenie marquee z logo:",
+      '📰 Tworzenie marquee z logo:',
       this.userSettings?.logoFilePath
     );
 
@@ -136,16 +136,27 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
       this.marqueeInstance,
       this.newsList.map((news) => () => news.content),
       () => {
-        const $separator = document.createElement("img");
+        const $separator = document.createElement('img');
         const path = this.userSettings?.separatorFilePath?.trim();
         $separator.src = path
           ? `${environment.publicUrl}${path}`
-          : "/assets/images/promogym_logo1.svg";
+          : '/assets/images/promogym_logo1.svg';
 
-        $separator.style.height = "4.5rem";
-        $separator.style.padding = "0 3rem";
-        $separator.style.paddingBottom = "0.5rem";
+        const width = window.innerWidth;
 
+        if (width <= 430) {
+          $separator.style.height = '1.5rem';
+          $separator.style.padding = '0 1rem';
+          // $separator.style.paddingBottom = '0.5rem';
+        } else if (width > 430 && width <= 767) {
+          $separator.style.height = '3rem';
+          $separator.style.padding = '0 2rem';
+          $separator.style.paddingBottom = '0.2rem';
+        } else if (width > 767) {
+          $separator.style.height = '4rem';
+          $separator.style.padding = '0 3rem';
+          $separator.style.paddingBottom = '0.5rem';
+        }
         return $separator;
       }
     );
