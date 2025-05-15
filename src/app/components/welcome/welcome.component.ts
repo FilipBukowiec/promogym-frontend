@@ -4,7 +4,9 @@ import { LoaderComponent } from "../loader/loader.component";
 import { CommonModule } from "@angular/common";
 import { TenantChangeService } from "../../services/tenant-change.service";
 import { Subject, takeUntil } from "rxjs";
-import { AuthService } from "../../services/auth.service";
+import { ViewChild, ElementRef } from "@angular/core";
+
+
 
 @Component({
   imports: [LoaderComponent, CommonModule],
@@ -16,28 +18,40 @@ export class WelcomeComponent {
   user: string = "";
   isLoading: boolean = true;
   isStarting: boolean = false;
-  private destroy$ = new Subject<void>();
   email: string = "";
+  private destroy$ = new Subject<void>();
+
+  @ViewChild('bgVideo', { static: false }) bgVideoRef!: ElementRef<HTMLVideoElement>;
+
 
   constructor(
     private userSettingsService: UserSettingsService,
     private tenantChangeService: TenantChangeService,
-    private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSettings();
-
-    // 🔁 Subskrybujemy zmianę tenantów
     this.tenantChangeService.tenantChanged$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.isLoading = true;
         this.isStarting = false;
-        this.loadSettings(); // <-- ponownie pobierz dane
+        this.loadSettings();
       });
-    
+
   };
+
+  ngAfterViewInit(): void {
+    if (this.bgVideoRef?.nativeElement) {
+      const video = this.bgVideoRef.nativeElement;
+      video.muted = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video
+        .play()
+        .catch((err) => console.warn('🎥 Autoplay blocked:', err));
+    }
+  }
 
 
   private loadSettings() {

@@ -1,13 +1,8 @@
 <app-loader *ngIf="isLoading"></app-loader>
 <div *ngIf="isStarting" class="start">
   <h1>Welcome {{user}} on promogym</h1>
-
   <p>Today is...</p>
-
-
 </div>
-
 <div>
-  <!-- <img src="/assets/images/globe.jpg" alt=""> -->
 </div>
-<video src="/assets/images/bg_home.mp4" playsinline muted autoplay preload="auto"></video>
+<video #bgVideo src="/assets/images/bg_home.mp4" playsinline muted autoplay preload="auto"></video>
