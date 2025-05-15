@@ -7,6 +7,7 @@ import { AuthService } from "./auth.service";
 import { switchMap, catchError, tap } from "rxjs/operators";
 import { Tenant } from "../models/tenant.model";
 import { RetryHelperService } from "./retry-helper.service";
+import { DataService } from "./data.service";
 
 @Injectable({
   providedIn: "root",
@@ -19,7 +20,8 @@ export class UserSettingsService {
   constructor(
     private http: HttpClient,
     private auth: AuthService,
-    private retryHelper: RetryHelperService
+    private retryHelper: RetryHelperService,
+    private data: DataService
   ) {}
 
   getSettings(): Observable<UserSettings> {
@@ -179,7 +181,5 @@ export class UserSettingsService {
     );
   }
 
-  refreshUserSettings(): void {
-    window.location.reload();
-  }
+
 }

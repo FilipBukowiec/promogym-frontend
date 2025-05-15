@@ -2,12 +2,9 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { SideMenuComponent } from "../side-menu/side-menu.component";
-import { AuthService as Auth0Service } from "@auth0/auth0-angular";
-import { AdminSettingsService } from "../../services/admin-settings.service";
-import { AdminSettings } from "../../models/admin-settings.model";
 import { WebSocketService } from "../../services/websocket.service";
-import { AuthService } from "../../services/auth.service";
-import { BehaviorSubject } from "rxjs";
+import { DataService } from "../../services/data.service";
+
 
 @Component({
   selector: "app-dashboard",
@@ -17,22 +14,14 @@ import { BehaviorSubject } from "rxjs";
 })
 export class DashboardComponent implements OnInit {
   constructor(
-    private auth: Auth0Service,
-    private adminSettings: AdminSettingsService,
     private websocketService: WebSocketService,
-    private authService: AuthService
-  ) {}
+    private dataService: DataService,
+  ) { }
 
   ngOnInit(): void {
-    this.auth.getAccessTokenSilently().subscribe((token) => {});
-    this.adminSettings.getSettings().subscribe({
-      next: (settings: AdminSettings) => {
-        console.log("ustawienia", settings);
-      },
-    });
-
-    this.authService.getUserInfo();
-
+    this.dataService.loadInitialData();
     this.websocketService.connectSocket();
   }
+
+
 }

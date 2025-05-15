@@ -8,12 +8,14 @@ import { Tenant } from "../models/tenant.model";
 import { environment } from "../../environments/environment";
 import { UserSettingsService } from "./user-settings.service";
 import { AdminSettingsService } from "./admin-settings.service";
+import { DataService } from "./data.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class WebSocketService {
   private socket: Socket;
+  private listenersAttached = false;
 
   // private mediaUpdateSubject = new BehaviorSubject<void>(null!);
   // mediaUpdate$ = this.mediaUpdateSubject.asObservable();
@@ -23,7 +25,8 @@ export class WebSocketService {
     private newsService: NewsService,
     private mediaService: MediaService,
     private userSettingsService: UserSettingsService,
-    private adminSettingService: AdminSettingsService
+    private adminSettingService: AdminSettingsService,
+    private dataService: DataService
   ) {
     this.socket = io(environment.socketUrl, {
       path: environment.socketPath,
@@ -33,10 +36,17 @@ export class WebSocketService {
   }
 
   connectSocket(): void {
-    console.log("👉 Próba połączenia z WebSocket:");
-    console.log("🌍 Host:", this.socket.io.opts.hostname);
-    console.log("🛣️ Path:", this.socket.io.opts.path);
-    console.log("⚡ Transports:", this.socket.io.opts.transports);
+    // console.log("👉 Próba połączenia z WebSocket:");
+    // console.log("🌍 Host:", this.socket.io.opts.hostname);
+    // console.log("🛣️ Path:", this.socket.io.opts.path);
+    // console.log("⚡ Transports:", this.socket.io.opts.transports);
+  console.log("🧩 WebSocketService → connectSocket() wywołane");
+
+  if (this.listenersAttached) {
+    console.log("⚠️ Słuchacze już podpięci – przerywam.");
+    return;
+  }
+
 
     this.socket.on("connect", () => {
       console.log("✅ Połączono z WebSocket!");
@@ -68,12 +78,14 @@ export class WebSocketService {
     });
 
     this.socket.on("userSettingsUpdate", (settingsData) => {
-      this.userSettingsService.refreshUserSettings();
+      this.dataService.reloadRouterOutlet();
     });
 
     this.socket.on("globalSettingsUpdate", (settingsData) => {
-      this.adminSettingService.refreshAdminSettings();
+      this.dataService.reloadRouterOutlet();
     });
+
+       this.listenersAttached = true;
   }
 
   // Metoda wywołująca liveUpdate (w razie potrzeby)
@@ -121,8 +133,6 @@ export class WebSocketService {
   }
 
   requestGlobalSettingsUpdate(): void {
-    // Wysyłanie komunikatu globalnego
     this.socket.emit("globalSettingsLiveUpdate");
-    console.log("Wysłano żądanie globalSettingsLiveUpdatefgfdgfdg");
   }
 }

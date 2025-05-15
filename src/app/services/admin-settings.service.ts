@@ -96,7 +96,5 @@ export class AdminSettingsService {
   }
 
 
-refreshAdminSettings():void{
-  window.location.reload();
-}
+
 }
