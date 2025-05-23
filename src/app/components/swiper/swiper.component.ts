@@ -8,7 +8,6 @@ import {
   ElementRef,
 } from '@angular/core';
 import Swiper from 'swiper';
-import { Autoplay } from 'swiper/modules';
 import { MediaService } from '../../services/media.service';
 import { Media } from '../../models/media.model';
 import { LoaderComponent } from '../loader/loader.component';
@@ -18,8 +17,6 @@ import { UserSettingsService } from '../../services/user-settings.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { TenantChangeService } from '../../services/tenant-change.service';
 import { environment } from '../../../environments/environment';
-
-Swiper.use([Autoplay]);
 
 @Component({
   selector: 'app-swiper',
@@ -46,16 +43,11 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     private userSettingsService: UserSettingsService,
     private retryHelper: RetryHelperService,
     private tenantChangeService: TenantChangeService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.mediaUpdateSubscription = this.mediaService.media$.subscribe(() => {
-      this.loadMediaData();
-    });
-
-    this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(() => {
-      this.loadMediaData();
-    });
+    this.mediaUpdateSubscription = this.mediaService.media$.subscribe(() => this.loadMediaData());
+    this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(() => this.loadMediaData());
 
     this.userSettingsService.getSettings().subscribe((settings) => {
       if (settings?.pictureSlideDuration) {
@@ -66,106 +58,81 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadMediaData();
   }
 
-  ngAfterViewInit(): void {
-    // Swiper init happens after media is loaded (in loadMediaData -> initializeSwiper)
-  }
+  ngAfterViewInit(): void {}
 
   private loadMediaData(): void {
     this.isLoading = true;
     this.dataLoadSubscription?.unsubscribe();
 
-    this.dataLoadSubscription = this.retryHelper
-      .withRetry(this.mediaService.getFilesForSwiper())
-      .subscribe({
-        next: (media) => {
-          if (!media || media.length === 0) {
-            this.isLoading = false;
-            throw new Error('Brak mediów do załadowania.');
-          }
-
-          this.media = media.sort((a, b) => a.order - b.order);
-          this.destroySwiper();
-
-          // Używamy Promise + nextTick do pewnego odświeżenia DOM
-          Promise.resolve().then(() => this.initializeSwiper());
-        },
-        error: (error) => {
-          console.error('❌ Błąd podczas pobierania mediów:', error);
+    this.dataLoadSubscription = this.retryHelper.withRetry(this.mediaService.getFilesForSwiper()).subscribe({
+      next: (media) => {
+        if (!media || media.length === 0) {
           this.isLoading = false;
-        },
-      });
+          throw new Error('Brak mediów do załadowania.');
+        }
+
+        this.media = media.sort((a, b) => a.order - b.order);
+        this.destroySwiper();
+
+        Promise.resolve().then(() => this.initializeSwiper());
+      },
+      error: (error) => {
+        console.error('❌ Błąd podczas pobierania mediów:', error);
+        this.isLoading = false;
+      },
+    });
   }
 
   private initializeSwiper(): void {
-    const swiperWrapper = this.swiperWrapperRef?.nativeElement as HTMLElement;
-    if (!swiperWrapper) return;
+    const wrapper = this.swiperWrapperRef?.nativeElement as HTMLElement;
+    if (!wrapper) return;
 
-    swiperWrapper.innerHTML = '';
+    wrapper.innerHTML = '';
 
-    let loadedMediaCount = 0;
-    const totalMediaCount = this.media.length;
-
-    const checkIfAllMediaLoaded = () => {
-      loadedMediaCount++;
-      if (loadedMediaCount === totalMediaCount) {
+    let loaded = 0;
+    const total = this.media.length;
+    const onLoaded = () => {
+      loaded++;
+      if (loaded === total) {
         this.isLoading = false;
         this.initializeSwiperInstance();
       }
     };
 
-    this.media.forEach((mediaItem) => {
+    this.media.forEach((item) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
-      const filePath = `${environment.publicUrl}${mediaItem.filePath}`;
+      const path = `${environment.publicUrl}${item.filePath}`;
 
-      if (mediaItem.filePath.endsWith('.mp4')) {
-        const video = document.createElement('video');
-        video.src = filePath;
-        video.muted = true;
-        video.setAttribute('muted', '');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        // (video as any).playsInline = true;
-        // video.setAttribute('autoplay', '');
-        // video.autoplay = true;
-        video.setAttribute('preload', 'auto');
-        video.style.width = '100vw';
-        video.style.height = '100%';
-        video.style.objectFit = 'cover';
+    if (item.filePath.endsWith('.mp4')) {
+  const video = document.createElement('video');
+  video.muted = true;
+  video.setAttribute('playsinline', '');         // <--- tutaj!
+  video.setAttribute('webkit-playsinline', '');  // <--- i tutaj!
+  video.autoplay = true;
+  video.preload = 'auto';
+  video.style.width = '100vw';
+  video.style.height = '100%';
+  video.style.objectFit = 'cover';
 
-        // Ładowanie wideo - zdarzenia zapewniające, że video jest gotowe
-        const loadHandler = () => {
-          video.removeEventListener('loadeddata', loadHandler);
-          video.removeEventListener('canplaythrough', loadHandler);
-          video.removeEventListener('loadedmetadata', loadHandler);
-          checkIfAllMediaLoaded();
-        };
+  video.src = path;
 
-        video.addEventListener('loadeddata', loadHandler);
-        video.addEventListener('canplaythrough', loadHandler);
-        video.addEventListener('loadedmetadata', loadHandler);
-
-        video.addEventListener('ended', () => {
-          this.isVideoPlaying = false;
-          this.mySwiper.slideNext();
-        });
+        video.addEventListener('loadeddata', onLoaded);
+        video.addEventListener('canplaythrough', onLoaded);
+        video.addEventListener('loadedmetadata', onLoaded);
 
         slide.appendChild(video);
       } else {
         const img = document.createElement('img');
-        img.src = filePath;
+        img.src = path;
         img.style.width = '100vw';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
-
-        img.onload = () => {
-          checkIfAllMediaLoaded();
-        };
-
+        img.onload = onLoaded;
         slide.appendChild(img);
       }
 
-      swiperWrapper.appendChild(slide);
+      wrapper.appendChild(slide);
     });
   }
 
@@ -175,61 +142,43 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mySwiper = new Swiper('.swiper', {
       slidesPerView: 1,
       loop: true,
-      autoplay: {
-        delay: this.pictureSlideDuration * 1000,
-        disableOnInteraction: false,
-      },
+      autoplay: false,
       speed: 800,
       effect: 'fade',
       fadeEffect: { crossFade: true },
       allowTouchMove: true,
       on: {
-        slideChangeTransitionStart: () => {
-          const currentSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
-          const video = currentSlide.querySelector('video') as HTMLVideoElement;
-
-          if (video) {
-            this.mySwiper.autoplay.stop();
-            video.currentTime = 0;
-
-            video.play()
-              .then(() => (this.isVideoPlaying = true))
-              .catch((err) => {
-                console.warn('Autoplay video failed:', err);
-                // Możesz tu dodać retry na interakcję użytkownika, jeśli chcesz
-              });
-
-            // Ustawiamy event listener tylko raz dla 'ended', żeby uniknąć multiplikacji
-            video.addEventListener(
-              'ended',
-              () => {
-                this.isVideoPlaying = false;
-                this.mySwiper.slideNext();
-              },
-              { once: true }
-            );
-          } else {
-            if (!this.isVideoPlaying) {
-              this.mySwiper.autoplay.start();
-            }
-          }
-        },
+        slideChangeTransitionStart: () => this.handleSlideChange(),
       },
     });
 
-    // Auto-play pierwszego video jeśli jest
-    const firstSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
-    const firstVideo = firstSlide.querySelector('video') as HTMLVideoElement;
+    // Użyj requestAnimationFrame żeby na pewno uruchomić po renderze
+    requestAnimationFrame(() => {
+      this.handleSlideChange();
+    });
+  }
 
-    if (firstVideo) {
-      this.mySwiper.autoplay.stop();
-      firstVideo.currentTime = 0;
+  private handleSlideChange(): void {
+    const currentSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
+    const video = currentSlide.querySelector('video') as HTMLVideoElement;
 
-      firstVideo.play()
-        .then(() => (this.isVideoPlaying = true))
-        .catch((err) => console.error('Błąd odtwarzania pierwszego wideo:', err));
+    if (video) {
+      this.isVideoPlaying = true;
+      video.currentTime = 0;
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('webkit-playsinline', '');
 
-      firstVideo.addEventListener(
+      // Zagraj video z małym delayem na iOS
+      setTimeout(() => {
+        video.play().catch((err) => {
+          console.warn('Nie udało się odtworzyć wideo:', err);
+          this.isVideoPlaying = false;
+          this.mySwiper.slideNext();
+        });
+      }, 200);
+
+      video.addEventListener(
         'ended',
         () => {
           this.isVideoPlaying = false;
@@ -237,6 +186,13 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         { once: true }
       );
+    } else {
+      this.isVideoPlaying = false;
+      setTimeout(() => {
+        if (!this.isVideoPlaying) {
+          this.mySwiper.slideNext();
+        }
+      }, this.pictureSlideDuration * 1000);
     }
   }
 
@@ -255,6 +211,6 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataLoadSubscription?.unsubscribe();
     this.mediaUpdateSubscription?.unsubscribe();
     this.tenantChangeSubscription?.unsubscribe();
-    this.mySwiper?.destroy(true, true);
+    this.destroySwiper();
   }
 }
