@@ -13,6 +13,13 @@
 
 
 
+.msg-box{
+display: flex;
+flex-direction: column;
+align-items: center;
+
+}
+
 .contact-form {
 
   background-color: rgba($color: $secondaryColor, $alpha: 0.2);

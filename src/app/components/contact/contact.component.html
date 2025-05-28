@@ -23,8 +23,12 @@
    
     </form>
     <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button>
-<button (click)="newMessage()" *ngIf="succes" >Write new message</button>
-    <!-- <p *ngIf="succes">jest good</p> -->
+    <div class="msg-box" *ngIf="succes">
+        <img class="image" src="/assets/images/accept.svg" alt="">
+        <span>Thank you for your message!</span>
+        <button (click)="newMessage()">Write new message</button>
+    </div>
+
 
     <p *ngIf="error">{{error}}</p>
 </section>
