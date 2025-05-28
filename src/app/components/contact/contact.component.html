@@ -1,6 +1,6 @@
 <section>
     <h1>Contact</h1>
-    <span class="descrption">Chcesz zgłosić swoją.....</span>
+    <span class="description">Below is our contact form. Please select the appropriate topic and send us a message. We’ll get back to you as soon as possible.</span>
 </section>
 
 <section><img class="image" src="/assets/images/promogym_logo.svg" alt=""></section>
@@ -23,8 +23,12 @@
    
     </form>
     <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button>
-<button (click)="newMessage()" *ngIf="succes" >Write new message</button>
-    <!-- <p *ngIf="succes">jest good</p> -->
+    <div class="msg-box" *ngIf="succes">
+        <img class="image" src="/assets/images/accept.svg" alt="">
+        <span>Thank you for your message!</span>
+        <button (click)="newMessage()">Write new message</button>
+    </div>
+
 
     <p *ngIf="error">{{error}}</p>
 </section>

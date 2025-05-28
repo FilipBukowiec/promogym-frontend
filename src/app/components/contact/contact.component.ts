@@ -20,7 +20,7 @@ export class ContactComponent implements OnInit {
   email: string = "";
   country: string = "";
 
-  subjects: string[] = ["Problems", "Improvement", "Support"];
+  subjects: string[] = ["Problems", "Improvement", "Support", "Other"];
 
   constructor(
     private contactService: ContactService,
@@ -41,7 +41,7 @@ export class ContactComponent implements OnInit {
 
   onSubmit() {
     if (!this.subject || !this.message) {
-      this.error = "Wypełnij wsio";
+      this.error = "All fields must be completed.";
       this.succes = false;
       return;
     }
