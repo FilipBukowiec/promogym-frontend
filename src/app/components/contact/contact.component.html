@@ -6,7 +6,7 @@
 <section><img class="image" src="/assets/images/promogym_logo.svg" alt=""></section>
 <section>
 
-    <form *ngIf="!succes" class="contact-form" (ngSubmit)="onSubmit()">
+    <form [hidden]="succes" class="contact-form" (ngSubmit)="onSubmit()">
         <h4>Contact form</h4>
         <span>Subject:
 
@@ -23,7 +23,7 @@
    
     </form>
     <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button>
-    <div class="msg-box" *ngIf="succes">
+    <div class="msg-box" [hidden]="!succes">
         <img class="image" src="/assets/images/accept.svg" alt="">
         <span>Thank you for your message!</span>
         <button (click)="newMessage()">Write new message</button>
