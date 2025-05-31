@@ -67,6 +67,7 @@ export class FooterComponent implements OnInit, OnDestroy {
   }
 
   private evaluateVisibility(settings: any): void {
+     this.isVisible = false; 
     const now = new Date();
     const currentMinute = now.getMinutes();
         
@@ -75,7 +76,7 @@ export class FooterComponent implements OnInit, OnDestroy {
       return;
     }
   
-    this.isVisible = false; // Resetuj widoczność
+   
   
     settings.footerVisibilityRules.forEach((rule: any) => {
       console.log(`⏳ Sprawdzam regułę: ${JSON.stringify(rule)}`);
