@@ -1,34 +1,34 @@
 <section>
-    <h1>Contact</h1>
-    <span class="description">Below is our contact form. Please select the appropriate topic and send us a message. We’ll get back to you as soon as possible.</span>
-</section>
+    <img class="image" src="/assets/images/promogym_logo.svg" alt="">
+    <h1>Contact Us</h1>
+    <span class="description">We're here to help and answer any questions you might have. We look forward to hearing from you! Please select the appropriate topic and send us a message. We'll get back to you as soon as possible.</span></section>
 
-<section><img class="image" src="/assets/images/promogym_logo.svg" alt=""></section>
 <section>
 
     <form [hidden]="succes" class="contact-form" (ngSubmit)="onSubmit()">
-        <h4>Contact form</h4>
-        <span>Subject:
+        <h4>Send us a message</h4>
+        <div class="subject">Subject:
 
             <select [(ngModel)]="subject" name="subject" required>
                 <option [disabled]="true" value="">Choose a subject</option>
                 <option *ngFor="let s of subjects" [value]="s">{{s}}</option>
             </select>
-        </span>
-        <span>Message:
-            <input type="text" [(ngModel)]="message" name="message" required/>
-
-
-        </span>
+        </div>
+          <div class="message">
+      <span>Message:</span>  
+        <input type="text" [(ngModel)]="message" name="message" required/>
+      </div>
    
+
+      <div class="send-btn"> <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button></div>
+      <p *ngIf="error">{{error}}</p>
+     
     </form>
-    <button *ngIf="!succes" (click)="onSubmit()" type="submit">Send message</button>
-    <div class="msg-box" [hidden]="!succes">
+    <div class="succes-box" [hidden]="!succes">
         <img class="image" src="/assets/images/accept.svg" alt="">
         <span>Thank you for your message!</span>
         <button (click)="newMessage()">Write new message</button>
     </div>
 
 
-    <p *ngIf="error">{{error}}</p>
 </section>
