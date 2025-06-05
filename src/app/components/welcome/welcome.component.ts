@@ -5,11 +5,12 @@ import { CommonModule } from "@angular/common";
 import { TenantChangeService } from "../../services/tenant-change.service";
 import { Subject, takeUntil } from "rxjs";
 import { ViewChild, ElementRef } from "@angular/core";
+import { RouterLink } from "@angular/router";
 
 
 
 @Component({
-  imports: [LoaderComponent, CommonModule],
+  imports: [LoaderComponent, CommonModule, RouterLink],
   selector: "app-welcome",
   templateUrl: "./welcome.component.html",
   styleUrls: ["./welcome.component.scss"],

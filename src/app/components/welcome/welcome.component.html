@@ -1,8 +1,28 @@
-<app-loader *ngIf="isLoading"></app-loader>
-<div *ngIf="isStarting" class="start">
-  <h1>Welcome {{user}} on promogym</h1>
-  <p>Today is...</p>
+
+
+
+<section>
+<video #bgVideo src="/assets/images/bg_home.mp4" playsinline muted autoplay preload="auto"></video></section>
+<section>  <app-loader *ngIf="isLoading"></app-loader>
+  <div *ngIf="isStarting" class="start">
+      <h1>Welcome <span class="user">{{user}}</span> on PromoGym</h1>
+ 
+<div class="wrapper">
+<table>
+  <tr>
+    <td class="icons"><i class="bi bi-calendar2-week"></i></td>
+    <td>dsfsdfsdsf</td>
+  </tr>
+  <tr>
+    <td class="icons"><i class="bi bi-clock-history"></i></td>
+    <td>sdfsdfsdf</td>
+  </tr>
+</table>
+
+
 </div>
-<div>
-</div>
-<video #bgVideo src="/assets/images/bg_home.mp4" playsinline muted autoplay preload="auto"></video>
+<button [routerLink]="['../start']"><i class="bi bi-google-play"></i> Start app</button>
+</div> 
+</section>
+
+
