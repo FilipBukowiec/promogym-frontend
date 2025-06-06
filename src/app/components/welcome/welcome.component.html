@@ -11,17 +11,18 @@
 <table>
   <tr>
     <td class="icons"><i class="bi bi-calendar2-week"></i></td>
-    <td>dsfsdfsdsf</td>
+    <td>{{today}}</td>
   </tr>
   <tr>
     <td class="icons"><i class="bi bi-clock-history"></i></td>
-    <td>sdfsdfsdf</td>
+    <td>{{clockService.currentTime$ |async}}</td>
   </tr>
 </table>
 
 
 </div>
 <button [routerLink]="['../start']"><i class="bi bi-google-play"></i> Start app</button>
+<span class="quote">{{todayQuote}}</span>
 </div> 
 </section>
 

@@ -6,6 +6,8 @@ import { TenantChangeService } from "../../services/tenant-change.service";
 import { Subject, takeUntil } from "rxjs";
 import { ViewChild, ElementRef } from "@angular/core";
 import { RouterLink } from "@angular/router";
+import { QuoteService } from "../../services/quote.service";
+import { ClockService } from "../../services/clock.service";
 
 
 
@@ -17,6 +19,8 @@ import { RouterLink } from "@angular/router";
 })
 export class WelcomeComponent {
   user: string = "";
+  today: string = "";
+  todayQuote: string = "";
   isLoading: boolean = true;
   isStarting: boolean = false;
   email: string = "";
@@ -25,7 +29,11 @@ export class WelcomeComponent {
   @ViewChild('bgVideo', { static: false }) bgVideoRef!: ElementRef<HTMLVideoElement>;
 
 
+
+
   constructor(
+    public clockService: ClockService,
+    private quoteService: QuoteService,
     private userSettingsService: UserSettingsService,
     private tenantChangeService: TenantChangeService,
   ) { }
@@ -39,6 +47,10 @@ export class WelcomeComponent {
         this.isStarting = false;
         this.loadSettings();
       });
+
+    const date = new Date();
+    this.today = date.toLocaleDateString();
+    this.todayQuote = this.quoteService.getQuoteOfTheDay();
 
   };
 

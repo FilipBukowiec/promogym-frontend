@@ -3,15 +3,21 @@
 :host {
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  //  background: linear-gradient(360deg, #000517 25%, #092144 100%);
-  background-color: $primaryColor;
+  overflow: auto;
+  // background: linear-gradient(360deg, #000517 25%, #092144 100%);
+  // background-color: $primaryColor;
 }
 
+.quote {
+  color: $secondaryColor;
+  font-style: italic;
+  font-size: 1.3rem;
+  opacity: 0.9;
+ text-align: center;
+}
 section {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -69,17 +75,21 @@ button:hover {
 
 i {
   font-size: 1rem;
-
 }
 
-td > i{
-  color:$accentColor;
+td > i {
+  color: $accentColor;
 }
 
-td{
-  color:$secondaryColor;
+td {
+  color: $secondaryColor;
   // border:1px solid black;
 }
+
+td:first-child {
+  width: 50px;
+}
+
 table {
   margin: 0;
 }
@@ -98,16 +108,34 @@ table {
 //   flex-direction: column;
 // }
 
-.start{
-display: flex;
-width: 100%;
-height: 100%;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-gap: 50px
+.start {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
 }
 
 img {
   width: 100%;
+}
+
+@media screen and (max-width: 1023px) {
+  :host {
+    display: flex;
+    flex-direction: column;
+  }
+
+  section:first-child {
+    aspect-ratio: 16/9;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  :host {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+  }
 }
