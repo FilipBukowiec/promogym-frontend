@@ -105,7 +105,6 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     const totalMediaCount = this.media.length;
 
     const checkIfAllMediaLoaded = () => {
-      console.log(`Loaded media: ${loadedMediaCount} / ${totalMediaCount}`);
       if (loadedMediaCount === totalMediaCount) {
         this.isLoading = false;
         this.initializeSwiperInstance();
@@ -121,14 +120,15 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
         const videoElement = document.createElement('video');
         videoElement.src = filePath;
         videoElement.muted = true;
-        videoElement.playsInline = true;
-        videoElement.preload = 'auto';
+        videoElement.setAttribute('playsinline', '');
+        // videoElement.setAttribute('autoplay', '');
+        videoElement.setAttribute('preload', 'auto');
         videoElement.style.width = '100vw';
         videoElement.style.height = '100%';
         videoElement.style.objectFit = 'cover';
         slide.appendChild(videoElement);
 
-        videoElement.addEventListener('canplay', () => {
+        videoElement.addEventListener('loadeddata', () => {
           loadedMediaCount++;
           checkIfAllMediaLoaded();
         });
@@ -185,38 +185,20 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mySwiper.autoplay.stop();
       video.currentTime = 0;
       video.muted = true;
-      video.playsInline = true;
-      video.preload = 'auto';
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
+      video.setAttribute('preload', 'auto');
 
-      if (video.readyState >= 3) {
-        video
-          .play()
-          .then(() => {
-            this.isVideoPlaying = true;
-          })
-          .catch((err) => {
-            console.error('Błąd odtwarzania wideo:', err);
-            this.isVideoPlaying = false;
-            this.mySwiper.slideNext();
-          });
-      } else {
-        video.addEventListener(
-          'canplay',
-          () => {
-            video
-              .play()
-              .then(() => {
-                this.isVideoPlaying = true;
-              })
-              .catch((err) => {
-                console.error('Błąd odtwarzania wideo:', err);
-                this.isVideoPlaying = false;
-                this.mySwiper.slideNext();
-              });
-          },
-          { once: true }
-        );
-      }
+      video
+        .play()
+        .then(() => {
+          this.isVideoPlaying = true;
+        })
+        .catch((err) => {
+          console.error('Błąd odtwarzania wideo:', err);
+          this.isVideoPlaying = false;
+          this.mySwiper.slideNext();
+        });
 
       video.addEventListener(
         'ended',
