@@ -51,8 +51,18 @@ export class UserMediaComponent implements OnInit {
   // 📌 Obsługa wyboru pliku
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+      const file = input.files[0];
+      const maxSize = 50*1024*1024;
+
+      if (file.size > maxSize){
+        alert("The file is too large! Maximum allowed size is 50 MB.");
+        this.selectedFile = null;
+        input.value = "";
+        return
+      }
+this.selectedFile = file;
     }
   }
 
