@@ -2,39 +2,27 @@
 @use "../../../styles/admin.scss" as *;
 
 
-
-// td{
-//     word-break: break-all;
-//     }
+// input[type="file"]{
+//   display:none
+// }
   
 .media {
     width: 192px;
     height: 108px;
-    // border-radius: 50%;
     object-fit: cover;
   }
   
-//   .add-box {
-//     display: flex;
-//     // padding: 10px;
-//     justify-content: center;
-//     align-items: center;
-//     gap: 10px;
-//   }
-  
-//   .photo-container{
-//     display: flex;
-//     justify-content: center;
-//   }
-  
+
+label{
+  display: inline-block;
+  color: $secondaryColor;
+  border:1px solid $accentColor;
+  padding: 10px;
+  border-radius: 2px;
+  cursor: pointer;
+}
 
 
-//   button {
-//     border-radius: 6px;
-//     background-color: $accentColor;
-//     color: $secondaryColor;
-//     cursor: pointer;
-//   }
-//   button:hover {
-//     color: $primaryColor;
-//   }
+label:hover{
+  background-color: $accentColor;
+}

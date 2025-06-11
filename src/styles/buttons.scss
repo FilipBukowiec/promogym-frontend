@@ -1,0 +1,17 @@
+@use "../../src/styles/variables.scss" as *;
+
+button {
+  background-color: transparent;
+  border: 1px solid $accentColor;
+  color: $secondaryColor;
+  padding: 3px;
+  white-space: nowrap;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 2px;
+//   min-width: 100px;
+}
+
+button:hover {
+  background-color: $accentColor;
+}

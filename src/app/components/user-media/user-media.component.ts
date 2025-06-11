@@ -15,8 +15,10 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./user-media.component.scss'],
 })
 export class UserMediaComponent implements OnInit {
+
+  selectedFileName: string = '';
+selectedFile: File | null = null;
   mediaList: Media[] = [];
-  selectedFile: File | null = null;
   loading:boolean = true;
   error: string | null = null;
 
@@ -59,10 +61,16 @@ export class UserMediaComponent implements OnInit {
       if (file.size > maxSize){
         alert("The file is too large! Maximum allowed size is 50 MB.");
         this.selectedFile = null;
+        this.selectedFileName = '';
         input.value = "";
         return
       }
 this.selectedFile = file;
+this.selectedFileName = file.name;
+    }
+    else{
+      this.selectedFile = null;
+      this.selectedFileName = "";
     }
   }
 

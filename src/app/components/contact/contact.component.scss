@@ -1,4 +1,5 @@
 @use "../../../styles/variables.scss" as *;
+@use "../../../styles/buttons.scss";
 // @use "../../../styles/admin.scss" as *;
 
 :host {
@@ -6,8 +7,6 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
-  // background: linear-gradient(360deg, #000517 25%, #092144 100%);
-  // background-color: $primaryColor;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -24,35 +23,24 @@ section {
   gap: 15px;
 }
 
-button {
-  border: 1px solid $accentColor;
-  border-radius: 2px;
-  color: $secondaryColor;
-  padding: 10px;
-  cursor: pointer;
-  width: 200px;
-}
+// button {
+//   border: 1px solid $accentColor;
+//   border-radius: 2px;
+//   color: $secondaryColor;
+//   padding: 10px;
+//   cursor: pointer;
+//   width: 200px;
+// }
 
-button:hover {
-  background-color: $accentColor;
-}
+// button:hover {
+//   background-color: $accentColor;
+// }
 
 .image {
   width: 180px;
-  // margin-bottom: 10px;
 }
 
-// section:nth-child(1) {
-//   width: 100%;
-//   display: flex;
-//   gap: 10px;
-// }
 
-// section:nth-child(2) {
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-// }
 
 .succes-box {
   display: flex;
