@@ -28,7 +28,7 @@ export class AnnouncementService {
   }
 
   // 📌 Pobieranie jednego ogłoszenia
-  getAnnouncement(id: string): Observable<Announcement> {
+  getAnnouncement(id: string): Observable<Announcement | null> {
     return this.authService.getAuthHeaders().pipe(
       switchMap(headers =>
         this.http.get<Announcement>(`${this.apiUrl}/${id}`, { headers })
@@ -41,10 +41,10 @@ export class AnnouncementService {
   }
 
   // 📌 Tworzenie ogłoszenia (z plikiem)
-  createAnnouncement(formData: FormData): Observable<any> {
+  createAnnouncement(formData: FormData): Observable<Announcement | null> {
     return this.authService.getAuthHeaders().pipe(
       switchMap(headers =>
-        this.http.post<any>(this.apiUrl, formData, { headers })
+        this.http.post<Announcement>(this.apiUrl, formData, { headers })
       ),
       catchError(error => {
         console.error('❌ Błąd tworzenia ogłoszenia:', error);
@@ -54,10 +54,10 @@ export class AnnouncementService {
   }
 
   // 📌 Aktualizacja ogłoszenia (z plikiem)
-  updateAnnouncement(id: string, formData: FormData): Observable<any> {
+  updateAnnouncement(id: string, formData: FormData): Observable<Announcement | null> {
     return this.authService.getAuthHeaders().pipe(
       switchMap(headers =>
-        this.http.put<any>(`${this.apiUrl}/${id}`, formData, { headers })
+        this.http.put<Announcement>(`${this.apiUrl}/${id}`, formData, { headers })
       ),
       catchError(error => {
         console.error('❌ Błąd aktualizacji ogłoszenia:', error);
@@ -67,10 +67,10 @@ export class AnnouncementService {
   }
 
   // 📌 Usuwanie ogłoszenia
-  deleteAnnouncement(id: string): Observable<any> {
+  deleteAnnouncement(id: string): Observable<Announcement | null> {
     return this.authService.getAuthHeaders().pipe(
       switchMap(headers =>
-        this.http.delete(`${this.apiUrl}/${id}`, { headers })
+        this.http.delete<Announcement>(`${this.apiUrl}/${id}`, { headers })
       ),
       catchError(error => {
         console.error('❌ Błąd usuwania ogłoszenia:', error);
