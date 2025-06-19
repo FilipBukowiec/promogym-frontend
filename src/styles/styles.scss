@@ -24,6 +24,19 @@ body {
 }
 
 
+input,
+select {
+  background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+  border-radius: 5px;
+  border: 1px solid rgba($color: $secondaryColor, $alpha: 0.1);
+  color: #fff;
+}
+
+option {
+  color: $primaryColor;
+}
+
+
 
 table {
   border-collapse: separate;

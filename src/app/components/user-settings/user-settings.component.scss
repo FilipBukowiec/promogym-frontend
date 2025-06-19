@@ -34,3 +34,52 @@ tr > td:last-child{
 .logo-preview{
     width: 200px;
 }
+
+// td{
+//     border: 1px solid red!important
+// }
+
+.buttons{
+    width: 50%;
+}
+
+.name{
+    display: flex;
+   background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+  border-radius: 5px;
+//   border: 1px solid rgba($color: $secondaryColor, $alpha: 0.1);
+  color: #fff;
+  padding: 0 0 0px 3px;
+  
+
+
+}
+
+
+
+.radio-name, .name{
+    display: block;
+    width: 100%;
+    
+}
+
+
+
+.edit{
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+}
+
+label{
+    font-size: 0.9rem;
+}
+
+
+
+// input, select, .edit, .name{
+//     width: 250px !important;
+// }

@@ -26,6 +26,7 @@
   padding: 1rem;
 }
 
+
 table {
   max-width: 740px;
   text-align: center;
@@ -35,6 +36,7 @@ h2 {
   text-align: center;
   color: $secondaryColor;
 }
+
 
 
 .active:hover td {
@@ -63,13 +65,18 @@ section:nth-child(2) {
   align-items: center;
 }
 
+// .edit{
+//      background-color: $secondaryColor;
+//     color: $primaryColor;
+//  }
+
 select, input{
   border:none;
 }
 
 td, th {
   text-align: center;
-  color: $accentColor;
+  color: $secondaryColor;
 
 }
 
