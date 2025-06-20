@@ -66,11 +66,13 @@ tr > td:last-child{
 
 
 .edit{
-    border: 1px solid white;
+    // border: 1px solid white;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
+    background-color: $secondaryColor;
+    color: $primaryColor;
 
 }
 

@@ -6,7 +6,9 @@
   align-items: flex-end;
   opacity: 0;
   transition: opacity 3s ease-in-out;
-  font-family: 'Impact', sans-serif;
+  // font-family: 'Impact', sans-serif;
+  font-family: "Anton", sans-serif;
+  // font-weight: bolder;
 }
 
 .footer.visible {
@@ -19,13 +21,15 @@
 }
 
 app-news-ticker {
-  flex: 1 1 auto; 
+  flex: 1 1 auto;
   display: flex !important;
   background-color: #ffffff;
   align-items: center !important;
   overflow: hidden;
   line-height: 2 !important;
   justify-content: center !important;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .clock-box {
@@ -36,6 +40,7 @@ app-news-ticker {
   background-color: black;
   color: #ffffff;
   flex-shrink: 0;
+  letter-spacing: 1px;
 }
 
 @media screen and (max-width: 430px) {
@@ -59,15 +64,11 @@ app-news-ticker {
 @media screen and (min-width: 431px) and (max-width: 767px) {
   .news-logo {
     height: 7rem;
-   
   }
 
   app-news-ticker {
- 
-    font-size: 3.5rem;
-
+    font-size: 3rem;
     height: 4.5rem;
-
   }
 
   .clock-box {
@@ -84,8 +85,9 @@ app-news-ticker {
 
   app-news-ticker,
   .clock-box {
-    font-size: 4.5rem;
+    font-size: 4rem;
     height: 6rem;
+    font-weight: bold;
   }
 
   .clock-box {
@@ -100,7 +102,7 @@ app-news-ticker {
 
   app-news-ticker,
   .clock-box {
-    font-size: 4.5rem;
+    font-size: 4rem;
     height: 6rem;
   }
 

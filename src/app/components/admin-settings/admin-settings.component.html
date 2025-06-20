@@ -12,7 +12,7 @@
   <div class="new-box">
 
     <span>Add new country to the list for advertisements</span>
-    <div class="new-content"><input type="text" [(ngModel)]="newCountry" placeholder="Add new country"
+    <div class="new-content"><input class="edit" type="text" [(ngModel)]="newCountry" placeholder="Add new country"
         [value]="newCountry" /><button (click)="addNewCountry()">Add new country</button>
     </div>
   </div>
@@ -33,7 +33,7 @@
       ">
       <td>
         <ng-container *ngIf="editCountryIndex === i; else displayCountry">
-          <input type="text" [(ngModel)]="adminSettings.countries[i]" />
+          <input class="edit edit-input" type="text" [(ngModel)]="adminSettings.countries[i]" />
         </ng-container>
         <ng-template #displayCountry>
           {{ country }}
@@ -59,10 +59,10 @@
     <span></span> Add the radio stream to the radio list:
 
     <div class="new-content">
-      <input [(ngModel)]="newRadioDescription" type="text" placeholder="Enter radio description"
+      <input class="edit" [(ngModel)]="newRadioDescription" type="text" placeholder="Enter radio description"
         [value]="newRadioDescription" />
 
-      <input [(ngModel)]="newRadioUrl" type="text" placeholder="Enter stream URL" [value]="newRadioUrl" />
+      <input class="edit" [(ngModel)]="newRadioUrl" type="text" placeholder="Enter stream URL" [value]="newRadioUrl" />
 
       <button (click)="addRadioStream()">Add stream</button>
     </div>
@@ -80,7 +80,7 @@
     <tr class="active" *ngFor="let radio of adminSettings.radioStreamList; let i = index">
       <td>
         <ng-container *ngIf="editRadioStreamIndex === i; else displayDescription">
-          <input type="text" [(ngModel)]="radio.description" />
+          <input class="edit edit-input" type="text" [(ngModel)]="radio.description" />
         </ng-container>
         <ng-template #displayDescription>
           {{ radio.description }}
@@ -89,7 +89,7 @@
 
       <td class="word-wrap">
         <ng-container *ngIf="editRadioStreamIndex === i; else displayUrl">
-          <input type="text" [(ngModel)]="radio.url" />
+          <input class="edit edit-input" type="text" [(ngModel)]="radio.url" />
         </ng-container>
         <ng-template #displayUrl >
           {{ radio.url }}

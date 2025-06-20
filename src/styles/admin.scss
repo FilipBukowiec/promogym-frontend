@@ -80,6 +80,11 @@ td, th {
 
 }
 
+.edit-input, input.edit:focus{
+    background-color: white;
+    color: $primaryColor;
+}
+
 
 
 .td-left {
