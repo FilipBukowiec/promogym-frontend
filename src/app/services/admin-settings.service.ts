@@ -12,7 +12,7 @@ import { switchMap, catchError, tap } from "rxjs/operators";
 export class AdminSettingsService {
   private apiUrl = `${environment.apiUrl}admin-settings`;
   private settingsSubject = new BehaviorSubject<AdminSettings | null>(null);
-  settings$ = this.settingsSubject.asObservable(); // Eksponujemy jako Observable
+  settings$ = this.settingsSubject.asObservable(); 
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
@@ -20,7 +20,7 @@ export class AdminSettingsService {
   getSettings(): Observable<AdminSettings> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
-        console.log("📡 Wysyłane nagłówki dla GET:", headers); // Debug
+        console.log("📡 Wysyłane nagłówki dla GET:", headers);
         return this.http.get<AdminSettings>(this.apiUrl, { headers }).pipe(
           tap((settings) => {
             console.log("✅ Pobrane ustawienia administracyjne:", settings);
@@ -31,7 +31,7 @@ export class AdminSettingsService {
       catchError((error) => {
         if (error.status === 404) {
           console.warn("⚠️ Brak ustawień, tworzymy domyślne.");
-          return this.createDefaultSettings(); // Usuwamy przekazywanie headers
+          return this.createDefaultSettings(); 
         }
         console.error("❌ Błąd pobierania ustawień:", error);
         return throwError(() => error);
@@ -47,7 +47,7 @@ export class AdminSettingsService {
              const defaultSettings: AdminSettings = {
           languages: ["pl", "eng"],
           countries: ["Poland"],
-          radioStreamList: [{ url: "dupa", description: "sfaf" }],
+          radioStreamList: [{ url: "", description: "" }],
         };
 
         console.log("📦 Dane do wysłania:", defaultSettings); // Sprawdzenie danych
@@ -78,7 +78,7 @@ export class AdminSettingsService {
   updateSettings(settings: AdminSettings): Observable<AdminSettings> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
-        console.log("📡 Wysyłane nagłówki dla PUT:", headers); // Debug
+        console.log("📡 Wysyłane nagłówki dla PUT:", headers); 
         return this.http
           .put<AdminSettings>(this.apiUrl, settings, { headers })
           .pipe(
