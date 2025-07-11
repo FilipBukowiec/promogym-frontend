@@ -1,19 +1,13 @@
 @use "../../../styles/admin.scss" as *;
 
-
-
-
 .countries {
   display: flex;
   flex-direction: column;
 }
 
-
-
 .left {
   text-align: left;
 }
-
 
 .word-wrap {
   word-break: break-all;
@@ -24,7 +18,7 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
- }
+}
 
 .country {
   min-width: 130px;

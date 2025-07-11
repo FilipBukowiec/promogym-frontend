@@ -26,7 +26,6 @@
   padding: 1rem;
 }
 
-
 table {
   max-width: 740px;
   text-align: center;
@@ -36,8 +35,6 @@ h2 {
   text-align: center;
   color: $secondaryColor;
 }
-
-
 
 .active:hover td {
   background-color: $accentColor;
@@ -65,27 +62,22 @@ section:nth-child(2) {
   align-items: center;
 }
 
-// .edit{
-//      background-color: $secondaryColor;
-//     color: $primaryColor;
-//  }
-
-select, input{
-  border:none;
+select,
+input {
+  border: none;
 }
 
-td, th {
+td,
+th {
   text-align: center;
   color: $secondaryColor;
-
 }
 
-.edit-input, input.edit:focus{
-    background-color: white;
-    color: $primaryColor;
+.edit-input,
+input.edit:focus {
+  background-color: white;
+  color: $primaryColor;
 }
-
-
 
 .td-left {
   text-align: left;
@@ -100,18 +92,14 @@ td, th {
 table {
   padding: 10px;
   background-color: rgba($color: #fff, $alpha: 0.1);
-      // background-color: rgba($color: #fff, $alpha: 0.2);
   border-radius: 5px;
-  //  background-color: #1F2937;
 }
 
-.photo-container{
+.photo-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-
 
 @media screen and (max-width: 767px) {
   table,
@@ -155,8 +143,6 @@ table {
     justify-content: center;
     align-items: center;
   }
-
-
 }
 
 @media screen and (min-width: 768px) {

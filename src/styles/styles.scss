@@ -1,8 +1,8 @@
 @use "variables" as *;
 
-@font-face{
-  font-family: 'Impact';
-  src: url('/assets/fonts/impact.ttf') format('truetype');
+@font-face {
+  font-family: "Impact";
+  src: url("/assets/fonts/impact.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -15,14 +15,12 @@ body {
   font-size: 16px;
   box-sizing: border-box;
   background: linear-gradient(360deg, #000517 25%, #092144 100%);
-  // background-color: #111827;
 }
 
 ::-webkit-scrollbar {
   background-color: #31343b;
-  width: 8px; 
+  width: 8px;
 }
-
 
 input,
 select {
@@ -35,8 +33,6 @@ select {
 option {
   color: $primaryColor;
 }
-
-
 
 table {
   border-collapse: separate;
@@ -99,8 +95,6 @@ a:hover {
   color: $accentColor !important;
 }
 
-
-
 i {
   cursor: pointer;
   color: $secondaryColor;
@@ -114,8 +108,6 @@ i:hover {
 input {
   width: 100%;
 }
-
-
 
 thead tr.special-row th {
   padding-bottom: 60px;
