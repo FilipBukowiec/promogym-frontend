@@ -22,7 +22,7 @@ export class AdvertisementsService {
       const formData = new FormData();
       formData.append("file", file);
       if (countries && countries.length > 0) {
-        formData.append("countries", JSON.stringify(countries)); // Zapisujemy kraje w formie JSON
+        formData.append("countries", JSON.stringify(countries));
       }
 
       return this.http.post<Advertisement>(
