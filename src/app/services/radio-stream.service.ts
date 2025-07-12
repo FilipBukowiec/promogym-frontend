@@ -1,25 +1,30 @@
-import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RadioStreamService {
   private audioPlayer: HTMLAudioElement = new Audio();
-  private currentPlayingStreamIndex$ = new BehaviorSubject<number | null>(null);
 
-  public sideMenuAudio$ = new BehaviorSubject<boolean>(false);
-  public userSettingsAudio$ = new BehaviorSubject<boolean>(false);
-  public adminSettingsAudio$ = new BehaviorSubject<boolean>(false);
+  private currentPlayingStreamIndex = signal<number | null>(null);
+
+  public sideMenuAudio = signal<boolean>(false);
+  public userSettingsAudio = signal<boolean>(false);
+  public adminSettingsAudio = signal<boolean>(false);
 
   constructor() {}
 
-  get currentPlayingStreamIndexState$(): Observable<number | null> {
-    return this.currentPlayingStreamIndex$.asObservable();
+  get currentPlayingStreamIndexSignal() {
+    return this.currentPlayingStreamIndex;
   }
 
-  playRadioStream(url: string, trueObservable: BehaviorSubject<boolean>, falseObservable?:BehaviorSubject<boolean>[], index?: number): void {
-    this.stopRadioStream(trueObservable); 
+  playRadioStream(
+    url: string,
+    trueSignal: () => void,
+    falseSignals: (() => void)[] = [],
+    index?: number
+  ): void {
+    this.stopRadioStream(trueSignal);
 
     this.audioPlayer.src = url;
     this.audioPlayer.load();
@@ -27,42 +32,36 @@ export class RadioStreamService {
     this.audioPlayer
       .play()
       .then(() => {
-        this.currentPlayingStreamIndex$.next(index ?? null); 
-        console.log(`Playing stream ${index}: ${url}`);
-        trueObservable.next(true);
-        if(falseObservable&& falseObservable.length >0){
-          falseObservable.forEach(observable => observable.next(false))
-        }
-        
+        this.currentPlayingStreamIndex.set(index ?? null);
+        trueSignal(); 
+        falseSignals.forEach((setFalse) => setFalse());
       })
       .catch((error) => {
         console.error('Error playing radio stream:', error);
-        this.stopRadioStream(trueObservable);
+        this.stopRadioStream(trueSignal);
       });
 
     this.audioPlayer.onerror = () => {
       console.error('Stream error, stopping...');
-      this.stopRadioStream(trueObservable);
+      this.stopRadioStream(trueSignal);
     };
   }
 
-  stopRadioStream(trueObservable: BehaviorSubject<boolean>): void {
+  stopRadioStream(setFalse: () => void): void {
     this.audioPlayer.pause();
-    this.currentPlayingStreamIndex$.next(null); 
-    trueObservable.next(false);
+    this.currentPlayingStreamIndex.set(null);
+    setFalse();
   }
 
-
- 
-  get sideMenuAudioState$() {
-    return this.sideMenuAudio$.asObservable();
+  get sideMenuAudioSignal() {
+    return this.sideMenuAudio;
   }
 
-  get userSettingsAudioState$() {
-    return this.userSettingsAudio$.asObservable();
+  get userSettingsAudioSignal() {
+    return this.userSettingsAudio;
   }
 
-  get adminSettingsAudioState$() {
-    return this.adminSettingsAudio$.asObservable();
+  get adminSettingsAudioSignal() {
+    return this.adminSettingsAudio;
   }
 }

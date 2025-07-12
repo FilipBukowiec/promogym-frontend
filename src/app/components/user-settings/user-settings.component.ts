@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, Signal, effect, } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Subscription } from "rxjs";
@@ -18,7 +18,7 @@ import { WebSocketService } from "../../services/websocket.service";
   templateUrl: "./user-settings.component.html",
   styleUrls: ["./user-settings.component.scss"],
 })
-export class UserSettingsComponent implements OnInit, OnDestroy {
+export class UserSettingsComponent implements OnInit {
   userSettings: UserSettings = {
     tenant_id: "",
     language: "",
@@ -43,12 +43,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   newEndMinute: number | null = null;
   radioStreamList: { url: string; description: string }[] = [];
   currentPlayingStreamIndex: number | null = null;
-  currentPlayingStreamUrl: string | null = null;
+  currentPlayingStreamIndexSignal!: Signal<number | null>;
 
   editFooterVisibilityIndex: number | null = null;
   loading: boolean = false;
   error: string | null = null;
-  private streamSubscription: Subscription = new Subscription();
 
   logoMarkedForDeletion: boolean = false;
   separatorMarkedForDeletion: boolean = false;
@@ -61,26 +60,23 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private retryHelper: RetryHelperService,
     private webSocketService: WebSocketService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
-      (index) => {
-        this.currentPlayingStreamIndex = index;
-      }
-    );
+    this.currentPlayingStreamIndexSignal = this.radioStreamService.currentPlayingStreamIndexSignal;
+    effect(() => {
+      this.currentPlayingStreamIndex = this.currentPlayingStreamIndexSignal();
+    })
+
   }
 
   onTenantChange() {
     console.log("🔄 Tenant zmieniony – przeładowuję dane...");
-    this.loadSettings(); // albo inna metoda
+    this.loadSettings();
   }
 
-  ngOnDestroy(): void {
-    this.streamSubscription.unsubscribe();
-  }
 
   loadSettings(): void {
     this.loading = true;
@@ -198,9 +194,8 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `${environment.publicUrl}${
-              this.userSettings.logoFilePath
-            }?t=${Date.now()}`;
+            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath
+              }?t=${Date.now()}`;
           }
         }
 
@@ -219,9 +214,8 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${
-              this.userSettings.separatorFilePath
-            }?t=${Date.now()}`;
+            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath
+              }?t=${Date.now()}`;
           }
         }
 
@@ -246,10 +240,9 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   updateSelectedIndex(event: Event): void {
     const selectedElement = event.target as HTMLSelectElement;
-    this.selectedRadioIndex = selectedElement.selectedIndex;
+    // jeśli masz opcję disabled, odejmij 1 by mieć właściwy indeks tablicy
+    this.selectedRadioIndex = selectedElement.selectedIndex > 0 ? selectedElement.selectedIndex - 1 : null;
   }
-
-  playRadioStream(): void {}
 
   onFileSelected(event: Event, type: "mainlogo" | "separator"): void {
     const input = event.target as HTMLInputElement;
@@ -292,6 +285,33 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
-    
+
   }
+
+
+
+  playSelectedStream() {
+    if (!this.userSettings.selectedRadioStream) return;
+
+    // Dodaj log, by sprawdzić index
+    console.log('Play stream index:', this.selectedRadioIndex);
+
+    this.radioStreamService.playRadioStream(
+      this.userSettings.selectedRadioStream,
+      () => this.radioStreamService.userSettingsAudio.set(true),
+      [
+        () => this.radioStreamService.adminSettingsAudio.set(false),
+        () => this.radioStreamService.sideMenuAudio.set(false),
+      ],
+      this.selectedRadioIndex ?? undefined
+    );
+  }
+
+  stopSelectedStream() {
+    this.radioStreamService.stopRadioStream(() =>
+      this.radioStreamService.userSettingsAudio.set(false)
+    );
+  }
+
+
 }

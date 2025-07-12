@@ -1,10 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, computed, OnInit, signal, Signal } from "@angular/core";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { RadioStreamService } from "../../services/radio-stream.service";
 import { AdminSettings } from "../../models/admin-settings.model";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { BehaviorSubject, Observable } from "rxjs";
 import { WebSocketService } from "../../services/websocket.service";
 
 @Component({
@@ -25,23 +24,25 @@ export class AdminSettingsComponent implements OnInit {
   editRadioStreamIndex: number | null = null;
   editCountryIndex: number | null = null;
   newCountry: string = "";
-  currentPlayingStreamIndex: number | null = null;
-  isPlaying$ = new BehaviorSubject<boolean>(false);
+  currentPlayingStreamIndex!: Signal<number | null>;
+  isPlaying!: Signal<boolean>;
+
+
+
 
   constructor(
     public adminSettingsService: AdminSettingsService,
     public radioStreamService: RadioStreamService,
     private websocketService: WebSocketService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
-      (index) => {
-        this.currentPlayingStreamIndex = index;
-      }
-    );
+    this.currentPlayingStreamIndex = this.radioStreamService.currentPlayingStreamIndexSignal;
+    this.isPlaying = computed(() => this.currentPlayingStreamIndex() !== null);
   }
+
+
 
   loadAdminSettings(): void {
     this.adminSettingsService.getSettings().subscribe({
@@ -58,20 +59,23 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   playRadioStream(index: number, url: string): void {
-    this.currentPlayingStreamIndex = null;
     this.radioStreamService.playRadioStream(
       url,
-      this.radioStreamService.adminSettingsAudio$,
+      () => this.radioStreamService.adminSettingsAudio.set(true),
       [
-        this.radioStreamService.sideMenuAudio$,
-        this.radioStreamService.userSettingsAudio$,
+        () => this.radioStreamService.sideMenuAudio.set(false),
+        () => this.radioStreamService.userSettingsAudio.set(false),
       ],
       index
-    ); // Odtwarzanie nowego strumienia
-    this.currentPlayingStreamIndex = index;
+    );
   }
 
-  /** Dodanie nowego radia */
+
+get currentPlayingStreamIndexValue(): number | null {
+  return this.currentPlayingStreamIndex();
+}
+
+
   addRadioStream(): void {
     if (
       this.newRadioDescription.trim() === "" ||

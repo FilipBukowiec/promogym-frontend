@@ -101,19 +101,15 @@
           <i class="bi bi-floppy-fill" *ngIf="editRadioStreamIndex == i" (click)="saveRadioStream(i)"></i>
           <i class="bi bi-trash3-fill" (click)="deleteRadioStream(i)"></i>
 
-          <i *ngIf="
-              !(radioStreamService.adminSettingsAudioState$ | async) ||
-              currentPlayingStreamIndex !== i
-            " class="bi bi-play-fill" (click)="playRadioStream(i, radio.url)"></i>
+      <i *ngIf="!radioStreamService.adminSettingsAudio() || currentPlayingStreamIndexValue !== i"
+   class="bi bi-play-fill"
+   (click)="playRadioStream(i, radio.url)">
+</i>
 
-          <i *ngIf="
-              (radioStreamService.adminSettingsAudioState$ | async) &&
-              currentPlayingStreamIndex === i
-            " class="bi bi-stop-fill" (click)="
-              radioStreamService.stopRadioStream(
-                this.radioStreamService.adminSettingsAudio$
-              )
-            "></i>
+<i *ngIf="radioStreamService.adminSettingsAudio() && currentPlayingStreamIndexValue === i"
+   class="bi bi-stop-fill"
+   (click)="radioStreamService.stopRadioStream(radioStreamService.adminSettingsAudio)">
+</i>
         </div>
       </td>
     </tr>

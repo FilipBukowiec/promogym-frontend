@@ -80,9 +80,9 @@
                 <li>
                     <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleRadioStream()">
                         
-                            <span *ngIf="radioStreamService.sideMenuAudioState$ | async"><i class="bi bi-volume-mute-fill"></i> Stop stream</span>
+                            <span *ngIf="radioStreamService.sideMenuAudio()"><i class="bi bi-volume-mute-fill"></i> Stop stream</span>
                                         
-                            <span *ngIf="!(radioStreamService.sideMenuAudioState$ | async)"><i class="bi bi-volume-up-fill"></i> Start stream</span>
+                            <span *ngIf="!radioStreamService.sideMenuAudio()"><i class="bi bi-volume-up-fill"></i> Start stream</span>
                        
                     </a>
                 </li>
