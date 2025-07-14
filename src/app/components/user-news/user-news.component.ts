@@ -26,11 +26,11 @@ export class UserNewsComponent implements OnInit {
     private newsService: NewsService,
     private webSocketService: WebSocketService,
     private retryHelper: RetryHelperService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadNews();
-    
+
   }
 
   onTenantChange() {

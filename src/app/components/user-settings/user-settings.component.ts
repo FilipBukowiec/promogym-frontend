@@ -240,7 +240,6 @@ export class UserSettingsComponent implements OnInit {
 
   updateSelectedIndex(event: Event): void {
     const selectedElement = event.target as HTMLSelectElement;
-    // jeśli masz opcję disabled, odejmij 1 by mieć właściwy indeks tablicy
     this.selectedRadioIndex = selectedElement.selectedIndex > 0 ? selectedElement.selectedIndex - 1 : null;
   }
 
@@ -292,10 +291,6 @@ export class UserSettingsComponent implements OnInit {
 
   playSelectedStream() {
     if (!this.userSettings.selectedRadioStream) return;
-
-    // Dodaj log, by sprawdzić index
-    console.log('Play stream index:', this.selectedRadioIndex);
-
     this.radioStreamService.playRadioStream(
       this.userSettings.selectedRadioStream,
       () => this.radioStreamService.userSettingsAudio.set(true),

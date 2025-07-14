@@ -39,7 +39,7 @@ export const routes: Routes = [
         component: WelcomeComponent,
       },
       { path: "start", component: MainAppComponent },
-      {path: "contact", component: ContactComponent},
+      { path: "contact", component: ContactComponent },
 
       { path: "news", component: NewsComponent },
 
@@ -63,7 +63,7 @@ export const routes: Routes = [
           { path: "user-settings", component: UserSettingsComponent },
           { path: "user-news", component: UserNewsComponent },
           { path: "user-media", component: UserMediaComponent },
-           { path: "", redirectTo: "user-settings", pathMatch: "full" },
+          { path: "", redirectTo: "user-settings", pathMatch: "full" },
         ],
       },
     ],

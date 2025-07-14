@@ -1,87 +1,61 @@
 @use "../../../styles/variables.scss" as *;
-@use "../../../styles/admin.scss" as*;
+@use "../../../styles/admin.scss" as *;
 
-iframe{
-    width: 90%;
-    aspect-ratio: 16/9;
+iframe {
+  width: 90%;
+  aspect-ratio: 16/9;
 }
 
-
-
-td{
-    text-align: left;
-    // color: white;
-
+td {
+  text-align: left;
 }
 
-tr > td:last-child{
-    border:none;
+tr > td:last-child {
+  border: none;
 }
 
-
-.newsbar{
-    text-align: center;
-    background-color: $accentColor;
-    color: white;
-    border-radius: 2px;
-    // width: 300px;
+.newsbar {
+  text-align: center;
+  background-color: $accentColor;
+  color: white;
+  border-radius: 2px;
 }
 
-.center{
-    text-align: center;
+.center {
+  text-align: center;
 }
 
-.logo-preview{
-    width: 200px;
+.logo-preview {
+  width: 200px;
 }
 
-// td{
-//     border: 1px solid red!important
-// }
-
-.buttons{
-    width: 50%;
+.buttons {
+  width: 50%;
 }
 
-.name{
-    display: flex;
-   background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+.name {
+  display: flex;
+  background-color: rgba($color: $secondaryColor, $alpha: 0.1);
   border-radius: 5px;
-//   border: 1px solid rgba($color: $secondaryColor, $alpha: 0.1);
   color: #fff;
   padding: 0 0 0px 3px;
-  
-
-
 }
 
-
-
-.radio-name, .name{
-    display: block;
-    width: 100%;
-    
+.radio-name,
+.name {
+  display: block;
+  width: 100%;
 }
 
-
-
-.edit{
-    // border: 1px solid white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    background-color: $secondaryColor;
-    color: $primaryColor;
-
+.edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: $secondaryColor;
+  color: $primaryColor;
 }
 
-label{
-    font-size: 0.9rem;
+label {
+  font-size: 0.9rem;
 }
-
-
-
-// input, select, .edit, .name{
-//     width: 250px !important;
-// }

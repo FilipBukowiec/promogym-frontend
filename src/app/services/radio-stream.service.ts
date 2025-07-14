@@ -12,7 +12,7 @@ export class RadioStreamService {
   public userSettingsAudio = signal<boolean>(false);
   public adminSettingsAudio = signal<boolean>(false);
 
-  constructor() {}
+  constructor() { }
 
   get currentPlayingStreamIndexSignal() {
     return this.currentPlayingStreamIndex;
@@ -33,7 +33,7 @@ export class RadioStreamService {
       .play()
       .then(() => {
         this.currentPlayingStreamIndex.set(index ?? null);
-        trueSignal(); 
+        trueSignal();
         falseSignals.forEach((setFalse) => setFalse());
       })
       .catch((error) => {
@@ -49,6 +49,8 @@ export class RadioStreamService {
 
   stopRadioStream(setFalse: () => void): void {
     this.audioPlayer.pause();
+    this.audioPlayer.src = '';
+    this.audioPlayer.load();
     this.currentPlayingStreamIndex.set(null);
     setFalse();
   }

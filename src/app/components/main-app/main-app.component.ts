@@ -14,24 +14,24 @@ import { FooterComponent } from '../footer/footer.component';
 export class MainAppComponent implements OnInit {
   showComponent: { [key: string]: boolean } = {};
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
     this.setDefaultComponentsVisibility();
     this.dataService.data$.subscribe(data => {
-        console.log('Otrzymane dane z dataService:', data); // Dodany log
-        this.showComponent = { ...this.showComponent, ...data };
-        console.log('Aktualizacja showComponent:', this.showComponent); // Dodany log
+      console.log('Otrzymane dane z dataService:', data);
+      this.showComponent = { ...this.showComponent, ...data };
+      console.log('Aktualizacja showComponent:', this.showComponent);
     });
-}
+  }
 
   private setDefaultComponentsVisibility(): void {
-    this.showComponent['swiper'] = true; // Domyślnie widoczny
-    this.showComponent['footer'] = true; // Domyślnie widoczny
+    this.showComponent['swiper'] = true;
+    this.showComponent['footer'] = true;
   }
 
   refreshComponents(): void {
     const newData = { swiper: true, footer: true };
-    this.dataService.updateData(newData); // Odśwież dane
+    this.dataService.updateData(newData);
   }
 }

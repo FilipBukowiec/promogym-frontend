@@ -7,7 +7,6 @@ import { AuthService } from "./auth.service";
 import { switchMap, catchError, tap } from "rxjs/operators";
 import { Tenant } from "../models/tenant.model";
 import { RetryHelperService } from "./retry-helper.service";
-import { DataService } from "./data.service";
 
 @Injectable({
   providedIn: "root",
@@ -21,7 +20,6 @@ export class UserSettingsService {
     private http: HttpClient,
     private auth: AuthService,
     private retryHelper: RetryHelperService,
-    private data: DataService
   ) {}
 
   getSettings(): Observable<UserSettings> {

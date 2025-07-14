@@ -18,7 +18,7 @@ export class HomepageComponent implements OnInit, AfterViewInit {
   @ViewChild('videoElement', { static: false })
   videoElement!: ElementRef<HTMLVideoElement>;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) { }
 
   ngOnInit(): void {
     this.auth.isAuthenticated$.subscribe((isAuthenticated) => {

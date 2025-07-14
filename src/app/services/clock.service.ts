@@ -28,7 +28,6 @@ export class ClockService {
     const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
 
     if (this.lastMinute !== minutes) {
-      // Emitujemy TYLKO jeśli zmieniła się minuta
       this.currentTimeSubject.next(`${hours}:${formattedMinutes}`);
       this.lastMinute = minutes;
     }

@@ -17,7 +17,7 @@ export class MediaService {
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(private http: HttpClient, private auth: AuthService) { }
 
   refreshMedia() {
     console.log("wywołanomedia")
@@ -90,7 +90,7 @@ export class MediaService {
       switchMap((headers) =>
         this.http.delete<void>(`${this.apiUrl}/${id}`, { headers })
       ),
-      switchMap(() => this.getFiles()), 
+      switchMap(() => this.getFiles()),
       catchError(this.handleError)
     );
   }
@@ -100,7 +100,7 @@ export class MediaService {
       switchMap((headers) =>
         this.http.put<void>(`${this.apiUrl}/move-up/${id}`, {}, { headers })
       ),
-      switchMap(() => this.getFiles()), 
+      switchMap(() => this.getFiles()),
       catchError(this.handleError)
     );
   }
@@ -110,7 +110,7 @@ export class MediaService {
       switchMap((headers) =>
         this.http.put<void>(`${this.apiUrl}/move-down/${id}`, {}, { headers })
       ),
-      switchMap(() => this.getFiles()), 
+      switchMap(() => this.getFiles()),
       catchError(this.handleError)
     );
   }
