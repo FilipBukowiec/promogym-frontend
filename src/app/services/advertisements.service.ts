@@ -15,7 +15,6 @@ export class AdvertisementsService {
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
-  // 📌 Przesyłanie ogłoszenia
   uploadFile(file: File, countries: string[]): Observable<Advertisement> {
   return this.auth.getAuthHeaders().pipe(
     switchMap((headers) => {
@@ -32,16 +31,15 @@ export class AdvertisementsService {
       );
     }),
     catchError((error) => {
-      console.error("Wystąpił błąd podczas przesyłania ogłoszenia: ", error);
+      console.error("Wystąpił błąd podczas przesyłania reklamya: ", error);
       return throwError(
-        "Nie udało się przesłać ogłoszenia. Spróbuj ponownie."
+        "Nie udało się przesłać reklamy. Spróbuj ponownie."
       );
     })
   );
 }
 
 
-  // 📌 Pobieranie ogłoszeń
   getAdvertisements(language?: string): Observable<Advertisement[]> {
     const url = language ? `${this.apiUrl}?language=${language}` : this.apiUrl;
   
@@ -49,23 +47,22 @@ export class AdvertisementsService {
       switchMap((headers) =>
         this.http.get<Advertisement[]>(url, { headers }).pipe(
           catchError((error) => {
-            console.error("❌ Błąd podczas pobierania ogłoszeń: ", error);
-            return throwError(() => new Error("Nie udało się pobrać ogłoszeń. Spróbuj ponownie."));
+            console.error("❌ Błąd podczas pobierania reklam: ", error);
+            return throwError(() => new Error("Nie udało się pobrać reklam. Spróbuj ponownie."));
           })
         )
       )
     );
   }
 
-  // 📌 Usuwanie ogłoszenia
   delete(id: string): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
         this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
           catchError((error) => {
-            console.error("Wystąpił błąd podczas usuwania ogłoszenia: ", error);
+            console.error("Wystąpił błąd podczas usuwania reklamy: ", error);
             return throwError(
-              "Nie udało się usunąć ogłoszenia. Spróbuj ponownie."
+              "Nie udało się usunąć reklamy. Spróbuj ponownie."
             );
           })
         )
@@ -73,7 +70,6 @@ export class AdvertisementsService {
     );
   }
 
-  // 📌 Przesuwanie ogłoszenia w górę
   moveUp(id: string): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
@@ -94,7 +90,6 @@ export class AdvertisementsService {
     );
   }
 
-  // 📌 Przesuwanie ogłoszenia w dół
   moveDown(id: string): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
@@ -103,11 +98,11 @@ export class AdvertisementsService {
           .pipe(
             catchError((error) => {
               console.error(
-                "Wystąpił błąd podczas przesuwania ogłoszenia w dół: ",
+                "Wystąpił błąd podczas przesuwania reklamy w dół: ",
                 error
               );
               return throwError(
-                "Nie udało się przesunąć ogłoszenia w dół. Spróbuj ponownie."
+                "Nie udało się przesunąć reaklamy w dół. Spróbuj ponownie."
               );
             })
           )
@@ -115,7 +110,6 @@ export class AdvertisementsService {
     );
   }
 
-  // 📌 Aktualizacja kolejności ogłoszeń
   updateOrder(orders: { id: string; order: number }[]): Observable<void> {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
@@ -124,11 +118,11 @@ export class AdvertisementsService {
           .pipe(
             catchError((error) => {
               console.error(
-                "Wystąpił błąd podczas aktualizacji kolejności ogłoszeń: ",
+                "Wystąpił błąd podczas aktualizacji kolejności reklam: ",
                 error
               );
               return throwError(
-                "Nie udało się zaktualizować kolejności ogłoszeń. Spróbuj ponownie."
+                "Nie udało się zaktualizować kolejności reklam. Spróbuj ponownie."
               );
             })
           )
@@ -142,8 +136,8 @@ export class AdvertisementsService {
     this.http.patch(`${this.apiUrl}/${id}`, updateData, {headers})
     ),
     catchError((error) => {
-      console.error("Wystąpił błąd podczas aktualizacji ogłoszenia: ", error);
-      return throwError("Nie udało się zaktualizować ogłoszenia. Spróbuj ponownie.");
+      console.error("Wystąpił błąd podczas aktualizacji reklamy: ", error);
+      return throwError("Nie udało się zaktualizować reklamy. Spróbuj ponownie.");
     })
   );
 
@@ -151,7 +145,6 @@ export class AdvertisementsService {
 
 
 
-  // 📌 Obsługuje błędy
   private handleError(error: any) {
     console.error("An error occurred:", error);
     return throwError(error);
