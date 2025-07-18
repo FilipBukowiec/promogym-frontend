@@ -25,7 +25,10 @@ export class AuthService {
   private userCountrySubject = new BehaviorSubject<string>("");
   public userCountry$ = this.userCountrySubject.asObservable();
 
-  constructor(private auth0: Auth0Service) {}
+  private isPremiumSubject = new BehaviorSubject<boolean>(false);
+  public isPremium$ = this.isPremiumSubject.asObservable();
+
+  constructor(private auth0: Auth0Service) { }
 
   // 📌 Pobranie nagłówków z tokena
   getAuthHeaders(): Observable<HttpHeaders> {
@@ -83,9 +86,9 @@ export class AuthService {
     );
   }
 
-  getUser(): Observable<{ roles: string[]; country: string }> {
+  getUserData(): Observable<{ roles: string[]; country: string }> {
     return this.auth0.getAccessTokenSilently().pipe(
-      map((token) => {
+      map(token => {
         const decodedToken: any = jwtDecode(token);
         return {
           roles: decodedToken["https://promogym.com/roles"] || [],
@@ -96,19 +99,23 @@ export class AuthService {
   }
 
   checkIfAdmin(): void {
-    this.auth0.getAccessTokenSilently().subscribe({
-      next: (token) => {
-        const decodedToken: any = jwtDecode(token);
-        const roles = decodedToken["https://promogym.com/roles"] || [];
-        const isAdmin = roles.includes("admin");
-        this.isAdminSubject.next(isAdmin);
-      },
-      error: (err) => {
-        console.error("Błąd podczas sprawdzania roli admina:", err);
-        this.isAdminSubject.next(false);
-      },
-    });
+    this.getUserData().pipe(
+      map(user => user.roles.includes("admin")),
+      take(1)
+    ).subscribe(isAdmin => this.isAdminSubject.next(isAdmin))
   }
+
+
+ checkIfPremiumUser(): void {
+  this.getUserData().pipe(
+    take(1)
+  ).subscribe(user => {
+    console.log("👤 Roles from token:", user.roles);
+    const isPremium = user.roles.includes("premium_user");
+    console.log("🌟 Is Premium:", isPremium);
+    this.isPremiumSubject.next(isPremium);
+  });
+}
 
   setSelectedTenant(tenant: Tenant): void {
     this.selectedTenantSubject.next(tenant);

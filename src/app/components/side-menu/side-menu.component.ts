@@ -32,6 +32,7 @@ export class SideMenuComponent implements AfterViewInit {
   ); // <-- Zmienione na BehaviorSubject
   isFullscreen$: Observable<boolean>;
   isAdmin = false;
+  isPremium = false;
   isStreamPlaying$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     false
   );
@@ -56,17 +57,20 @@ export class SideMenuComponent implements AfterViewInit {
     this.userSettings$ = this.userSettingsService.observeSettings();
     this.isFullscreen$ = this.fullscreenService.isFullscreen$;
 
-    // this.userSettings$ = this.userSettingsService.settings$;
-
     // this.isStreamPlaying$ = this.radioStreamService.isStreamPlaying$;
     // this.isAnnouncementPlaying$ = this.announcementService.isPlaying$;
   }
 
   ngOnInit(): void {
     this.authService.checkIfAdmin();
+
     this.authService.isAdmin$.subscribe((isAdmin) => {
       this.isAdmin = isAdmin;
     });
+    this.authService.checkIfPremiumUser();
+    this.authService.isPremium$.subscribe((isPremium) => {
+      this.isPremium = isPremium;
+    })
 
     this.retryHelperService
       .withRetry(this.userSettingsService.getAllTenants())
@@ -112,21 +116,21 @@ export class SideMenuComponent implements AfterViewInit {
     });
   }
 
-  
+
 
   onTenantChange(newTenant: Tenant) {
     const previousTenant = this.selectedTenant;
     console.log("🟡 Poprzedni tenant:", previousTenant);
     console.log("🟢 Nowy tenant:", newTenant);
-  
+
     this.selectedTenant = newTenant;
     this.authService.setSelectedTenant(newTenant);
-  
+
     this.webSocketService.changeRoomForTenant(previousTenant, newTenant);
     this.tenantChangeService.notifyTenantChanged();
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   toggleFullscreen(): void {
     this.fullscreenService.toggleFullscreen();
@@ -171,34 +175,34 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
   toggleRadioStream(): void {
-  this.userSettings$.pipe(take(1)).subscribe((settings) => {
-    if (settings?.selectedRadioStream) {
-      const sideMenuAudio = this.radioStreamService.sideMenuAudio();
+    this.userSettings$.pipe(take(1)).subscribe((settings) => {
+      if (settings?.selectedRadioStream) {
+        const sideMenuAudio = this.radioStreamService.sideMenuAudio();
 
-      if (sideMenuAudio) {
-        // Jeśli radio gra → zatrzymujemy
-        this.radioStreamService.stopRadioStream(() =>
-          this.radioStreamService.sideMenuAudio.set(false)
-        );
+        if (sideMenuAudio) {
+          // Jeśli radio gra → zatrzymujemy
+          this.radioStreamService.stopRadioStream(() =>
+            this.radioStreamService.sideMenuAudio.set(false)
+          );
+        } else {
+          // Jeśli nie gra → uruchamiamy
+          this.radioStreamService.playRadioStream(
+            settings.selectedRadioStream,
+            () => this.radioStreamService.sideMenuAudio.set(true),
+            [
+              () => this.radioStreamService.userSettingsAudio.set(false),
+              () => this.radioStreamService.adminSettingsAudio.set(false),
+            ]
+          );
+          console.log("Radyjko startuje:", settings.selectedRadioStream);
+        }
       } else {
-        // Jeśli nie gra → uruchamiamy
-        this.radioStreamService.playRadioStream(
-          settings.selectedRadioStream,
-          () => this.radioStreamService.sideMenuAudio.set(true),
-          [
-            () => this.radioStreamService.userSettingsAudio.set(false),
-            () => this.radioStreamService.adminSettingsAudio.set(false),
-          ]
+        console.error(
+          "❌ Brak ustawionego strumienia radiowego w ustawieniach użytkownika"
         );
-        console.log("Radyjko startuje:", settings.selectedRadioStream);
       }
-    } else {
-      console.error(
-        "❌ Brak ustawionego strumienia radiowego w ustawieniach użytkownika"
-      );
-    }
-  });
-}
+    });
+  }
 
   logout(): void {
     this.auth0Service.logout({

@@ -41,7 +41,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     private userSettingsService: UserSettingsService,
     private retryHelper: RetryHelperService,
     private tenantChangeService: TenantChangeService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.userSettingsService.getSettings().subscribe((settings) => {
@@ -93,7 +93,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   initializeSwiper(): void {
     const swiperWrapper = document.querySelector('.swiper-wrapper') as HTMLElement;

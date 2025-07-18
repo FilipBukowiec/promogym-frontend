@@ -48,7 +48,7 @@ export class MediaService {
   }
 
   getFilesForSwiper(): Observable<Media[]> {
-    return this.auth.getUser().pipe(
+    return this.auth.getUserData().pipe(
       switchMap(({ roles, country }) => {
         const isPremium = roles.includes("premium_user");
         return this.auth.getAuthHeaders().pipe(
