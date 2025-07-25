@@ -6,9 +6,13 @@ import { WebSocketService } from '../../services/websocket.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { LoaderComponent } from '../loader/loader.component';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
+import { AdvertisementsService } from '../../services/advertisements.service';
+import { Advertisement } from '../../models/advertisement.model'
+import { switchMap, take } from 'rxjs';
 
 @Component({
-  standalone:true,
+  standalone: true,
   imports: [CommonModule, LoaderComponent],
   selector: 'app-user-media',
   templateUrl: './user-media.component.html',
@@ -17,18 +21,32 @@ import { environment } from '../../../environments/environment';
 export class UserMediaComponent implements OnInit {
 
   selectedFileName: string = '';
-selectedFile: File | null = null;
+  selectedFile: File | null = null;
   mediaList: Media[] = [];
-  loading:boolean = true;
+  loading: boolean = true;
   error: string | null = null;
+  isPremium: boolean = false;
+  advertisementsList: Advertisement[] = [];
 
-  constructor(private mediaService: MediaService,   private retryHelper: RetryHelperService, private webSocketService: WebSocketService) {}
 
-  ngOnInit(): void {
-    this.loadMedia();
-  }
+  constructor(private mediaService: MediaService, private retryHelper: RetryHelperService, private webSocketService: WebSocketService, private authService: AuthService, private advertisementsService: AdvertisementsService) { }
 
-  onTenantChange(){
+ngOnInit(): void {
+  this.loadMedia();
+
+  this.authService.checkIfPremiumUser();
+
+  this.authService.isPremium$
+    .pipe(take(1))
+    .subscribe((isPremium) => {
+      this.isPremium = isPremium;
+      if (!isPremium) {
+        this.loadAdvertisementsForUserCountry();
+      }
+    });
+}
+
+  onTenantChange() {
     this.loadMedia();
   }
 
@@ -38,17 +56,43 @@ selectedFile: File | null = null;
 
     this.retryHelper.withRetry(this.mediaService.getFiles()).subscribe({
       next: (data) => {
-    
-          this.mediaList = data;
-          this.loading = false
-        },
-        error: (err) => {
-          console.error('❌ Błąd ładowania mediów:', err);
-          this.error = 'Nie udało się załadować mediów.';
-          this.loading = false;
-        },
-      });
-    }
+
+        this.mediaList = data;
+        this.loading = false
+      },
+      error: (err) => {
+        console.error('❌ Błąd ładowania mediów:', err);
+        this.error = 'Nie udało się załadować mediów.';
+        this.loading = false;
+      },
+    });
+  }
+
+
+  // Pobieranie reklam dla kraju tenanta
+
+  loadAdvertisementsForUserCountry(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.authService.getUserData().pipe(
+      take(1),
+      switchMap(userData => {
+        const country = userData.country;
+        return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
+      })
+    ).subscribe({
+      next: (ads) => {
+        this.advertisementsList = ads;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Błąd ładowania reklam:', err);
+        this.error = 'Nie udało się załadować reklam.';
+        this.loading = false;
+      }
+    });
+  }
 
   // 📌 Obsługa wyboru pliku
   onFileSelected(event: Event): void {
@@ -56,19 +100,19 @@ selectedFile: File | null = null;
 
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const maxSize = 50*1024*1024;
+      const maxSize = 50 * 1024 * 1024;
 
-      if (file.size > maxSize){
+      if (file.size > maxSize) {
         alert("The file is too large! Maximum allowed size is 50 MB.");
         this.selectedFile = null;
         this.selectedFileName = '';
         input.value = "";
         return
       }
-this.selectedFile = file;
-this.selectedFileName = file.name;
+      this.selectedFile = file;
+      this.selectedFileName = file.name;
     }
-    else{
+    else {
       this.selectedFile = null;
       this.selectedFileName = "";
     }
@@ -90,14 +134,12 @@ this.selectedFileName = file.name;
   // 📌 Usuwanie pliku
   deleteMedia(id: string): void {
     const confirmed = window.confirm('Are you sure you want to delete this media?');
-  
+
     if (confirmed) {
       this.mediaService.deleteFile(id).subscribe(
         () => {
-          // Usuwamy tylko usunięte media z lokalnej listy
           this.mediaList = this.mediaList.filter(media => media._id !== id);
-          // Opcjonalnie: Możesz odświeżyć listę mediów z backendu, aby mieć pewność, że masz aktualne dane
-          this.loadMedia(); // Odświeżenie listy po usunięciu
+          this.loadMedia();
         },
         (error) => {
           console.error('Błąd podczas usuwania pliku:', error);
@@ -107,7 +149,7 @@ this.selectedFileName = file.name;
     }
   }
 
-  
+
   // 📌 Przesunięcie pliku w górę
   moveUp(id: string): void {
     this.mediaService.moveFileUp(id).subscribe(
@@ -129,8 +171,12 @@ this.selectedFileName = file.name;
     return `${environment.publicUrl}${filePath}`;
   }
 
-  liveUpdate():void{
+  liveUpdate(): void {
     this.webSocketService.requestMediaUpdate();
-  
-      }
+
+  }
+
+
+
+
 }

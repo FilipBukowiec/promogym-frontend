@@ -28,9 +28,6 @@ export class WelcomeComponent {
 
   @ViewChild('bgVideo', { static: false }) bgVideoRef!: ElementRef<HTMLVideoElement>;
 
-
-
-
   constructor(
     public clockService: ClockService,
     private quoteService: QuoteService,
