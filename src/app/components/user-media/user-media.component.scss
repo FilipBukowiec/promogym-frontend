@@ -1,0 +1,28 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/admin.scss" as *;
+
+
+// input[type="file"]{
+//   display:none
+// }
+  
+.media {
+    width: 192px;
+    height: 108px;
+    object-fit: cover;
+  }
+  
+
+label{
+  display: inline-block;
+  color: $secondaryColor;
+  border:1px solid $accentColor;
+  padding: 10px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+
+label:hover{
+  background-color: $accentColor;
+}

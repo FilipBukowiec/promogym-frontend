@@ -1,0 +1,61 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/admin.scss" as *;
+
+iframe {
+  width: 90%;
+  aspect-ratio: 16/9;
+}
+
+td {
+  text-align: left;
+}
+
+tr > td:last-child {
+  border: none;
+}
+
+.newsbar {
+  text-align: center;
+  background-color: $accentColor;
+  color: white;
+  border-radius: 2px;
+}
+
+.center {
+  text-align: center;
+}
+
+.logo-preview {
+  width: 200px;
+}
+
+.buttons {
+  width: 50%;
+}
+
+.name {
+  display: flex;
+  background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+  border-radius: 5px;
+  color: #fff;
+  padding: 0 0 0px 3px;
+}
+
+.radio-name,
+.name {
+  display: block;
+  width: 100%;
+}
+
+.edit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: $secondaryColor;
+  color: $primaryColor;
+}
+
+label {
+  font-size: 0.9rem;
+}

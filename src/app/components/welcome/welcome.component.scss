@@ -1,0 +1,112 @@
+@use "../../../styles/variables.scss" as *;
+@use "../../../styles/buttons.scss";
+
+:host {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+ }
+
+.quote {
+  color: $secondaryColor;
+  font-style: italic;
+  font-size: 1.3rem;
+  opacity: 0.9;
+  text-align: center;
+}
+section {
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.user {
+  color: $accentColor;
+}
+
+section:nth-child(2) {
+  padding: 30px;
+  gap: 20px;
+}
+
+video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+h1 {
+  text-align: center;
+  color: $secondaryColor; 
+  margin: 0;
+}
+
+
+.wrapper {
+  width: 100%;
+  padding: 0 10px;
+  border-radius: 5px;
+  background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+i {
+  font-size: 1rem;
+}
+
+td > i {
+  color: $accentColor;
+}
+
+td {
+  color: $secondaryColor;
+}
+
+td:first-child {
+  width: 50px;
+}
+
+table {
+  margin: 0;
+}
+
+
+.start {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+}
+
+img {
+  width: 100%;
+}
+
+@media screen and (max-width: 1023px) {
+  :host {
+    display: flex;
+    flex-direction: column;
+  }
+
+  section:first-child {
+    aspect-ratio: 16/9;
+  }
+
+  button{
+    min-width: 200px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  :host {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+  }
+}

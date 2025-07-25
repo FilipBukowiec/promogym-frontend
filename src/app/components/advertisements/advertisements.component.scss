@@ -1,0 +1,46 @@
+@use "../../../styles/admin.scss" as *;
+
+.countries {
+  display: flex;
+  flex-direction: column;
+}
+
+.left {
+  text-align: left;
+}
+
+.word-wrap {
+  word-break: break-all;
+}
+
+.countries-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.country {
+  min-width: 130px;
+}
+
+section:nth-child(2) {
+  gap: 30px;
+  justify-content: center;
+}
+
+section:nth-child(2) > input {
+  width: 300px;
+}
+
+.media {
+  width: 192px;
+  height: 108px;
+  object-fit: cover;
+}
+
+@media screen and (min-width: 768px) {
+  .countries-container {
+    max-width: 740px;
+  }
+}

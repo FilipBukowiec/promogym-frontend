@@ -1,0 +1,119 @@
+@use "variables" as *;
+
+@font-face {
+  font-family: "Impact";
+  src: url("/assets/fonts/impact.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Saira !important;
+  font-size: 16px;
+  box-sizing: border-box;
+  background: linear-gradient(360deg, #000517 25%, #092144 100%);
+}
+
+::-webkit-scrollbar {
+  background-color: #31343b;
+  width: 8px;
+}
+
+input,
+select {
+  background-color: rgba($color: $secondaryColor, $alpha: 0.1);
+  border-radius: 5px;
+  border: 1px solid rgba($color: $secondaryColor, $alpha: 0.1);
+  color: #fff;
+}
+
+option {
+  color: $primaryColor;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0px 3px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+tr {
+  text-align: justify;
+
+  color: #a8a8a8;
+
+  color: $accentColor;
+}
+
+.table-row:hover {
+  background-color: $accentColor;
+  color: $secondaryColor;
+}
+
+.td-left {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.td-right {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+td {
+  padding: 10px;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 20px;
+}
+
+.break-td {
+  word-break: break-all;
+}
+
+li {
+  list-style-type: none;
+}
+
+a {
+  color: $secondaryColor !important;
+  cursor: pointer;
+  list-style-type: none;
+  text-decoration: none;
+}
+
+a:hover {
+  color: $accentColor !important;
+}
+
+i {
+  cursor: pointer;
+  color: $secondaryColor;
+  font-size: 1.5rem;
+}
+
+i:hover {
+  color: $primaryColor;
+}
+
+input {
+  width: 100%;
+}
+
+thead tr.special-row th {
+  padding-bottom: 60px;
+}
+
+.check {
+  width: 16px;
+  height: 16px;
+}

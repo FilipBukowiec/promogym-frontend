@@ -1,0 +1,149 @@
+@use "../../../styles/variables.scss" as *;
+
+:host {
+  position: absolute;
+  display: flex;
+  z-index: 1500; //najwyższy indeks domyślny aby zawsze było menu na górze
+}
+
+.btn-close {
+  background-color: $secondaryColor !important;
+}
+
+.btn-close:hover {
+  background-color: $accentColor !important;
+}
+
+.logo-menu {
+  height: 12rem;
+}
+
+.side-menu {
+  height: 5rem;
+  width: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// menu container
+.offcanvas {
+  width: 270px !important ;
+  background-color: $primaryColor !important;
+  overflow: auto;
+}
+
+.offcanvas-header {
+  height: 5rem !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.offcanvas-body ul {
+  margin: 0 !important;
+  padding: 10px;
+  width: 100%;
+}
+
+.offcanvas-body {
+  margin-top: 5rem;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.logo-menu {
+  width: 140px;
+  margin-bottom: 20px;
+}
+
+.nav-link {
+  padding-left: 30px;
+  border-radius: 3px;
+  transition: background-color 0.1s ease, transform 0.1s ease;
+  margin: 2px 0;
+}
+
+.nav-link,
+.nav-link span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link:hover {
+  background-color: $accentColor !important;
+}
+
+.nav-link i {
+  font-size: 1rem;
+  color: $secondaryColor;
+}
+
+i {
+  font-size: 2rem;
+  
+}
+
+i:hover{
+  color: $accentColor;
+}
+
+button {
+  color: $secondaryColor;
+  font-size: 1rem;
+}
+
+button:hover {
+  color: $accentColor;
+}
+
+a {
+  color: $secondaryColor !important;
+  display: flex;
+}
+
+.navbar-toggler {
+  background-color: transparent !important;
+}
+
+.navbar-toggler:hover{
+  opacity: 1!important;
+}
+
+.dropdown-toggle{
+  background-color: grey;
+  border:none;
+  color: black;
+}
+
+.dropdown-toggle:hover{
+  background-color: $accentColor;
+  color: $secondaryColor;
+}
+
+.dropdown-item{
+  color: red!important;
+
+}
+
+.dropdown {
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  position: relative; /* Ustawiamy relative, żeby child elementy mogły być pozycjonowane absolutnie względem niego */
+}
+
+/* Styl dla menu dropdown */
+.dropdown-menu {
+  background-color: rgb(255, 255, 255);
+  position: absolute;  /* Pozycjonujemy menu absolutnie względem dropdown */
+  top: 100%!important;   /* Ustawiamy menu bezpośrednio poniżej przycisku */
+  left: 50%!important; /* Ustawiamy lewy brzeg menu na 50% szerokości kontenera */
+  transform: translateX(-50%)!important;  /* Przesuwamy menu o połowę jego szerokości w lewo, aby je wyśrodkować */
+  width: auto; /* Możesz ustawić konkretną szerokość, jeśli to konieczne */
+}

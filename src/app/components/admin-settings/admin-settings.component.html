@@ -1,0 +1,117 @@
+<section>
+  <h1>Admin settings</h1>
+  <span class="description">Remember, after adding new settings, you must press the 'Save settings' button. From that
+    moment, each device will be activated with the new settings. However, if you want to change the settings on devices
+    that are currently in use, click the 'Live update' button. This will reload the application on those devices.</span>
+
+  <div class="actions"><button (click)="saveSettings()">Save settings</button><button (click)="liveUpdate()">Live update</button></div>
+</section>
+<section>
+  <img class="image" src="assets/images/globe.svg" alt="globe languages" />
+
+  <div class="new-box">
+
+    <span>Add new country to the list for advertisements</span>
+    <div class="new-content"><input class="edit" type="text" [(ngModel)]="newCountry" placeholder="Add new country"
+        [value]="newCountry" /><button (click)="addNewCountry()">Add new country</button>
+    </div>
+  </div>
+
+</section>
+<section>
+  <table>
+    <caption>List of countries for advertisements:</caption>
+    <tr>
+      <th>Country</th>
+      <th>Action</th>
+    </tr>
+
+    <tr class="active" *ngFor="
+        let country of adminSettings.countries;
+        let i = index;
+        trackBy: trackByCountry
+      ">
+      <td>
+        <ng-container *ngIf="editCountryIndex === i; else displayCountry">
+          <input class="edit edit-input" type="text" [(ngModel)]="adminSettings.countries[i]" />
+        </ng-container>
+        <ng-template #displayCountry>
+          {{ country }}
+        </ng-template>
+      </td>
+      <td>
+        <div class="icon-container">
+          <i class="bi bi-pencil-fill" *ngIf="editCountryIndex !== i" (click)="editCountry(i)"></i>
+          <i class="bi bi-floppy-fill" *ngIf="editCountryIndex === i" (click)="saveCountry(i)"></i>
+          <i class="bi bi-trash3-fill" (click)="deleteCountry(i)"></i>
+        </div>
+      </td>
+    </tr>
+  </table>
+</section>
+
+
+<section>
+  <img class="image" src="assets/images/radio.svg" alt="Radio stream list for app" />
+  <div class="new-box">
+
+
+    <span></span> Add the radio stream to the radio list:
+
+    <div class="new-content">
+      <input class="edit" [(ngModel)]="newRadioDescription" type="text" placeholder="Enter radio description"
+        [value]="newRadioDescription" />
+
+      <input class="edit" [(ngModel)]="newRadioUrl" type="text" placeholder="Enter stream URL" [value]="newRadioUrl" />
+
+      <button (click)="addRadioStream()">Add stream</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <table>
+    <caption>List of available radio streams:</caption>
+    <tr>
+      <th>Description</th>
+      <th>Stream URL</th>
+      <th>Action</th>
+    </tr>
+    <tr class="active" *ngFor="let radio of adminSettings.radioStreamList; let i = index">
+      <td>
+        <ng-container *ngIf="editRadioStreamIndex === i; else displayDescription">
+          <input class="edit edit-input" type="text" [(ngModel)]="radio.description" />
+        </ng-container>
+        <ng-template #displayDescription>
+          {{ radio.description }}
+        </ng-template>
+      </td>
+
+      <td class="word-wrap">
+        <ng-container *ngIf="editRadioStreamIndex === i; else displayUrl">
+          <input class="edit edit-input" type="text" [(ngModel)]="radio.url" />
+        </ng-container>
+        <ng-template #displayUrl >
+          {{ radio.url }}
+        </ng-template>
+      </td>
+      <td>
+        <div class="icon-container">
+          <i class="bi bi-pencil-fill" *ngIf="editRadioStreamIndex !== i" (click)="editRadioStream(i)"></i>
+          <i class="bi bi-floppy-fill" *ngIf="editRadioStreamIndex == i" (click)="saveRadioStream(i)"></i>
+          <i class="bi bi-trash3-fill" (click)="deleteRadioStream(i)"></i>
+
+      <i *ngIf="!radioStreamService.adminSettingsAudio() || currentPlayingStreamIndexValue !== i"
+   class="bi bi-play-fill"
+   (click)="playRadioStream(i, radio.url)">
+</i>
+
+<i *ngIf="radioStreamService.adminSettingsAudio() && currentPlayingStreamIndexValue === i"
+   class="bi bi-stop-fill"
+   (click)="radioStreamService.stopRadioStream(radioStreamService.adminSettingsAudio)">
+</i>
+        </div>
+      </td>
+    </tr>
+  </table>
+</section>

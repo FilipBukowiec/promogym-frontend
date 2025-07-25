@@ -1,0 +1,54 @@
+<section>
+    <img class="image" src="/assets/images/promogym_logo.svg" alt="" />
+    <h1>Contact Us</h1>
+    <span class="description">We're here to help and answer any questions you might have. We look forward
+        to hearing from you! Please select the appropriate topic and send us a
+        message. We'll get back to you as soon as possible.</span>
+    <table>
+        <tr>
+            <td><i class="bi bi-telephone-inbound-fill"></i></td>
+            <td>+48 731-617-692</td>
+        </tr>
+        <tr>
+            <td><i class="bi bi-envelope"></i></td>
+            <td>filip.bukowiec&#64;promogym.pl</td>
+        </tr>
+    </table>
+</section>
+<section>
+    @if (!succes) {
+    <form class="contact-form" (ngSubmit)="onSubmit()">
+        <h4>Send us a message</h4>
+        <div class="subject">
+            Subject:
+
+            <select [(ngModel)]="subject" name="subject" required>
+                <option [disabled]="true" value="">Choose a subject</option>
+
+                @for (s of subjects; track s){
+                <option [value]="s">{{ s }}</option>
+                }
+            </select>
+        </div>
+        <div class="message">
+            <span>Message:</span>
+            <input type="text" [(ngModel)]="message" name="message" required />
+        </div>
+
+        <div class="send-btn">
+            <button (click)="onSubmit()" type="submit">Send message</button>
+        </div>
+
+        @if (error){
+        <p>{{ error }}</p>
+        }
+    </form>
+    }
+    @if(succes){
+    <div class="succes-box">
+        <img class="image" src="/assets/images/accept.svg" alt="" />
+        <span>Thank you for your message!</span>
+        <button (click)="newMessage()">Write new message</button>
+    </div>
+    }
+</section>
