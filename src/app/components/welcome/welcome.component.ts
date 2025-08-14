@@ -8,6 +8,7 @@ import { ViewChild, ElementRef } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { QuoteService } from "../../services/quote.service";
 import { ClockService } from "../../services/clock.service";
+import { SentencesService } from "../../services/sentences.service";
 
 
 
@@ -30,6 +31,7 @@ export class WelcomeComponent {
 
   constructor(
     public clockService: ClockService,
+    private sentencesService: SentencesService,
     private quoteService: QuoteService,
     private userSettingsService: UserSettingsService,
     private tenantChangeService: TenantChangeService,
