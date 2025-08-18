@@ -20,7 +20,7 @@ export class SentencesService {
     private http: HttpClient,
     private auth: AuthService,
     private retryHelper: RetryHelperService
-  ) {}
+  ) { }
 
   getAllSentences(): Observable<Sentence[]> {
     return this.retryHelper.withRetry(
@@ -105,5 +105,13 @@ export class SentencesService {
             .pipe(switchMap(() => this.getAllSentences()))
         )
       );
+  }
+
+  deleteSentence(id: string): Observable<Sentence[]> {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) =>
+        this.http.delete<Sentence>(`${this.apiUrl}/${id}`, { headers }).pipe(switchMap(() => this.getAllSentences()))
+      )
+    )
   }
 }

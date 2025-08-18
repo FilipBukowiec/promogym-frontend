@@ -30,7 +30,7 @@ export class SentencesComponent implements OnInit {
   constructor(
     private sentencesService: SentencesService,
     private retryHelper: RetryHelperService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loading = true;
@@ -45,21 +45,7 @@ export class SentencesComponent implements OnInit {
     });
   }
 
-  // loadAllSentences(): void {
-  //   this.loading = true;
-  //   this.retryHelper.withRetry(this.sentencesService.getAllSentences()).subscribe({
-  //     next: (data) => {
-  //       this.sentencesList = data;
-  //       this.loading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('❌ Błąd ładowania newsów:', err);
-  //       this.error = 'Nie udało się załadować wszystkich sentencji.';
-  //       this.loading = false;
-  //     },
-  //   });
-  // }
-
+  
   addNewSentence(): void {
     if (this.newSentence.trim()) {
       this.loading = true;
@@ -92,4 +78,33 @@ export class SentencesComponent implements OnInit {
       },
     });
   }
+
+  deleteSentence(id: string): void {
+    if (!confirm("czy chcesz usunąć")) {
+      return;
+    }
+    this.loading = true;
+    this.sentencesService.deleteSentence(id).subscribe({
+      next: () => {
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    })
+  }
+
+
+  moveUp(id:string):void{
+    this.sentencesService.moveUp(id).subscribe({
+      next: () => {
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    })
+  }
+
+
 }

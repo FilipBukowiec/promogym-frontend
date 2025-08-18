@@ -60,6 +60,9 @@
                     }
                     <td>
                         <div class="icon-container">
+                            <button (click)="deleteSentence(sentence._id)">Delete sentence</button>
+                            <button (click)="moveUp(sentence._id)">w góre</button>
+                            <button>w dół</button>
                             <!-- Ikony akcji możesz też wstawić w @if/@else -->
                         </div>
                     </td>
