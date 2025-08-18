@@ -15,8 +15,7 @@ import { Observable } from 'rxjs';
   standalone: true,
 })
 export class SentencesComponent implements OnInit {
-
-  addMode: string = ''
+  addMode: string = '';
   loading: boolean = false;
   sentencesList: Sentence[] = [];
   newSentence: string = '';
@@ -28,10 +27,10 @@ export class SentencesComponent implements OnInit {
 
   error: string | null = null;
 
-
-
-  constructor(private sentencesService: SentencesService, private retryHelper: RetryHelperService) { }
-
+  constructor(
+    private sentencesService: SentencesService,
+    private retryHelper: RetryHelperService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -42,10 +41,9 @@ export class SentencesComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-      }
+      },
     });
   }
-
 
   // loadAllSentences(): void {
   //   this.loading = true;
@@ -62,27 +60,36 @@ export class SentencesComponent implements OnInit {
   //   });
   // }
 
-
-
   addNewSentence(): void {
-  if (this.newSentence.trim()) {
+    if (this.newSentence.trim()) {
+      this.loading = true;
+      this.sentencesService.addNewSentence(this.newSentence).subscribe({
+        next: () => {
+          this.newSentence = '';
+          this.loading = false; // loader wyłączony po zakończeniu
+        },
+        error: () => {
+          this.loading = false;
+          // tu można też ustawić komunikat o błędzie
+        },
+      });
+    }
+  }
+
+  deleteSentences(): void {
+    if (!confirm('czy chcesz usunąć')) {
+      return;
+    }
+
     this.loading = true;
-    this.sentencesService.addNewSentence(this.newSentence).subscribe({
+    this.sentencesService.deleteAllSentences().subscribe({
       next: () => {
-        this.newSentence = "";
-        this.loading = false; // loader wyłączony po zakończeniu
+        this.loading = false;
       },
+
       error: () => {
         this.loading = false;
-        // tu można też ustawić komunikat o błędzie
-      }
+      },
     });
   }
-}
-
-  // deleteSentence(id: string):void{
-  //   return this.sentencesService.
-  // }
-
-
 }
