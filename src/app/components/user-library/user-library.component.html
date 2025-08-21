@@ -1,0 +1,60 @@
+<ng-container *ngIf="loading">
+  <app-loader></app-loader>
+</ng-container>
+<ng-container *ngIf="!loading">
+  <section>
+    <h1>Library</h1>
+    <span class="description"
+      >After adding a media item, you should use the "Live Update" button to
+      refresh the news on all currently active devices. Devices that are started
+      after this will, of course, receive the updated news automatically.</span
+    >
+
+    <button (click)="liveUpdate()">Live update</button>
+  </section>
+  <div class="library-container">
+    @for (item of mediaList; track item._id) {
+    <div class="library-item">
+      <input
+        class="library-item__checkbox"
+        type="checkbox"
+        (change)="toggleLibraryItem(item, $event)"
+        [checked]="libraryIdsByTenant.includes(item._id)"
+      />
+      <img
+        *ngIf="item.fileType?.startsWith('image')"
+        class="media"
+        [src]="getFullFilePath(item.filePath)"
+        alt="{{ item.fileName }}"
+      />
+      <video
+        *ngIf="item.fileType.startsWith('video')"
+        class="media"
+        [src]="getFullFilePath(item.filePath)"
+        controls
+      ></video>
+    </div>
+    }
+  </div>
+
+  <section *ngIf="!isPremium">
+    <h2>Sponsored content is included as part of your current plan.</h2>
+    <br />
+    <div class="ads-container">
+      <div *ngFor="let ads of advertisementsList; let i = index">
+        <img
+          *ngIf="ads.fileType.startsWith('image')"
+          class="media"
+          [src]="getFullFilePath(ads.filePath)"
+          alt="{{ ads.fileName }}"
+        />
+        <video
+          *ngIf="ads.fileType.startsWith('video')"
+          class="media"
+          [src]="getFullFilePath(ads.filePath)"
+          controls
+        ></video>
+      </div>
+    </div>
+  </section>
+</ng-container>

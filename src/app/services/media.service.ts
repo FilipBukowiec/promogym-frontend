@@ -1,29 +1,31 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { BehaviorSubject, forkJoin, Observable, throwError } from "rxjs";
-import { AuthService } from "./auth.service";
-import { switchMap, catchError, map } from "rxjs/operators";
-import { environment } from "../../environments/environment";
-import { Media } from "../models/media.model";
-import { Advertisement } from "../models/advertisement.model";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, forkJoin, Observable, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
+import { switchMap, catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { Media } from '../models/media.model';
+import { Advertisement } from '../models/advertisement.model';
+import { Library } from '../models/library.model';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
+  private apiUrl3 = `${environment.apiUrl}library`;
 
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService) { }
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
   refreshMedia() {
-    console.log("wywołanomedia")
+    console.log('wywołanomedia');
     this.getFilesForSwiper().subscribe({
       next: (media) => this.mediaSubject.next(media),
-      error: (error) => console.error("❌ Błąd pobierania mediów:", error),
+      error: (error) => console.error('❌ Błąd pobierania mediów:', error),
     });
   }
 
@@ -31,7 +33,7 @@ export class MediaService {
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) => {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
         return this.http.post<Media>(`${this.apiUrl}/upload`, formData, {
           headers,
         });
@@ -50,30 +52,62 @@ export class MediaService {
   getFilesForSwiper(): Observable<Media[]> {
     return this.auth.getUserData().pipe(
       switchMap(({ roles, country }) => {
-        const isPremium = roles.includes("premium_user");
+        const isPremium = roles.includes('premium_user');
         return this.auth.getAuthHeaders().pipe(
           switchMap((headers) => {
             if (isPremium) {
-              return this.http.get<Media[]>(this.apiUrl, { headers });
-            } else {
+              const tenantId = headers.get('tenant-id');
               return forkJoin({
+                library: this.http.get<Library[]>(
+                  `${this.apiUrl3}/tenant/list/${tenantId}`,
+                  { headers }
+                ),
+                media: this.http.get<Media[]>(this.apiUrl, { headers }),
+              }).pipe(
+                map(({ media, library }) => {
+                  const lastOrder =
+                    media.length > 0
+                      ? Math.max(...media.map((item) => item.order))
+                      : 0;
+                  const libraryAsMedia = library.map((ad, index) => ({
+                    ...ad,
+                    tenant_id: 'default_tenant',
+                    order: lastOrder + index + 1,
+                  }));
+                  return [...media, ...libraryAsMedia].sort(
+                    (a, b) => a.order - b.order
+                  );
+                })
+              );
+            } else {
+              const tenantId = headers.get('tenant-id');
+              return forkJoin({
+                library: this.http.get<Library[]>(
+                  `${this.apiUrl3}/tenant/list/${tenantId}`,
+                  { headers }
+                ),
                 media: this.http.get<Media[]>(this.apiUrl, { headers }),
                 ads: this.http.get<Advertisement[]>(
                   `${this.apiUrl2}/${country}`,
                   { headers }
                 ),
               }).pipe(
-                map(({ media, ads }) => {
+                map(({ media, ads, library }) => {
                   const lastOrder =
                     media.length > 0
                       ? Math.max(...media.map((item) => item.order))
                       : 0;
                   const adsAsMedia = ads.map((ad, index) => ({
                     ...ad,
-                    tenant_id: "default_tenant",
+                    tenant_id: 'default_tenant',
                     order: lastOrder + index + 1,
                   }));
-                  return [...media, ...adsAsMedia].sort(
+                  const libraryAsMedia = library.map((ad, index) => ({
+                    ...ad,
+                    tenant_id: 'default_tenant',
+                    order: media.length + ads.length + index + 1,
+                  }));
+                  return [...media, ...adsAsMedia, ...libraryAsMedia].sort(
                     (a, b) => a.order - b.order
                   );
                 })
@@ -116,9 +150,9 @@ export class MediaService {
   }
 
   private handleError(error: any): Observable<never> {
-    console.error("Błąd w MediaService:", error);
+    console.error('Błąd w MediaService:', error);
     return throwError(
-      () => new Error("Wystąpił problem z operacją na mediach.")
+      () => new Error('Wystąpił problem z operacją na mediach.')
     );
   }
 }
