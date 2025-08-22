@@ -20,7 +20,7 @@ export class SentencesService {
     private http: HttpClient,
     private auth: AuthService,
     private retryHelper: RetryHelperService
-  ) { }
+  ) {}
 
   getAllSentences(): Observable<Sentence[]> {
     return this.retryHelper.withRetry(
@@ -58,8 +58,9 @@ export class SentencesService {
           `${this.apiUrl}/${id}/move-up`,
           {},
           { headers }
-        )
+        ).pipe(switchMap(()=> this.getAllSentences()))
       ),
+
       catchError((error) => {
         console.error('Nie możne przesunąc w górę', error);
         return of([]);
@@ -74,8 +75,9 @@ export class SentencesService {
           `${this.apiUrl}/${id}/move-down`,
           {},
           { headers }
-        )
+        ).pipe(switchMap(()=> this.getAllSentences()))
       ),
+
       catchError((error) => {
         console.error('Nie możne przesunąc w górę', error);
         return of([]);
@@ -108,10 +110,14 @@ export class SentencesService {
   }
 
   deleteSentence(id: string): Observable<Sentence[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.delete<Sentence>(`${this.apiUrl}/${id}`, { headers }).pipe(switchMap(() => this.getAllSentences()))
-      )
-    )
+    return this.auth
+      .getAuthHeaders()
+      .pipe(
+        switchMap((headers) =>
+          this.http
+            .delete<Sentence>(`${this.apiUrl}/${id}`, { headers })
+            .pipe(switchMap(() => this.getAllSentences()))
+        )
+      );
   }
 }

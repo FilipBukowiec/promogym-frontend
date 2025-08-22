@@ -24,6 +24,7 @@ export class SentencesComponent implements OnInit {
   editingSentenceId: string | null = null;
 
   sentences$!: Observable<Sentence[]>;
+  sentences: Sentence[] = [];
 
   error: string | null = null;
 
@@ -35,14 +36,16 @@ export class SentencesComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.sentences$ = this.sentencesService.sentences$;
-    this.sentencesService.getAllSentences().subscribe({
-      next: () => {
+    this.sentencesService.getAllSentences().subscribe(
+    data => {
+this.sentences = data
         this.loading = false;
       },
-      error: () => {
+      error => {
         this.loading = false;
+        console.error(error)
       },
-    });
+    );
   }
 
   
@@ -97,6 +100,17 @@ export class SentencesComponent implements OnInit {
 
   moveUp(id:string):void{
     this.sentencesService.moveUp(id).subscribe({
+      next: () => {
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    })
+  }
+
+   moveDown(id:string):void{
+    this.sentencesService.moveDown(id).subscribe({
       next: () => {
         this.loading = false;
       },
