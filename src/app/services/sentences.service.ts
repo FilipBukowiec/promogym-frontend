@@ -13,14 +13,14 @@ import { RetryHelperService } from './retry-helper.service';
 export class SentencesService {
   private apiUrl = `${environment.apiUrl}sentences`;
 
-  private sentencesSubject = new BehaviorSubject<Sentence[]>([]);
+  public sentencesSubject = new BehaviorSubject<Sentence[]>([]);
   sentences$ = this.sentencesSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private auth: AuthService,
     private retryHelper: RetryHelperService
-  ) {}
+  ) { }
 
   getAllSentences(): Observable<Sentence[]> {
     return this.retryHelper.withRetry(
@@ -58,7 +58,7 @@ export class SentencesService {
           `${this.apiUrl}/${id}/move-up`,
           {},
           { headers }
-        ).pipe(switchMap(()=> this.getAllSentences()))
+        ).pipe(switchMap(() => this.getAllSentences()))
       ),
 
       catchError((error) => {
@@ -75,7 +75,7 @@ export class SentencesService {
           `${this.apiUrl}/${id}/move-down`,
           {},
           { headers }
-        ).pipe(switchMap(()=> this.getAllSentences()))
+        ).pipe(switchMap(() => this.getAllSentences()))
       ),
 
       catchError((error) => {
@@ -91,11 +91,27 @@ export class SentencesService {
         this.http
           .post<Sentence>(`${this.apiUrl}/single`, { content }, { headers })
           .pipe(
-            switchMap(() => this.getAllSentences()) // odśwież BehaviorSubject
+            switchMap(() => this.getAllSentences()) 
           )
       )
     );
   }
+
+  addNewSentences(sentences: { content: string }[]) {
+    return this.auth.getAuthHeaders().pipe(
+      switchMap((headers) =>
+        this.http.post<Sentence[]>(`${this.apiUrl}/bulk`, sentences, {headers})
+          .pipe(
+            switchMap(() => this.getAllSentences())
+
+          )))
+  }
+
+
+
+
+
+
 
   deleteAllSentences(): Observable<Sentence[]> {
     return this.auth
@@ -120,4 +136,17 @@ export class SentencesService {
         )
       );
   }
+
+updateSentence(id: string, content: string): Observable<Sentence> {
+  return this.auth.getAuthHeaders().pipe(
+    switchMap((headers) =>
+      this.http.put<Sentence>(`${this.apiUrl}/${id}`, { content }, { headers })
+    ),
+    catchError((error) => {
+      console.error('Błąd aktualizacji sentencji', error);
+      return of({} as Sentence); })
+  );
+}
+
+
 }

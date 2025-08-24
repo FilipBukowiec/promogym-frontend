@@ -31,26 +31,25 @@ export class UserMediaComponent implements OnInit {
 
   constructor(private mediaService: MediaService, private retryHelper: RetryHelperService, private webSocketService: WebSocketService, private authService: AuthService, private advertisementsService: AdvertisementsService) { }
 
-ngOnInit(): void {
-  this.loadMedia();
+  ngOnInit(): void {
+    this.loadMedia();
 
-  this.authService.checkIfPremiumUser();
+    this.authService.checkIfPremiumUser();
 
-  this.authService.isPremium$
-    .pipe(take(1))
-    .subscribe((isPremium) => {
-      this.isPremium = isPremium;
-      if (!isPremium) {
-        this.loadAdvertisementsForUserCountry();
-      }
-    });
-}
+    this.authService.isPremium$
+      .pipe(take(1))
+      .subscribe((isPremium) => {
+        this.isPremium = isPremium;
+        if (!isPremium) {
+          this.loadAdvertisementsForUserCountry();
+        }
+      });
+  }
 
   onTenantChange() {
     this.loadMedia();
   }
 
-  // 📌 Pobieranie listy plików
   loadMedia(): void {
     this.loading = true;
 
@@ -69,7 +68,6 @@ ngOnInit(): void {
   }
 
 
-  // Pobieranie reklam dla kraju tenanta
 
   loadAdvertisementsForUserCountry(): void {
     this.loading = true;
@@ -94,7 +92,6 @@ ngOnInit(): void {
     });
   }
 
-  // 📌 Obsługa wyboru pliku
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
@@ -118,7 +115,6 @@ ngOnInit(): void {
     }
   }
 
-  // 📌 Dodawanie pliku
   addMedia(): void {
     if (!this.selectedFile) return;
 
@@ -131,7 +127,6 @@ ngOnInit(): void {
     );
   }
 
-  // 📌 Usuwanie pliku
   deleteMedia(id: string): void {
     const confirmed = window.confirm('Are you sure you want to delete this media?');
 
@@ -150,7 +145,6 @@ ngOnInit(): void {
   }
 
 
-  // 📌 Przesunięcie pliku w górę
   moveUp(id: string): void {
     this.mediaService.moveFileUp(id).subscribe(
       () => this.loadMedia(),
@@ -158,7 +152,6 @@ ngOnInit(): void {
     );
   }
 
-  // 📌 Przesunięcie pliku w dół
   moveDown(id: string): void {
     this.mediaService.moveFileDown(id).subscribe(
       () => this.loadMedia(),
@@ -166,7 +159,6 @@ ngOnInit(): void {
     );
   }
 
-  // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
     return `${environment.publicUrl}${filePath}`;
   }

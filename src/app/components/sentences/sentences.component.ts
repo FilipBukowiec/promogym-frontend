@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Sentence } from '../../models/sentence.model';
 import { SentencesService } from '../../services/sentences.service';
-import { RetryHelperService } from '../../services/retry-helper.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -17,49 +16,68 @@ import { Observable } from 'rxjs';
 export class SentencesComponent implements OnInit {
   addMode: string = '';
   loading: boolean = false;
-  sentencesList: Sentence[] = [];
   newSentence: string = '';
   newSentences: string = '';
-  editedSentence: string = '';
   editingSentenceId: string | null = null;
+
+  editedContent: string = '';
 
   sentences$!: Observable<Sentence[]>;
   sentences: Sentence[] = [];
 
-  error: string | null = null;
-
-  constructor(
-    private sentencesService: SentencesService,
-    private retryHelper: RetryHelperService
-  ) { }
+  constructor(private sentencesService: SentencesService) {}
 
   ngOnInit(): void {
     this.loading = true;
     this.sentences$ = this.sentencesService.sentences$;
+    this.sentencesService.sentences$.subscribe((sentences) => {
+      this.sentences = sentences;
+    });
+
     this.sentencesService.getAllSentences().subscribe(
-    data => {
-this.sentences = data
+      (data) => {
+        this.sentences = data;
         this.loading = false;
       },
-      error => {
+      (error) => {
         this.loading = false;
-        console.error(error)
-      },
+        console.error(error);
+      }
     );
   }
 
-  
+  addSentences(): void {
+    if (!this.newSentences.trim()) return;
+    this.loading = true;
+
+    const contents = this.newSentences
+      .split(';')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+
+    const dtos = contents.map((content) => ({ content }));
+
+    this.sentencesService.addNewSentences(dtos).subscribe({
+      next: () => {
+        this.newSentences = '';
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
   addNewSentence(): void {
     if (this.newSentence.trim()) {
       this.loading = true;
       this.sentencesService.addNewSentence(this.newSentence).subscribe({
         next: () => {
           this.newSentence = '';
-          this.loading = false; // loader wyłączony po zakończeniu
+          this.loading = false;
         },
         error: () => {
           this.loading = false;
-          // tu można też ustawić komunikat o błędzie
         },
       });
     }
@@ -83,7 +101,7 @@ this.sentences = data
   }
 
   deleteSentence(id: string): void {
-    if (!confirm("czy chcesz usunąć")) {
+    if (!confirm('czy chcesz usunąć')) {
       return;
     }
     this.loading = true;
@@ -94,11 +112,10 @@ this.sentences = data
       error: () => {
         this.loading = false;
       },
-    })
+    });
   }
 
-
-  moveUp(id:string):void{
+  moveUp(id: string): void {
     this.sentencesService.moveUp(id).subscribe({
       next: () => {
         this.loading = false;
@@ -106,10 +123,10 @@ this.sentences = data
       error: () => {
         this.loading = false;
       },
-    })
+    });
   }
 
-   moveDown(id:string):void{
+  moveDown(id: string): void {
     this.sentencesService.moveDown(id).subscribe({
       next: () => {
         this.loading = false;
@@ -117,8 +134,33 @@ this.sentences = data
       error: () => {
         this.loading = false;
       },
-    })
+    });
   }
 
+  startEditing(sentence: Sentence): void {
+    this.editingSentenceId = sentence._id;
+    this.editedContent = sentence.content;
+  }
 
+  saveChanges(): void {
+    if (!this.editingSentenceId || !this.editedContent.trim()) return;
+
+    this.loading = true;
+    this.sentencesService
+      .updateSentence(this.editingSentenceId, this.editedContent)
+      .subscribe({
+        next: (updatedSentence) => {
+          const updatedSentences = this.sentences.map((s) =>
+            s._id === updatedSentence._id ? updatedSentence : s
+          );
+          this.sentencesService.sentencesSubject.next(updatedSentences);
+          this.editingSentenceId = null;
+          this.editedContent = '';
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
+  }
 }

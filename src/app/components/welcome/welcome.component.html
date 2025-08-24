@@ -22,7 +22,7 @@
 
 </div>
 <button [routerLink]="['../start']"><i class="bi bi-google-play"></i> Start app</button>
-<span class="quote">{{todayQuote}}</span>
+<span class="quote">{{(todayQuote | async)?.content}}</span>
 </div> 
 </section>
 
