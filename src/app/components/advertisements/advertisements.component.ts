@@ -46,7 +46,7 @@ export class AdvertisementsComponent implements OnInit {
 
   loadAdvertisements(): void {
     console.log("📥 Ładowanie reklam...");
-    this.advertisementsService.getAdvertisements().subscribe(
+    this.advertisementsService.getAllAdvertisements().subscribe(
       (data) => {
         console.log("✅ Odebrane reklamy:", data);
         this.advertisementList = data;

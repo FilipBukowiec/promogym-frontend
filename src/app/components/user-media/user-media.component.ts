@@ -77,7 +77,7 @@ export class UserMediaComponent implements OnInit {
       take(1),
       switchMap(userData => {
         const country = userData.country;
-        return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
+        return this.retryHelper.withRetry(this.advertisementsService.getAdvertisementsByCountry(country));
       })
     ).subscribe({
       next: (ads) => {
@@ -92,6 +92,9 @@ export class UserMediaComponent implements OnInit {
     });
   }
 
+
+
+  
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 

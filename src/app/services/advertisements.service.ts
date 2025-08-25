@@ -41,21 +41,31 @@ export class AdvertisementsService {
 
 
   // 📌 Pobieranie ogłoszeń
-  getAdvertisements(language?: string): Observable<Advertisement[]> {
-    const url = language ? `${this.apiUrl}?language=${language}` : this.apiUrl;
-  
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.get<Advertisement[]>(url, { headers }).pipe(
-          catchError((error) => {
-            console.error("❌ Błąd podczas pobierania reklam: ", error);
-            return throwError(() => new Error("Nie udało się pobrać reklam. Spróbuj ponownie."));
-          })
-        )
+getAllAdvertisements(): Observable<Advertisement[]> {
+  return this.auth.getAuthHeaders().pipe(
+    switchMap((headers) =>
+      this.http.get<Advertisement[]>(this.apiUrl, { headers }).pipe(
+        catchError((error) => {
+          console.error("❌ Błąd podczas pobierania wszystkich reklam: ", error);
+          return throwError(() => new Error("Nie udało się pobrać reklam."));
+        })
       )
-    );
-  }
+    )
+  );
+}
 
+getAdvertisementsByCountry(country: string): Observable<Advertisement[]> {
+  const url = `${this.apiUrl}/${country}`;
+  return this.auth.getAuthHeaders().pipe(
+    switchMap((headers) =>
+      this.http.get<Advertisement[]>(url, { headers }).pipe(
+        catchError((error) => {
+          console.error(`❌ Błąd podczas pobierania reklam dla kraju ${country}: `, error);
+          return throwError(() => new Error("Nie udało się pobrać reklam dla danego kraju."));
+        })
+      )
+    ))
+  }
 
 
 
