@@ -37,7 +37,6 @@ export class UserMediaComponent implements OnInit {
     this.authService.checkIfPremiumUser();
 
     this.authService.isPremium$
-      .pipe(take(1))
       .subscribe((isPremium) => {
         this.isPremium = isPremium;
         if (!isPremium) {
@@ -74,7 +73,6 @@ export class UserMediaComponent implements OnInit {
     this.error = null;
 
     this.authService.getUserData().pipe(
-      take(1),
       switchMap(userData => {
         const country = userData.country;
         return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));

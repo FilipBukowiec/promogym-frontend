@@ -41,8 +41,8 @@ export class AdvertisementsService {
 
 
   // 📌 Pobieranie ogłoszeń
-  getAdvertisements(language?: string): Observable<Advertisement[]> {
-    const url = language ? `${this.apiUrl}?language=${language}` : this.apiUrl;
+  getAdvertisements(country?: string): Observable<Advertisement[]> {
+    const url = country ? `${this.apiUrl}/${country}` : this.apiUrl;
   
     return this.auth.getAuthHeaders().pipe(
       switchMap((headers) =>
