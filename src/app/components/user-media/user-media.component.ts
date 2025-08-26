@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { AdvertisementsService } from '../../services/advertisements.service';
 import { Advertisement } from '../../models/advertisement.model'
-import { switchMap, take } from 'rxjs';
+import { switchMap, take, throwError } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -37,7 +37,6 @@ export class UserMediaComponent implements OnInit {
     this.authService.checkIfPremiumUser();
 
     this.authService.isPremium$
-      .pipe(take(1))
       .subscribe((isPremium) => {
         this.isPremium = isPremium;
         if (!isPremium) {
@@ -70,28 +69,43 @@ export class UserMediaComponent implements OnInit {
 
 
   loadAdvertisementsForUserCountry(): void {
-    this.loading = true;
-    this.error = null;
+  this.loading = true;
+  this.error = null;
 
-    this.authService.getUserData().pipe(
-      take(1),
-      switchMap(userData => {
-        const country = userData.country;
-        return this.retryHelper.withRetry(this.advertisementsService.getAdvertisementsByCountry(country));
-      })
-    ).subscribe({
-      next: (ads) => {
-        this.advertisementsList = ads;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Błąd ładowania reklam:', err);
-        this.error = 'Nie udało się załadować reklam.';
-        this.loading = false;
+  this.authService.isAdmin$.pipe(
+    switchMap(isAdmin => {
+      if (isAdmin) {
+        // Admin – obserwujemy wybranego tenant’a
+        return this.authService.selectedTenant$.pipe(
+          switchMap((tenant) => {
+            const country = tenant?.country;
+            if (!country) return throwError(() => new Error('Brak kraju do pobrania reklam'));
+            return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
+          })
+        );
+      } else {
+        // Zwykły użytkownik – obserwujemy własny kraj
+        return this.authService.getUserData().pipe(
+          switchMap((userData) => {
+            const country = userData.country;
+            if (!country) return throwError(() => new Error('Brak kraju do pobrania reklam'));
+            return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
+          })
+        );
       }
-    });
-  }
-
+    })
+  ).subscribe({
+    next: (ads) => {
+      this.advertisementsList = ads;
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Błąd ładowania reklam:', err);
+      this.error = 'Nie udało się załadować reklam.';
+      this.loading = false;
+    }
+  });
+}
 
 
   

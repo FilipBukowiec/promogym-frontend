@@ -41,7 +41,7 @@ export class DataService {
 
 
   public loadInitialData() {
-    this.auth.getAccessTokenSilently().subscribe((token) => { });
+    this.auth.getAccessTokenSilently().subscribe(() => { });
     this.adminSettings.getSettings().subscribe({
       next: (settings: AdminSettings) => {
         console.log("ustawienia", settings);
