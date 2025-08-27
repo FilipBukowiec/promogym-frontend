@@ -11,11 +11,12 @@ import { HomepageComponent } from './components/homepage/homepage.component';
 import { MainAppComponent } from './components/main-app/main-app.component';
 import { ManagementComponent } from './components/management/management.component';
 import { NewsComponent } from './components/news/news.component';
+import { SentencesComponent } from './components/sentences/sentences.component';
+import { UserLibraryComponent } from './components/user-library/user-library.component';
 import { UserMediaComponent } from './components/user-media/user-media.component';
 import { UserNewsComponent } from './components/user-news/user-news.component';
 import { UserSettingsComponent } from './components/user-settings/user-settings.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
-import { UserLibraryComponent } from './components/user-library/user-library.component';
 
 export const routes: Routes = [
   {
@@ -62,6 +63,7 @@ export const routes: Routes = [
             component: AdminAnnouncementsComponent,
           },
           { path: '', redirectTo: 'admin-settings', pathMatch: 'full' },
+          { path: 'sentences', component: SentencesComponent },
         ],
       },
       {

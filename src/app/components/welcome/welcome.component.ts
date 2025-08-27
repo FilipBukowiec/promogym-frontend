@@ -3,11 +3,13 @@ import { UserSettingsService } from "../../services/user-settings.service";
 import { LoaderComponent } from "../loader/loader.component";
 import { CommonModule } from "@angular/common";
 import { TenantChangeService } from "../../services/tenant-change.service";
-import { Subject, takeUntil } from "rxjs";
+import { Observable, Subject, takeUntil } from "rxjs";
 import { ViewChild, ElementRef } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { QuoteService } from "../../services/quote.service";
 import { ClockService } from "../../services/clock.service";
+import { SentencesService } from "../../services/sentences.service";
+import { Sentence } from "../../models/sentence.model";
 
 
 
@@ -20,7 +22,7 @@ import { ClockService } from "../../services/clock.service";
 export class WelcomeComponent {
   user: string = "";
   today: string = "";
-  todayQuote: string = "";
+  todayQuote!: Observable<Sentence>
   isLoading: boolean = true;
   isStarting: boolean = false;
   email: string = "";
@@ -30,7 +32,7 @@ export class WelcomeComponent {
 
   constructor(
     public clockService: ClockService,
-    private quoteService: QuoteService,
+    private sentencesService: SentencesService,
     private userSettingsService: UserSettingsService,
     private tenantChangeService: TenantChangeService,
   ) { }
@@ -47,7 +49,7 @@ export class WelcomeComponent {
 
     const date = new Date();
     this.today = date.toLocaleDateString();
-    this.todayQuote = this.quoteService.getQuoteOfTheDay();
+    this.todayQuote = this.sentencesService.getSentenceOfTheDay();
 
   };
 

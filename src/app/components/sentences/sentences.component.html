@@ -1,0 +1,91 @@
+<ng-container *ngIf="loading">
+  <app-loader></app-loader>
+</ng-container>
+<ng-container *ngIf="!loading">
+  <section>
+    <h1>Sentences</h1>
+    <span class="description">After adding a news item, you should use the "Live Update" button to
+      refresh the news on all currently active devices. Devices that are started
+      after this will, of course, receive the updated news automatically.</span>
+
+
+  </section>
+  <section>
+    <img class="image" src="/assets/images/quotes.svg" alt="Quotes image" />
+    <div class="new-box">
+      <span>Add new sentence to the list</span>
+      <span class="mode">
+        <span>
+          <input type="radio" name="mode" value="single" [(ngModel)]="addMode" />1 sentence</span>
+        <span><input type="radio" name="mode" value="multiple" [(ngModel)]="addMode" />Multiple sentence</span>
+      </span>
+      @if(addMode === "single") {
+      <div class="new-content">
+        <input class="news edit" type="text" [(ngModel)]="newSentence" placeholder="Write new sentence" />
+        <button (click)="addNewSentence()">Add new sentence</button>
+      </div>
+      } @if(addMode === "multiple") {
+      <div class="new-content">
+        <input class="news edit" type="text" [(ngModel)]="newSentences"
+          placeholder="Write new sentences (one per line)" />
+        <button (click)="addSentences()">Add new Sentences</button>
+      </div>
+      }
+      <button (click)="deleteSentences()">Delete sentences</button>
+    </div>
+  </section>
+
+  <section>
+    <table>
+      <caption>
+        <h2>Sentences</h2>
+      </caption>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Sentence</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sentence of sentences$ | async; track sentence._id; let i = $index) {
+        <tr>
+          <td>{{ sentence.order }}</td>
+
+          @if (editingSentenceId !== sentence._id) {
+          <td>{{ sentence.content }}</td>
+          } @else {
+          <td>
+            <input class="edit-input" [(ngModel)]="editedContent" placeholder="Edit sentence" />
+          </td>
+          }
+
+          <td>
+            <div class="icon-container">
+              @if (i > 0) {
+              <i class="bi bi-arrow-up" (click)="moveUp(sentence._id)" title="Move up"></i>
+              }
+
+              @if (i < sentences.length - 1) { <i class="bi bi-arrow-down" (click)="moveDown(sentence._id)"
+                title="Move down"></i>
+                }
+
+                @if (editingSentenceId !== sentence._id) {
+                <i class="bi bi-pencil-fill" (click)="startEditing(sentence)" title="Edit sentence"></i>
+                }
+
+                @if (editingSentenceId === sentence._id) {
+                <i class="bi bi-floppy-fill" (click)="saveChanges()" title="Save sentence"></i>
+
+                }
+
+                <i class="bi bi-trash3-fill" (click)="deleteSentence(sentence._id)" title="Delete sentence"></i>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+</ng-container>
