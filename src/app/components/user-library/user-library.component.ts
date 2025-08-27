@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { switchMap, take, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, switchMap, take, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Advertisement } from '../../models/advertisement.model';
 import { Media } from '../../models/media.model';
@@ -18,13 +18,14 @@ import { LoaderComponent } from '../loader/loader.component';
   templateUrl: './user-library.component.html',
   styleUrls: ['./user-library.component.scss'],
 })
-export class UserLibraryComponent implements OnInit {
+export class UserLibraryComponent implements OnInit, OnDestroy {
   mediaList: Media[] = [];
   libraryIdsByTenant: string[] = [];
   loading: boolean = true;
   error: string | null = null;
   isPremium: boolean = false;
   advertisementsList: Advertisement[] = [];
+  private readonly onDestroy$ = new Subject();
 
   constructor(
     private retryHelper: RetryHelperService,
@@ -110,30 +111,33 @@ export class UserLibraryComponent implements OnInit {
   }
 
   private getLibraryIdByTenantId(): void {
-    this.authService.userTenant$
+    this.authService.selectedTenant$
       .pipe(
-        switchMap((tenantId) =>
-          this.libraryService.getLibraryByTenantId(tenantId)
+        switchMap((tenant) =>
+          this.libraryService.getLibraryByTenantId(tenant?.tenant_id as string)
         ),
-        tap((data) => (this.libraryIdsByTenant = data.map((item) => item._id))),
-        take(1)
+        tap((data) => (this.libraryIdsByTenant = data.map((item) => item._id)))
       )
       .subscribe();
   }
 
   public addTenant(id: string): void {
-    this.authService.userTenant$
+    this.authService.selectedTenant$
       .pipe(
-        switchMap((tenantId) => this.libraryService.addTenant(tenantId, id)),
+        switchMap((tenant) =>
+          this.libraryService.addTenant(tenant?.tenant_id as string, id)
+        ),
         take(1)
       )
       .subscribe();
   }
 
   public removeTenant(id: string): void {
-    this.authService.userTenant$
+    this.authService.selectedTenant$
       .pipe(
-        switchMap((tenantId) => this.libraryService.removeTenant(tenantId, id)),
+        switchMap((tenant) =>
+          this.libraryService.removeTenant(tenant?.tenant_id as string, id)
+        ),
         take(1)
       )
       .subscribe();
@@ -146,5 +150,10 @@ export class UserLibraryComponent implements OnInit {
     } else {
       this.removeTenant(item._id);
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.onDestroy$.next(void 0);
+    this.onDestroy$.complete();
   }
 }
