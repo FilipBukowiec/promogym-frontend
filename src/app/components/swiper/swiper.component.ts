@@ -116,7 +116,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
       slide.classList.add('swiper-slide');
       const filePath = `${environment.publicUrl}${element.filePath}`;
 
-      if (element.filePath.endsWith('.mp4')) {
+      if (element.filePath.endsWith('.mp4') || element.filePath.endsWith('.mov')) {
         const videoElement = document.createElement('video');
         videoElement.src = filePath;
         videoElement.muted = true;

@@ -137,6 +137,7 @@ export class AuthService {
               this.userCountrySubject.next(country);
               this.userEmailSubject.next(email);
               this.userTenantSubject.next(tenantId);
+              this.selectedTenantSubject.next({tenant_id: tenantId, country})
             })
           );
         }),

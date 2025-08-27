@@ -1,21 +1,22 @@
 import { Routes } from '@angular/router';
-import { HomepageComponent } from './components/homepage/homepage.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AuthGuard } from '@auth0/auth0-angular';
-import { WelcomeComponent } from './components/welcome/welcome.component';
-import { NewsComponent } from './components/news/news.component';
-import { ManagementComponent } from './components/management/management.component';
-import { UserSettingsComponent } from './components/user-settings/user-settings.component';
-import { UserNewsComponent } from './components/user-news/user-news.component';
-import { UserMediaComponent } from './components/user-media/user-media.component';
-import { MainAppComponent } from './components/main-app/main-app.component';
+import { AdminAnnouncementsComponent } from './components/admin-announcements/admin-announcements.component';
+import { AdminLibraryComponent } from './components/admin-library/admin-library.component';
 import { AdminSettingsComponent } from './components/admin-settings/admin-settings.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { AdvertisementsComponent } from './components/advertisements/advertisements.component';
 import { ContactComponent } from './components/contact/contact.component';
-import { AnnouncementsComponent } from './components/announcements/announcements.component';
-import { AdminAnnouncementsComponent } from './components/admin-announcements/admin-announcements.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { HomepageComponent } from './components/homepage/homepage.component';
+import { MainAppComponent } from './components/main-app/main-app.component';
+import { ManagementComponent } from './components/management/management.component';
+import { NewsComponent } from './components/news/news.component';
 import { SentencesComponent } from './components/sentences/sentences.component';
+import { UserLibraryComponent } from './components/user-library/user-library.component';
+import { UserMediaComponent } from './components/user-media/user-media.component';
+import { UserNewsComponent } from './components/user-news/user-news.component';
+import { UserSettingsComponent } from './components/user-settings/user-settings.component';
+import { WelcomeComponent } from './components/welcome/welcome.component';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,10 @@ export const routes: Routes = [
             path: 'admin-settings',
             component: AdminSettingsComponent,
           },
+          {
+            path: 'admin-library',
+            component: AdminLibraryComponent,
+          },
           { path: 'advertisements', component: AdvertisementsComponent },
           {
             path: 'admin-announcements',
@@ -68,6 +73,7 @@ export const routes: Routes = [
           { path: 'user-settings', component: UserSettingsComponent },
           { path: 'user-news', component: UserNewsComponent },
           { path: 'user-media', component: UserMediaComponent },
+          { path: 'user-library', component: UserLibraryComponent },
           { path: '', redirectTo: 'user-settings', pathMatch: 'full' },
         ],
       },
