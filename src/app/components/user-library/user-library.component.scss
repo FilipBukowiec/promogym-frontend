@@ -35,8 +35,9 @@ label:hover {
 }
 
 .library-container {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .library-item {
