@@ -1,0 +1,12 @@
+.media {
+  width: 192px;
+  height: 108px;
+  object-fit: cover;
+}
+
+.ads-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}

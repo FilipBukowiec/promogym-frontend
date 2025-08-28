@@ -6,7 +6,6 @@ import { TenantChangeService } from "../../services/tenant-change.service";
 import { Observable, Subject, takeUntil } from "rxjs";
 import { ViewChild, ElementRef } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { QuoteService } from "../../services/quote.service";
 import { ClockService } from "../../services/clock.service";
 import { SentencesService } from "../../services/sentences.service";
 import { Sentence } from "../../models/sentence.model";

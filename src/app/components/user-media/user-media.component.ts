@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
 import { Media } from '../../models/media.model';
@@ -9,45 +9,55 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 import { AdvertisementsService } from '../../services/advertisements.service';
 import { Advertisement } from '../../models/advertisement.model'
-import { switchMap, take, throwError } from 'rxjs';
+import { Observable, of, switchMap} from 'rxjs';
+import { AdvertisementsComponent } from "../advertisements/advertisements.component";
+import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, LoaderComponent],
+  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent],
   selector: 'app-user-media',
   templateUrl: './user-media.component.html',
   styleUrls: ['./user-media.component.scss'],
 })
 export class UserMediaComponent implements OnInit {
 
+
   selectedFileName: string = '';
   selectedFile: File | null = null;
   mediaList: Media[] = [];
   loading: boolean = true;
   error: string | null = null;
-  isPremium: boolean = false;
   advertisementsList: Advertisement[] = [];
 
-
-  constructor(private mediaService: MediaService, private retryHelper: RetryHelperService, private webSocketService: WebSocketService, private authService: AuthService, private advertisementsService: AdvertisementsService) { }
+  constructor(private mediaService: MediaService, private retryHelper: RetryHelperService, private webSocketService: WebSocketService, public authService: AuthService, private advertisementsService: AdvertisementsService) { }
 
   ngOnInit(): void {
-    this.loadMedia();
+    this.loading = true;
 
-    this.authService.checkIfPremiumUser();
-
-    this.authService.isPremium$
-      .subscribe((isPremium) => {
-        this.isPremium = isPremium;
-        if (!isPremium) {
-          this.loadAdvertisementsForUserCountry();
+    this.authService.selectedTenant$
+      .pipe(
+        switchMap(tenant => {
+          if (!tenant) return of([]);
+          this.loading = true;
+          return this.retryHelper.withRetry(this.mediaService.getFiles());
+        })
+      )
+      .subscribe({
+        next: data => {
+          this.mediaList = data;
+          this.loading = false;
+        },
+        error: err => {
+          console.error('❌ Błąd ładowania mediów:', err);
+          this.error = 'Nie udało się załadować mediów.';
+          this.loading = false;
         }
       });
+    // this.showAdsForTenantCountry();
   }
 
-  onTenantChange() {
-    this.loadMedia();
-  }
+
 
   loadMedia(): void {
     this.loading = true;
@@ -68,47 +78,20 @@ export class UserMediaComponent implements OnInit {
 
 
 
-  loadAdvertisementsForUserCountry(): void {
-  this.loading = true;
-  this.error = null;
+  // showAdsForTenantCountry(): void {
+  //   this.authService.selectedTenant$.pipe(switchMap(tenant => {
+  //     if (tenant?.country) {
+  //       return this.advertisementsService.getAdvertisements(tenant.country)
+  //     }
+  //     return [];
 
-  this.authService.isAdmin$.pipe(
-    switchMap(isAdmin => {
-      if (isAdmin) {
-        // Admin – obserwujemy wybranego tenant’a
-        return this.authService.selectedTenant$.pipe(
-          switchMap((tenant) => {
-            const country = tenant?.country;
-            if (!country) return throwError(() => new Error('Brak kraju do pobrania reklam'));
-            return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
-          })
-        );
-      } else {
-        // Zwykły użytkownik – obserwujemy własny kraj
-        return this.authService.getUserData().pipe(
-          switchMap((userData) => {
-            const country = userData.country;
-            if (!country) return throwError(() => new Error('Brak kraju do pobrania reklam'));
-            return this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(country));
-          })
-        );
-      }
-    })
-  ).subscribe({
-    next: (ads) => {
-      this.advertisementsList = ads;
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('❌ Błąd ładowania reklam:', err);
-      this.error = 'Nie udało się załadować reklam.';
-      this.loading = false;
-    }
-  });
-}
+  //   })
+  //   ).subscribe({
+  //     next: ads => this.advertisementsList = ads,
+  //     error: err => console.error("Błąd pobierania reklam", err)
+  //   })
+  // }
 
-
-  
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 

@@ -10,10 +10,11 @@ import { LibraryService } from '../../services/library.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { LoaderComponent } from '../loader/loader.component';
+import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, LoaderComponent],
+  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent],
   selector: 'app-user-library',
   templateUrl: './user-library.component.html',
   styleUrls: ['./user-library.component.scss'],
@@ -23,30 +24,18 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
   libraryIdsByTenant: string[] = [];
   loading: boolean = true;
   error: string | null = null;
-  isPremium: boolean = false;
-  advertisementsList: Advertisement[] = [];
+  
   private readonly onDestroy$ = new Subject();
 
   constructor(
     private retryHelper: RetryHelperService,
     private webSocketService: WebSocketService,
-    private authService: AuthService,
-    private advertisementsService: AdvertisementsService,
+    public authService: AuthService,
     private readonly libraryService: LibraryService
   ) {}
 
   ngOnInit(): void {
     this.loadMedia();
-
-    this.authService.checkIfPremiumUser();
-
-    this.authService.isPremium$.pipe(take(1)).subscribe((isPremium) => {
-      this.isPremium = isPremium;
-      if (!isPremium) {
-        this.loadAdvertisementsForUserCountry();
-      }
-    });
-
     this.getLibraryIdByTenantId();
   }
 
@@ -71,35 +60,7 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Pobieranie reklam dla kraju tenanta
 
-  loadAdvertisementsForUserCountry(): void {
-    this.loading = true;
-    this.error = null;
-
-    this.authService
-      .getUserData()
-      .pipe(
-        take(1),
-        switchMap((userData) => {
-          const country = userData.country;
-          return this.retryHelper.withRetry(
-            this.advertisementsService.getAdvertisements(country)
-          );
-        })
-      )
-      .subscribe({
-        next: (ads) => {
-          this.advertisementsList = ads;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('❌ Błąd ładowania reklam:', err);
-          this.error = 'Nie udało się załadować reklam.';
-          this.loading = false;
-        },
-      });
-  }
 
   // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {

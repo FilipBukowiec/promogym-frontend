@@ -40,7 +40,7 @@ export class AdvertisementsService {
 }
 
 
-  // 📌 Pobieranie ogłoszeń
+  // 📌 Pobieranie reklam
   getAdvertisements(country?: string): Observable<Advertisement[]> {
     const url = country ? `${this.apiUrl}/${country}` : this.apiUrl;
   

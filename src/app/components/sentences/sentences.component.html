@@ -27,7 +27,7 @@
       } @if(addMode === "multiple") {
       <div class="new-content">
         <input class="news edit" type="text" [(ngModel)]="newSentences"
-          placeholder="Write new sentences (one per line)" />
+          placeholder="Write new sentences (each sentence must be separated by a semicolon)" />
         <button (click)="addSentences()">Add new Sentences</button>
       </div>
       }

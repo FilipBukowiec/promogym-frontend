@@ -1,3 +1,5 @@
+
+
 <ng-container *ngIf="loading">
   <app-loader></app-loader>
 </ng-container>
@@ -59,15 +61,7 @@
   </section>
 
 
-  <section *ngIf="!isPremium">
-    <h2>Sponsored content is included as part of your current plan.</h2><br>
-    <div class="ads-container">
-      <div *ngFor="let ads of advertisementsList; let i = index">
-        <img *ngIf="ads.fileType.startsWith('image')" class="media" [src]="getFullFilePath(ads.filePath)"
-          alt="{{ ads.fileName }}" />
-        <video *ngIf="ads.fileType.startsWith('video')" class="media" [src]="getFullFilePath(ads.filePath)"
-          controls></video>
-      </div>
-    </div>
+  <section *ngIf="!(authService.isPremium$ | async)">
+<app-user-advertisements></app-user-advertisements>
   </section>
 </ng-container>

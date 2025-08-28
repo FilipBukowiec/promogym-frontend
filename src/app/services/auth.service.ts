@@ -28,6 +28,8 @@ export class AuthService {
   private isPremiumSubject = new BehaviorSubject<boolean>(false);
   public isPremium$ = this.isPremiumSubject.asObservable();
 
+
+
   constructor(private auth0: Auth0Service) { }
 
   // 📌 Pobranie nagłówków z tokena

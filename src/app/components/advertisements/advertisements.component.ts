@@ -4,6 +4,7 @@ import { AdvertisementsService } from "../../services/advertisements.service";
 import { Advertisement } from "../../models/advertisement.model";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { environment } from "../../../environments/environment";
+import { AuthService } from "../../services/auth.service";
 
 @Component({
   standalone: true,
@@ -23,14 +24,15 @@ export class AdvertisementsComponent implements OnInit {
 
   constructor(
     private advertisementsService: AdvertisementsService,
-    private adminSettingsService: AdminSettingsService
-  ) {}
+    private adminSettingsService: AdminSettingsService,
+  ) { }
 
   ngOnInit(): void {
     console.log("🔄 Inicjalizacja komponentu reklam");
     this.loadAdminSettings();
     this.loadAdvertisements();
   }
+
 
   loadAdminSettings(): void {
     console.log("📥 Ładowanie ustawień administracyjnych...");

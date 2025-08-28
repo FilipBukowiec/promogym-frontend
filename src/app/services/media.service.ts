@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, forkJoin, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { switchMap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -50,8 +50,12 @@ export class MediaService {
   }
 
   getFilesForSwiper(): Observable<Media[]> {
-    return this.auth.getUserData().pipe(
-      switchMap(({ roles, country }) => {
+     return combineLatest([
+    this.auth.getUserData(),       // role usera z tokena
+    this.auth.selectedTenant$      // aktualnie wybrany tenant
+  ]).pipe(
+    switchMap(([{ roles }, tenant]) => {
+      if (!tenant) return of([]); // brak wybranego tenanta -> zwróć pustą listę
         const isPremium = roles.includes('premium_user');
         return this.auth.getAuthHeaders().pipe(
           switchMap((headers) => {
@@ -88,7 +92,7 @@ export class MediaService {
                 ),
                 media: this.http.get<Media[]>(this.apiUrl, { headers }),
                 ads: this.http.get<Advertisement[]>(
-                  `${this.apiUrl2}/${country}`,
+                  `${this.apiUrl2}/${tenant.country}`,
                   { headers }
                 ),
               }).pipe(
