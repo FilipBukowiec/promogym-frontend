@@ -49,7 +49,7 @@
       </thead>
       <tbody>
         @for (sentence of sentences$ | async; track sentence._id; let i = $index) {
-        <tr>
+        <tr class="active">
           <td>{{ sentence.order }}</td>
 
           @if (editingSentenceId !== sentence._id) {

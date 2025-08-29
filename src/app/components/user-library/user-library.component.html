@@ -23,7 +23,10 @@
     }
   </div>
 
-   <section *ngIf="!(authService.isPremium$ | async)">
-<app-user-advertisements></app-user-advertisements>
+
+  @if(!(authService.isPremium$ | async)){
+  <section>
+    <app-user-advertisements></app-user-advertisements>
   </section>
+}
 </ng-container>

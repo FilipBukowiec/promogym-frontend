@@ -54,7 +54,7 @@ export class UserMediaComponent implements OnInit {
           this.loading = false;
         }
       });
-    // this.showAdsForTenantCountry();
+    
   }
 
 
@@ -78,19 +78,6 @@ export class UserMediaComponent implements OnInit {
 
 
 
-  // showAdsForTenantCountry(): void {
-  //   this.authService.selectedTenant$.pipe(switchMap(tenant => {
-  //     if (tenant?.country) {
-  //       return this.advertisementsService.getAdvertisements(tenant.country)
-  //     }
-  //     return [];
-
-  //   })
-  //   ).subscribe({
-  //     next: ads => this.advertisementsList = ads,
-  //     error: err => console.error("Błąd pobierania reklam", err)
-  //   })
-  // }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

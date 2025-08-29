@@ -1,9 +1,17 @@
-<h2>Sponsored content is included as part of your current plan.</h2><br>
-    <div class="ads-container">
-      <div *ngFor="let ads of advertisementsList; let i = index">
-        <img *ngIf="ads.fileType.startsWith('image')" class="media" [src]="getFullFilePath(ads.filePath)"
-          alt="{{ ads.fileName }}" />
-        <video *ngIf="ads.fileType.startsWith('video')" class="media" [src]="getFullFilePath(ads.filePath)"
-          controls></video>
-      </div>
-    </div>
+<h2>Sponsored content is included as part of your current plan.</h2>
+<br />
+<div class="ads-container">
+  @for(ads of advertisementsList; track ads; let i=$index){
+  <div>
+    @if(ads.fileType.startsWith('image')){
+    <img
+      class="media"
+      [src]="getFullFilePath(ads.filePath)"
+      alt="{{ ads.fileName }}"
+    />
+    } @if(ads.fileType.startsWith('video')) {
+    <video class="media" [src]="getFullFilePath(ads.filePath)" controls></video>
+    }
+  </div>
+  }
+</div>
