@@ -10,6 +10,7 @@
 
     <button (click)="liveUpdate()">Live update</button>
   </section>
+  <section>
   <div class="library-container">
     @for (item of mediaList; track item._id) {
     <div class="library-item">
@@ -22,6 +23,7 @@
     </div>
     }
   </div>
+  </section>
 
 
   @if(!(authService.isPremium$ | async)){

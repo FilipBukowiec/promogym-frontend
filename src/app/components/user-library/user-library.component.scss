@@ -1,26 +1,12 @@
 @use "../../../styles/variables.scss" as *;
 @use "../../../styles/admin.scss" as *;
 
-:host {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
+
 
 .media {
   width: 192px;
   height: 108px;
   object-fit: cover;
-}
-
-label {
-  display: inline-block;
-  color: $secondaryColor;
-  border: 1px solid $accentColor;
-  padding: 10px;
-  border-radius: 2px;
-  cursor: pointer;
 }
 
 label:hover {
@@ -44,6 +30,9 @@ label:hover {
   background: rgba(0, 0, 0, 0.7);
   padding: 1rem;
   margin: 1rem;
+  display: flex;
+  flex-direction: column;
+
   &__checkbox {
     margin-bottom: 1rem;
   }
