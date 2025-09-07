@@ -4,18 +4,24 @@
 <ng-container *ngIf="!loading">
   <section>
     <h1>Library</h1>
-    <span class="description">After adding a media item, you should use the "Live Update" button to refresh the news on
-      all currently active devices. Devices that are started after this will, of course, receive the updated news
-      automatically.</span>
-
-
+    <span class="description"
+      >After adding a media item, you should use the "Live Update" button to
+      refresh the news on all currently active devices. Devices that are started
+      after this will, of course, receive the updated news automatically.</span
+    >
   </section>
   <section>
-    <img class="image" src="/assets/images/breaking-news.gif" alt="">
+    <img class="image" src="/assets/images/breaking-news.gif" alt="" />
     <div class="new-box">
-      <span>Add new media to the list. Prefer format JPG, PNG, MP4. The maximum file size is 50 MB. </span>
-      <div class="new-content"> <input type="file" id="fileInput" (change)="onFileSelected($event)" />
-        <button (click)="addMedia()" [disabled]="!selectedFile">Add media</button>
+      <span
+        >Add new media to the list. Prefer format JPG, PNG, MP4. The maximum
+        file size is 50 MB.
+      </span>
+      <div class="new-content">
+        <input type="file" id="fileInput" (change)="onFileSelected($event)" />
+        <button (click)="addMedia()" [disabled]="!selectedFile">
+          Add media
+        </button>
       </div>
     </div>
   </section>
@@ -25,7 +31,6 @@
         <h2>Media</h2>
       </caption>
 
-
       <tr>
         <th>Order</th>
         <th>File name</th>
@@ -33,27 +38,45 @@
         <th>Action</th>
       </tr>
 
-
-
       <tr class="active" *ngFor="let media of mediaList; let i = index">
         <td>{{ media.order }}</td>
-        <td>{{ media.fileName }}</td>
+        <td>{{ media.fileName | mediaFileName }}</td>
         <td class="photo-container">
-          <img *ngIf="media.fileType.startsWith('image')" class="media" [src]="getFullFilePath(media.filePath)"
-            alt="{{ media.fileName }}" />
-          <video *ngIf="media.fileType.startsWith('video')" class="media" [src]="getFullFilePath(media.filePath)"
-            controls></video>
+          <img
+            *ngIf="media.fileType.startsWith('image')"
+            class="media"
+            [src]="getFullFilePath(media.filePath)"
+            alt="{{ media.fileName | mediaFileName }}"
+          />
+          <video
+            *ngIf="media.fileType.startsWith('video')"
+            class="media"
+            [src]="getFullFilePath(media.filePath)"
+            controls
+          ></video>
         </td>
         <td>
           <div class="icon-container">
-            <i class="bi bi-arrow-up" *ngIf="i > 0" (click)="moveUp(media._id)" title="Przesuń w górę"></i>
-            <i class="bi bi-arrow-down" *ngIf="i < mediaList.length - 1" (click)="moveDown(media._id)"
-              title="Przesuń w dół"></i>
-            <i class="bi bi-trash3-fill" (click)="deleteMedia(media._id)" title="Usuń media"></i>
+            <i
+              class="bi bi-arrow-up"
+              *ngIf="i > 0"
+              (click)="moveUp(media._id)"
+              title="Przesuń w górę"
+            ></i>
+            <i
+              class="bi bi-arrow-down"
+              *ngIf="i < mediaList.length - 1"
+              (click)="moveDown(media._id)"
+              title="Przesuń w dół"
+            ></i>
+            <i
+              class="bi bi-trash3-fill"
+              (click)="deleteMedia(media._id)"
+              title="Usuń media"
+            ></i>
           </div>
         </td>
       </tr>
-
     </table>
   </section>
 </ng-container>

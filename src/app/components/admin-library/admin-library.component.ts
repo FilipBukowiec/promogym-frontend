@@ -11,10 +11,11 @@ import { AdvertisementsService } from '../../services/advertisements.service';
 import { Advertisement } from '../../models/advertisement.model';
 import { switchMap, take } from 'rxjs';
 import { LibraryService } from '../../services/library.service';
+import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, LoaderComponent],
+  imports: [CommonModule, LoaderComponent, MediaFileNamePipe],
   selector: 'app-admin-library',
   templateUrl: './admin-library.component.html',
   styleUrls: ['./admin-library.component.scss'],

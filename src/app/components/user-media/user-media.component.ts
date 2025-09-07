@@ -12,10 +12,11 @@ import { Advertisement } from '../../models/advertisement.model'
 import { Observable, of, switchMap} from 'rxjs';
 import { AdvertisementsComponent } from "../advertisements/advertisements.component";
 import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
+import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent],
+  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent, MediaFileNamePipe],
   selector: 'app-user-media',
   templateUrl: './user-media.component.html',
   styleUrls: ['./user-media.component.scss'],
