@@ -44,13 +44,13 @@
       *ngFor="let advertisement of advertisementList; let i = index"
     >
       <td>{{ advertisement.order }}</td>
-      <td class="word-wrap left">{{ advertisement.fileName }}</td>
+      <td class="word-wrap left">{{ advertisement.fileName | mediaFileName}}</td>
       <td class="photo-container">
         <img
           *ngIf="advertisement.fileType.startsWith('image')"
           class="media"
           [src]="getFullFilePath(advertisement.filePath)"
-          alt="{{ advertisement.fileName }}"
+          alt="{{ advertisement.fileName | mediaFileName}}"
         />
         <video
           *ngIf="advertisement.fileType.startsWith('video')"

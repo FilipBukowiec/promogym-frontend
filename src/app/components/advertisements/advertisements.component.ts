@@ -5,10 +5,11 @@ import { Advertisement } from "../../models/advertisement.model";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { environment } from "../../../environments/environment";
 import { AuthService } from "../../services/auth.service";
+import { MediaFileNamePipe } from "../../shared/pipes/media-file-name.pipe";
 
 @Component({
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MediaFileNamePipe],
   selector: "app-advertisements",
   templateUrl: "./advertisements.component.html",
   styleUrls: ["./advertisements.component.scss"],

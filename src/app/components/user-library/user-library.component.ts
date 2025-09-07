@@ -11,10 +11,11 @@ import { RetryHelperService } from '../../services/retry-helper.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { LoaderComponent } from '../loader/loader.component';
 import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
+import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent],
+  imports: [CommonModule, LoaderComponent, UserAdvertisementsComponent, MediaFileNamePipe],
   selector: 'app-user-library',
   templateUrl: './user-library.component.html',
   styleUrls: ['./user-library.component.scss'],

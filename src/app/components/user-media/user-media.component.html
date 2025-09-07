@@ -42,13 +42,13 @@
 
       <tr class="active" *ngFor="let media of mediaList; let i = index">
         <td>{{ media.order }}</td>
-        <td>{{ media.fileName }}</td>
+        <td>{{ media.fileName | mediaFileName}}</td>
         <td class="photo-container">
           <img
             *ngIf="media.fileType.startsWith('image')"
             class="media"
             [src]="getFullFilePath(media.filePath)"
-            alt="{{ media.fileName }}"
+            alt="{{ media.fileName | mediaFileName}}"
           />
           <video
             *ngIf="media.fileType.startsWith('video')"

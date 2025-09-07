@@ -17,7 +17,7 @@
       <input class="library-item__checkbox" type="checkbox" (change)="toggleLibraryItem(item, $event)"
         [checked]="libraryIdsByTenant.includes(item._id)" />
       <img *ngIf="item.fileType?.startsWith('image')" class="media" [src]="getFullFilePath(item.filePath)"
-        alt="{{ item.fileName }}" />
+        alt="{{ item.fileName  | mediaFileName}}" />
       <video *ngIf="item.fileType.startsWith('video')" class="media" [src]="getFullFilePath(item.filePath)"
         controls></video>
     </div>
