@@ -1,8 +1,18 @@
 <app-top-menu>
-    <li><a [routerLink]="['user-settings']">General settings</a></li>
-    <li><a [routerLink]="['user-news']">News</a></li>
-    <li><a [routerLink]="['user-media']">Media</a></li>
-    <li><a [routerLink]="['user-library']">Library</a></li>
+    <li><a [routerLink]="['user-settings']" class="nav-link">
+            <i class="bi bi-gear-fill"></i>
+            <span>General settings</span></a></li>
+    <li><a [routerLink]="['user-news']" class="nav-link">
+            <i class="bi bi-newspaper"></i>
+            <span>News</span></a></li>
+
+    <li><a [routerLink]="['user-media']" class="nav-link">
+            <i class="bi bi-play-btn-fill"></i>
+            <span>Media</span></a></li>
+    <li><a [routerLink]="['user-library']" class="nav-link">
+            <i class="bi bi-check2-square"></i>
+            <span>Library</span></a>
+    </li>
 </app-top-menu>
 <div class="content">
     <router-outlet></router-outlet>

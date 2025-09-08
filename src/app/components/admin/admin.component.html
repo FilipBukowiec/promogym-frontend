@@ -1,11 +1,38 @@
 <app-top-menu>
-  <li><a [routerLink]="['admin-settings']">Admin settings</a></li>
   <li>
-    <a [routerLink]="['advertisements']">Advertisements</a>
+    <a [routerLink]="['admin-settings']" class="nav-link">
+      <i class="bi bi-gear-fill"></i>
+      <span>Admin settings</span>
+    </a>
   </li>
-  <li><a [routerLink]="['admin-announcements']">Announcements</a></li>
-  <li><a [routerLink]="['admin-library']">Library</a></li>
-  <li><a [routerLink]="['sentences']">Sentences</a></li>
+
+  <li>
+    <a [routerLink]="['advertisements']" class="nav-link">
+      <i class="bi bi-play-btn-fill"></i>
+      <span>Advertisements</span>
+    </a>
+  </li>
+
+  <li>
+    <a [routerLink]="['admin-announcements']" class="nav-link">
+      <i class="bi bi-megaphone-fill"></i>
+      <span>Announcements</span>
+    </a>
+  </li>
+
+  <li>
+    <a [routerLink]="['admin-library']" class="nav-link">
+      <i class="bi bi-journal-bookmark-fill"></i>
+      <span>Library</span>
+    </a>
+  </li>
+
+  <li>
+    <a [routerLink]="['sentences']" class="nav-link">
+      <i class="bi bi-chat-left-text-fill"></i>
+      <span>Sentences</span>
+    </a>
+  </li>
 </app-top-menu>
 <div class="content">
   <router-outlet></router-outlet>

@@ -7,18 +7,8 @@
   overflow-y: auto;
 }
 
-ul {
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  color: $secondaryColor;
-  gap: 2rem;
-  margin: 0;
-}
-
-li:hover {
-  color: $accentColor;
+.content {
+  height: calc(100% - 5rem);
 }
 
 app-top-menu {
@@ -26,6 +16,32 @@ app-top-menu {
   top: 0;
 }
 
-.content {
-  height: calc(100% - 5rem);
+li:hover {
+  color: $accentColor;
+}
+
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link i {
+  color: currentColor;
+}
+
+.nav-link:hover {
+  color: $accentColor; 
+}
+
+
+
+@media screen and (max-width: 767px) {
+ .nav-link span{
+    display: none;
+  }
 }
