@@ -289,24 +289,18 @@ export class UserSettingsComponent implements OnInit {
 
 
 
-  playSelectedStream() {
-    if (!this.userSettings.selectedRadioStream) return;
-    this.radioStreamService.playRadioStream(
-      this.userSettings.selectedRadioStream,
-      () => this.radioStreamService.userSettingsAudio.set(true),
-      [
-        () => this.radioStreamService.adminSettingsAudio.set(false),
-        () => this.radioStreamService.sideMenuAudio.set(false),
-      ],
-      this.selectedRadioIndex ?? undefined
-    );
-  }
+  playSelectedStream(): void {
+  if (!this.userSettings.selectedRadioStream) return;
+  this.radioStreamService.playRadioStream(
+    this.userSettings.selectedRadioStream,
+    'user',
+    this.selectedRadioIndex ?? undefined
+  );
+}
 
-  stopSelectedStream() {
-    this.radioStreamService.stopRadioStream(() =>
-      this.radioStreamService.userSettingsAudio.set(false)
-    );
-  }
+stopSelectedStream(): void {
+  this.radioStreamService.stopRadioStream();
+}
 
 
 }

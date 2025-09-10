@@ -175,34 +175,19 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
   toggleRadioStream(): void {
-    this.userSettings$.pipe(take(1)).subscribe((settings) => {
-      if (settings?.selectedRadioStream) {
-        const sideMenuAudio = this.radioStreamService.sideMenuAudio();
+  this.userSettings$.pipe(take(1)).subscribe((settings) => {
+    if (!settings?.selectedRadioStream) {
+      console.error('❌ Brak ustawionego strumienia radiowego w ustawieniach użytkownika');
+      return;
+    }
 
-        if (sideMenuAudio) {
-          // Jeśli radio gra → zatrzymujemy
-          this.radioStreamService.stopRadioStream(() =>
-            this.radioStreamService.sideMenuAudio.set(false)
-          );
-        } else {
-          // Jeśli nie gra → uruchamiamy
-          this.radioStreamService.playRadioStream(
-            settings.selectedRadioStream,
-            () => this.radioStreamService.sideMenuAudio.set(true),
-            [
-              () => this.radioStreamService.userSettingsAudio.set(false),
-              () => this.radioStreamService.adminSettingsAudio.set(false),
-            ]
-          );
-          console.log("Radyjko startuje:", settings.selectedRadioStream);
-        }
-      } else {
-        console.error(
-          "❌ Brak ustawionego strumienia radiowego w ustawieniach użytkownika"
-        );
-      }
-    });
-  }
+    if (this.radioStreamService.sideMenuAudio()) {
+      this.radioStreamService.stopRadioStream();
+    } else {
+      this.radioStreamService.playRadioStream(settings.selectedRadioStream, 'side');
+    }
+  });
+}
 
   logout(): void {
     this.auth0Service.logout({
