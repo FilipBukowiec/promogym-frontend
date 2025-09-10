@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, Signal, effect, } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Subscription } from "rxjs";
@@ -18,7 +18,7 @@ import { WebSocketService } from "../../services/websocket.service";
   templateUrl: "./user-settings.component.html",
   styleUrls: ["./user-settings.component.scss"],
 })
-export class UserSettingsComponent implements OnInit {
+export class UserSettingsComponent implements OnInit, OnDestroy {
   userSettings: UserSettings = {
     tenant_id: "",
     language: "",
@@ -43,11 +43,12 @@ export class UserSettingsComponent implements OnInit {
   newEndMinute: number | null = null;
   radioStreamList: { url: string; description: string }[] = [];
   currentPlayingStreamIndex: number | null = null;
-  currentPlayingStreamIndexSignal!: Signal<number | null>;
+  currentPlayingStreamUrl: string | null = null;
 
   editFooterVisibilityIndex: number | null = null;
   loading: boolean = false;
   error: string | null = null;
+  private streamSubscription: Subscription = new Subscription();
 
   logoMarkedForDeletion: boolean = false;
   separatorMarkedForDeletion: boolean = false;
@@ -60,23 +61,26 @@ export class UserSettingsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private retryHelper: RetryHelperService,
     private webSocketService: WebSocketService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    this.currentPlayingStreamIndexSignal = this.radioStreamService.currentPlayingStreamIndexSignal;
-    effect(() => {
-      this.currentPlayingStreamIndex = this.currentPlayingStreamIndexSignal();
-    })
-
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
+      (index) => {
+        this.currentPlayingStreamIndex = index;
+      }
+    );
   }
 
   onTenantChange() {
     console.log("🔄 Tenant zmieniony – przeładowuję dane...");
-    this.loadSettings();
+    this.loadSettings(); // albo inna metoda
   }
 
+  ngOnDestroy(): void {
+    this.streamSubscription.unsubscribe();
+  }
 
   loadSettings(): void {
     this.loading = true;
@@ -194,8 +198,9 @@ export class UserSettingsComponent implements OnInit {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath
-              }?t=${Date.now()}`;
+            this.tempLogoPreviewUrl = `${environment.publicUrl}${
+              this.userSettings.logoFilePath
+            }?t=${Date.now()}`;
           }
         }
 
@@ -214,8 +219,9 @@ export class UserSettingsComponent implements OnInit {
         if (res) {
           this.userSettings = res;
           if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath
-              }?t=${Date.now()}`;
+            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${
+              this.userSettings.separatorFilePath
+            }?t=${Date.now()}`;
           }
         }
 
@@ -240,8 +246,10 @@ export class UserSettingsComponent implements OnInit {
 
   updateSelectedIndex(event: Event): void {
     const selectedElement = event.target as HTMLSelectElement;
-    this.selectedRadioIndex = selectedElement.selectedIndex > 0 ? selectedElement.selectedIndex - 1 : null;
+    this.selectedRadioIndex = selectedElement.selectedIndex;
   }
+
+  playRadioStream(): void {}
 
   onFileSelected(event: Event, type: "mainlogo" | "separator"): void {
     const input = event.target as HTMLInputElement;
@@ -284,23 +292,6 @@ export class UserSettingsComponent implements OnInit {
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
-
+    
   }
-
-
-
-  playSelectedStream(): void {
-  if (!this.userSettings.selectedRadioStream) return;
-  this.radioStreamService.playRadioStream(
-    this.userSettings.selectedRadioStream,
-    'user',
-    this.selectedRadioIndex ?? undefined
-  );
-}
-
-stopSelectedStream(): void {
-  this.radioStreamService.stopRadioStream();
-}
-
-
 }

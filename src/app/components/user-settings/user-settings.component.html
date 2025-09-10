@@ -30,13 +30,12 @@
         <h2>General settings</h2>
       </caption>
       <tr>
-        <td>
-          <label for=""> User name:</label>
-          <br>
-          <span class="name" *ngIf="!editUserName">{{ userSettings.name }}</span>
-          <input class="edit" *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text" />
+        <td colspan="2">
+          User name:
+          <span *ngIf="!editUserName">{{ userSettings.name }}</span>
+          <input *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text" />
         </td>
-        <td class="buttons"><br>
+        <td>
           <div class="icon-container">
             <i class="bi bi-pencil-fill" *ngIf="!editUserName" (click)="editUserNameField()"></i>
             <i class="bi bi-floppy-fill" *ngIf="editUserName" (click)="saveUserName()"></i>
@@ -54,13 +53,10 @@
         </select>
       </td>
     </tr> -->
-
-
       <tr>
-        <td>
-          <label for="radioSelect">Selected radio stream:</label><br>
-          <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings.selectedRadioStream"
-            (change)="updateSelectedIndex($event)">
+        <td colspan="2">
+          Selected radio stream:
+          <select [(ngModel)]="userSettings.selectedRadioStream" (change)="updateSelectedIndex($event)">
             <option [disabled]="true" value="">Select radio stream</option>
             <option *ngFor="let radio of radioStreamList; let i = index" [value]="radio.url">
               {{ radio.description }}
@@ -68,24 +64,42 @@
           </select>
         </td>
 
-        <td><br>
+        <td>
           <div class="icon-container">
-      <i *ngIf="!radioStreamService.userSettingsAudio() || radioStreamService.currentPlayingStreamIndexSignal() !== selectedRadioIndex"
-   class="bi bi-play-fill"
-   (click)="playSelectedStream()"></i>
+            <i *ngIf="
+              !(radioStreamService.userSettingsAudioState$ | async) ||
+              currentPlayingStreamIndex !== selectedRadioIndex
+            " class="bi bi-play-fill" (click)="
+              radioStreamService.playRadioStream(
+                userSettings.selectedRadioStream || '',
+                radioStreamService.userSettingsAudio$,
+                [
+                  radioStreamService.adminSettingsAudio$,
+                  radioStreamService.sideMenuAudio$
+                ],
+                selectedRadioIndex ?? undefined
+              )
+            ">
+            </i>
 
-<i *ngIf="radioStreamService.userSettingsAudio() && radioStreamService.currentPlayingStreamIndexSignal() === selectedRadioIndex"
-   class="bi bi-stop-fill"
-   (click)="stopSelectedStream()"></i>
 
+            <i *ngIf="
+              (radioStreamService.userSettingsAudioState$ | async) &&
+              currentPlayingStreamIndex === selectedRadioIndex
+            " class="bi bi-stop-fill" (click)="
+              radioStreamService.stopRadioStream(
+                radioStreamService.userSettingsAudio$
+              )
+            ">
+            </i>
           </div>
         </td>
       </tr>
 
       <tr>
-        <td colspan="2">
-          <label for="slideduration">Set picture slide duration:</label><br>
-          <select class="slide-duration" name="" id="slideduration" [(ngModel)]="userSettings.pictureSlideDuration">
+        <td colspan="3">
+          Set picture slide duration:
+          <select name="" id="" [(ngModel)]="userSettings.pictureSlideDuration">
             <option *ngFor="let seconds of time" [value]="seconds">
               {{ seconds }}
             </option>
@@ -93,16 +107,13 @@
           seconds per slide
         </td>
       </tr>
+      <br />
+      <br />
+      <tr>
+        <td class="newsbar" colspan="3">Footer newsbar option</td>
+      </tr>
 
-    </table>
 
-
-
-    <table>
-
-      <caption>
-        <h2>Footer newsbar option</h2>
-      </caption>
       <tr>
         <td>Main footer logo</td>
         <td>
