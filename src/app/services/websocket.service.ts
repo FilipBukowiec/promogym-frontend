@@ -1,78 +1,70 @@
-import { Injectable } from "@angular/core";
-import { io, Socket } from "socket.io-client";
-import { AuthService } from "./auth.service";
-import { NewsService } from "./news.service";
-import { MediaService } from "./media.service";
-import { Tenant } from "../models/tenant.model";
-import { environment } from "../../environments/environment";
+import { Injectable } from '@angular/core';
+import { io, Socket } from 'socket.io-client';
+import { AuthService } from '../auth/services/auth.service';
+import { NewsService } from './news.service';
+import { MediaService } from './media.service';
+import { Tenant } from '../models/tenant.model';
+import { environment } from '../../environments/environment';
 
-import { DataService } from "./data.service";
+import { DataService } from './data.service';
+import { take } from 'rxjs';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class WebSocketService {
   private socket: Socket;
   private listenersAttached = false;
 
-
-  constructor(
-    private authService: AuthService,
-    private newsService: NewsService,
-    private mediaService: MediaService,
-    private dataService: DataService
-  ) {
+  constructor(private authService: AuthService, private newsService: NewsService, private mediaService: MediaService, private dataService: DataService) {
     this.socket = io(environment.socketUrl, {
       path: environment.socketPath,
-      transports: ["websocket"],
+      transports: ['websocket'],
     });
     (window as any).socket = this.socket;
   }
 
   connectSocket(): void {
-
-    console.log("🧩 WebSocketService → connectSocket() wywołane");
+    console.log('🧩 WebSocketService → connectSocket() wywołane');
 
     if (this.listenersAttached) {
-      console.log("⚠️ Słuchacze już podpięci – przerywam.");
+      console.log('⚠️ Słuchacze już podpięci – przerywam.');
       return;
     }
 
+    this.socket.on('connect', () => {
+      console.log('✅ Połączono z WebSocket!');
+      console.log('🌐 Aktualny host:', this.socket.io.opts.hostname);
+      console.log('🛣️ Aktualny path:', this.socket.io.opts.path);
 
-    this.socket.on("connect", () => {
-      console.log("✅ Połączono z WebSocket!");
-      console.log("🌐 Aktualny host:", this.socket.io.opts.hostname);
-      console.log("🛣️ Aktualny path:", this.socket.io.opts.path);
-
-      this.authService.getAuthHeaders().subscribe((headers) => {
-        const tenantId = headers.get("tenant-id");
+      this.authService.selectCurrentTenant().subscribe((currentTenant) => {
+        const tenantId = currentTenant.tenant_id;
         if (tenantId) {
-          console.log("📥 Dołączanie do pokoju dla tenant_id:", tenantId);
-          this.socket.emit("joinTenant", tenantId);
+          console.log('📥 Dołączanie do pokoju dla tenant_id:', tenantId);
+          this.socket.emit('joinTenant', tenantId);
         }
       });
-      console.log("📥 Dołączanie do pokoju globalnego");
-      this.socket.emit("joinGlobalRoom");
+      console.log('📥 Dołączanie do pokoju globalnego');
+      this.socket.emit('joinGlobalRoom');
     });
 
-    this.socket.on("connect_error", (err) => {
-      console.error("❌ Błąd połączenia z WebSocket:", err);
+    this.socket.on('connect_error', (err) => {
+      console.error('❌ Błąd połączenia z WebSocket:', err);
     });
 
-
-    this.socket.on("newsUpdate", (newsData) => {
-      this.newsService.refreshNews();
+    this.socket.on('newsUpdate', (newsData) => {
+      this.newsService.refreshNews().pipe(take(1)).subscribe();
     });
 
-    this.socket.on("mediaUpdate", (mediaData) => {
-      this.mediaService.refreshMedia();
+    this.socket.on('mediaUpdate', (mediaData) => {
+      this.mediaService.refreshMedia().pipe(take(1)).subscribe();
     });
 
-    this.socket.on("userSettingsUpdate", (settingsData) => {
+    this.socket.on('userSettingsUpdate', (settingsData) => {
       this.dataService.reloadRouterOutlet();
     });
 
-    this.socket.on("globalSettingsUpdate", (settingsData) => {
+    this.socket.on('globalSettingsUpdate', (settingsData) => {
       this.dataService.reloadRouterOutlet();
     });
 
@@ -80,49 +72,49 @@ export class WebSocketService {
   }
 
   requestNewsUpdate(): void {
-    this.authService.getAuthHeaders().subscribe((headers) => {
-      const tenantId = headers.get("tenant-id");
+    this.authService.selectCurrentTenant().subscribe((currentTenant) => {
+      const tenantId = currentTenant.tenant_id;
       if (tenantId) {
-        this.socket.emit("newsLiveUpdate", tenantId);
+        this.socket.emit('newsLiveUpdate', tenantId);
       } else {
-        console.error("Brak tenant_id w nagłówkach");
+        console.error('Brak tenant_id w nagłówkach');
       }
     });
   }
 
   requestMediaUpdate(): void {
-    this.authService.getAuthHeaders().subscribe((headers) => {
-      const tenantId = headers.get("tenant-id");
+    this.authService.selectCurrentTenant().subscribe((currentTenant) => {
+      const tenantId = currentTenant.tenant_id;
       if (tenantId) {
-        this.socket.emit("mediaLiveUpdate", tenantId);
+        this.socket.emit('mediaLiveUpdate', tenantId);
       } else {
-        console.error("Brak tenant_id w nagłówkach");
+        console.error('Brak tenant_id w nagłówkach');
       }
     });
   }
 
   changeRoomForTenant(oldTenant: Tenant | null, newTenant: Tenant): void {
     if (oldTenant && oldTenant.tenant_id !== newTenant.tenant_id) {
-      console.log("📤 Leaving room:", oldTenant.tenant_id);
-      this.socket.emit("leaveTenant", oldTenant.tenant_id);
+      console.log('📤 Leaving room:', oldTenant.tenant_id);
+      this.socket.emit('leaveTenant', oldTenant.tenant_id);
     }
 
-    console.log("📥 Joining room:", newTenant.tenant_id);
-    this.socket.emit("joinTenant", newTenant.tenant_id);
+    console.log('📥 Joining room:', newTenant.tenant_id);
+    this.socket.emit('joinTenant', newTenant.tenant_id);
   }
 
   requestUserSettingsUpdate(): void {
-    this.authService.getAuthHeaders().subscribe((headers) => {
-      const tenantId = headers.get("tenant-id");
+    this.authService.selectCurrentTenant().pipe(take(1)).subscribe((currentTenant) => {
+      const tenantId = currentTenant.tenant_id;
       if (tenantId) {
-        this.socket.emit("userSettingsLiveUpdate", tenantId);
+        this.socket.emit('userSettingsLiveUpdate', tenantId);
       } else {
-        console.error("Brak tenant_id w nagłówkach");
+        console.error('Brak tenant_id w nagłówkach');
       }
     });
   }
 
   requestGlobalSettingsUpdate(): void {
-    this.socket.emit("globalSettingsLiveUpdate");
+    this.socket.emit('globalSettingsLiveUpdate');
   }
 }

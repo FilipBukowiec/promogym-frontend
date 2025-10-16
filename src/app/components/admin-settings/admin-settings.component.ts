@@ -44,7 +44,7 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   loadAdminSettings(): void {
-    this.adminSettingsService.getSettings().subscribe({
+    this.adminSettingsService.settings$.subscribe({
       next: (adminSettings) => {
         if (adminSettings) {
           this.adminSettings = adminSettings;

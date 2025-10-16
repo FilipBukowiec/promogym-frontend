@@ -6,13 +6,14 @@ import { News } from '../../models/news.model';
 import { WebSocketService } from '../../services/websocket.service';
 import { LoaderComponent } from '../loader/loader.component';
 import { RetryHelperService } from '../../services/retry-helper.service';
+import { switchMap, take, tap } from 'rxjs';
 
 @Component({
   selector: 'app-user-news',
   standalone: true,
   imports: [CommonModule, FormsModule, LoaderComponent],
   templateUrl: './user-news.component.html',
-  styleUrl: './user-news.component.scss'
+  styleUrl: './user-news.component.scss',
 })
 export class UserNewsComponent implements OnInit {
   newsList: News[] = [];
@@ -22,15 +23,10 @@ export class UserNewsComponent implements OnInit {
   loading: boolean = false;
   error: string | null = null;
 
-  constructor(
-    private newsService: NewsService,
-    private webSocketService: WebSocketService,
-    private retryHelper: RetryHelperService
-  ) { }
+  constructor(private newsService: NewsService, private webSocketService: WebSocketService, private retryHelper: RetryHelperService) {}
 
   ngOnInit(): void {
     this.loadNews();
-
   }
 
   onTenantChange() {
@@ -52,12 +48,19 @@ export class UserNewsComponent implements OnInit {
     });
   }
 
-  addNews(): void {
+  public addNews(): void {
     if (this.newContent.trim()) {
-      this.newsService.addNews(this.newContent).subscribe((newNews) => {
-        this.newsList.unshift(newNews);
-        this.newContent = '';
-      });
+      this.newsService
+        .addNews(this.newContent)
+        .pipe(
+          tap((newNews) => {
+            this.newsList.unshift(newNews);
+            this.newContent = '';
+          }),
+          switchMap(() => this.newsService.refreshNews()),
+          take(1)
+        )
+        .subscribe();
     }
   }
 
@@ -69,7 +72,7 @@ export class UserNewsComponent implements OnInit {
   saveChanges(): void {
     if (this.editingNewsId && this.editedContent.trim()) {
       this.newsService.updateNews(this.editingNewsId, this.editedContent).subscribe((updatedNews) => {
-        const index = this.newsList.findIndex(news => news._id === this.editingNewsId);
+        const index = this.newsList.findIndex((news) => news._id === this.editingNewsId);
         if (index !== -1) {
           this.newsList[index] = updatedNews;
         }
@@ -83,7 +86,7 @@ export class UserNewsComponent implements OnInit {
     if (confirmed) {
       this.newsService.deleteNews(newsId).subscribe(
         () => {
-          this.newsList = this.newsList.filter(news => news._id !== newsId);
+          this.newsList = this.newsList.filter((news) => news._id !== newsId);
         },
         (error) => {
           console.error('Error deleting news:', error);

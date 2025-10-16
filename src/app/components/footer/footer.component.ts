@@ -45,7 +45,7 @@ export class FooterComponent implements OnInit, OnDestroy {
 
     this.subscription = combineLatest([
       this.clockService.currentTime$,
-      this.userSettingsService.observeSettings(),
+      this.userSettingsService.settings$,
     ]).subscribe({
       next: ([currentTime, settings]) => {
 

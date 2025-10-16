@@ -6,18 +6,20 @@ import { register as registerSwiperElements } from 'swiper/element/bundle';
 import { provideRouter, Router, withHashLocation } from '@angular/router';
 import { routes } from './app/app.routes';
 import { AuthService, provideAuth0 } from '@auth0/auth0-angular';
+import { tokenInterceptor } from './app/auth/interceptors/token.interceptor';
+import { userDataInterceptor } from './app/auth/interceptors/user-data.interceptor';
 
 registerSwiperElements();
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([tokenInterceptor, userDataInterceptor])),
     provideRouter(routes, withHashLocation()),
     provideAuth0({
       domain: 'dev-yaku6y1r82y6pb0p.us.auth0.com',
-      clientId: 'JQinAZtrxoZN1KNNVsHKSpugFQj0EUHH', 
+      clientId: 'JQinAZtrxoZN1KNNVsHKSpugFQj0EUHH',
       authorizationParams: {
-        redirect_uri: window.location.origin + "/#/dashboard",
+        redirect_uri: window.location.origin + '/#/dashboard',
         audience: 'https://promogym.com/api',
       },
     }),

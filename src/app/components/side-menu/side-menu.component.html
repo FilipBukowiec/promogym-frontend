@@ -1,109 +1,90 @@
 <div class="side-menu">
-    <button class="navbar-toggler menu-btn" [class.opacity-0]="isOnStartPage$ | async"
-        [class.pointer-events-none]="isOnStartPage$ | async" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-        <i class="bi bi-list"></i>
-    </button>
+  <button
+    class="navbar-toggler menu-btn"
+    [class.opacity-0]="isOnStartPage$ | async"
+    [class.pointer-events-none]="isOnStartPage$ | async"
+    type="button"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#offcanvasNavbar"
+    aria-controls="offcanvasNavbar"
+    aria-label="Toggle navigation"
+  >
+    <i class="bi bi-list"></i>
+  </button>
 
-    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasNavbar"
-        aria-labelledby="offcanvasNavbarLabel">
-        <div class="offcanvas-header">
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <img class="logo-menu" src="../../../assets/images/promogym_logo.svg" />
+  <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+    <div class="offcanvas-header">
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <img class="logo-menu" src="../../../assets/images/promogym_logo.svg" />
 
+      <div *ngIf="isAdmin$ | async" class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selectedTenant?.tenant_id || "Choose tenant" }}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li *ngFor="let tenant of tenants">
+            <a class="dropdown-item" (click)="onTenantChange(tenant)"> {{ tenant.tenant_id }} ({{ tenant.country }}) </a>
+          </li>
+        </ul>
+      </div>
 
+      <ul class="navbar-nav flex-grow-1">
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['welcome']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
+            <i class="bi bi-house-door"></i>Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['start']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas" (click)="onStartClick($event)">
+            <span *ngIf="isOnStartPage$ | async"> <i class="bi bi-arrow-clockwise"></i> Refresh app </span>
+            <span *ngIf="!(isOnStartPage$ | async)"> <i class="bi bi-google-play"></i> Start app </span>
+          </a>
+        </li>
 
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
+            <i class="bi bi-kanban"></i>Management</a
+          >
+        </li>
 
-            <div *ngIf="isAdmin" class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  {{ selectedTenant?.tenant_id || 'Choose tenant' }}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li *ngFor="let tenant of tenants">
-                    <a class="dropdown-item" (click)="onTenantChange(tenant)">
-                      {{ tenant.tenant_id }} ({{ tenant.country }})
-                    </a>
-                  </li>
-                </ul>
-              </div>
+        <li *ngIf="isAdmin$ | async" class="nav-item">
+          <a href="" class="nav-link" [routerLink]="['admin']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
+            <i class="bi bi-person-fill"></i>Admin</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['contact']" routerLinkActive="rout er-link-active" data-bs-dismiss="offcanvas"
+            ><i class="bi bi-chat-dots-fill"></i> Contact</a
+          >
+        </li>
 
+        <li class="nav-item">
+          <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleFullscreen()">
+            <span *ngIf="isFullscreen$ | async"><i class="bi bi-fullscreen-exit"></i>Exit FullScreen</span>
+            <span *ngIf="!(isFullscreen$ | async)"><i class="bi bi-arrows-fullscreen"></i>Go FullScreen</span>
+          </a>
+        </li>
 
+        <li>
+          <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleRadioStream()">
+            <span *ngIf="radioStreamService.sideMenuAudioState$ | async"><i class="bi bi-volume-mute-fill"></i> Stop stream</span>
 
-
-            <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['welcome']" routerLinkActive="router-link-active"
-                        data-bs-dismiss="offcanvas">
-                        <i class="bi bi-house-door"></i>Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['start']" routerLinkActive="router-link-active"
-                        data-bs-dismiss="offcanvas" (click)="onStartClick($event)">
-                        <span *ngIf="isOnStartPage$ | async">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh app
-                        </span>
-                        <span *ngIf="!(isOnStartPage$ | async)">
-                            <i class="bi bi-google-play"></i> Start app
-                        </span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active"
-                        data-bs-dismiss="offcanvas">
-                        <i class="bi bi-kanban"></i>Management</a>
-                </li>
-
-                <li *ngIf="isAdmin" class="nav-item">
-                    <a href="" class="nav-link" [routerLink]="['admin']" routerLinkActive="router-link-active"
-                        data-bs-dismiss="offcanvas">
-                        <i class="bi bi-person-fill"></i>Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['contact']" routerLinkActive="rout er-link-active"
-                        data-bs-dismiss="offcanvas"><i class="bi bi-chat-dots-fill"></i>
-                        Contact</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleFullscreen()">
-                        <span *ngIf="isFullscreen$ | async"><i class="bi bi-fullscreen-exit"></i>Exit FullScreen</span>
-                        <span *ngIf="!(isFullscreen$ | async)"><i class="bi bi-arrows-fullscreen"></i>Go
-                            FullScreen</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a class="nav-link" data-bs-dismiss="offcanvas" (click)="toggleRadioStream()">
-                        
-                            <span *ngIf="radioStreamService.sideMenuAudioState$ | async"><i class="bi bi-volume-mute-fill"></i> Stop stream</span>
-                                        
-                            <span *ngIf="!(radioStreamService.sideMenuAudioState$ | async)"><i class="bi bi-volume-up-fill"></i> Start stream</span>
-                       
-                    </a>
-                </li>
-                <!--    <li class="nav-item"> 
+            <span *ngIf="!(radioStreamService.sideMenuAudioState$ | async)"><i class="bi bi-volume-up-fill"></i> Start stream</span>
+          </a>
+        </li>
+        <!--    <li class="nav-item"> 
                                 <a class="nav-link" [routerLink]="['/dashboard','contact']" routerLinkActive="router-link-active"
                                 data-bs-dismiss="offcanvas">
                                 <i class="bi bi-chat-dots"></i>Contact</a>
                             </li>-->
-                <li class="nav-item">
-                    <a class="nav-link" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas"
-                        (click)="logout()"><i class="bi bi-box-arrow-right"></i>
-                        Logout</a>
-                </li>
-            </ul>
-
-
-
-        </div>
-
+        <li class="nav-item">
+          <a class="nav-link" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas" (click)="logout()"
+            ><i class="bi bi-box-arrow-right"></i> Logout</a
+          >
+        </li>
+      </ul>
     </div>
-
-
-
+  </div>
 </div>

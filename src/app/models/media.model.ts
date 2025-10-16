@@ -4,5 +4,5 @@ export interface Media {
   filePath: string;
   fileType: string;
   order: number;
-  tenant_id: string;
+  tenant_id?: string;
 }

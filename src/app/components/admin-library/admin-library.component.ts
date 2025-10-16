@@ -1,17 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
-import { Media } from '../../models/media.model';
-import { WebSocketService } from '../../services/websocket.service';
-import { RetryHelperService } from '../../services/retry-helper.service';
-import { LoaderComponent } from '../loader/loader.component';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { catchError, EMPTY, filter, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../services/auth.service';
-import { AdvertisementsService } from '../../services/advertisements.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { Advertisement } from '../../models/advertisement.model';
-import { switchMap, take } from 'rxjs';
+import { Media } from '../../models/media.model';
+import { AdvertisementsService } from '../../services/advertisements.service';
 import { LibraryService } from '../../services/library.service';
+import { MediaService } from '../../services/media.service';
+import { RetryHelperService } from '../../services/retry-helper.service';
 import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
+import { LoaderComponent } from '../loader/loader.component';
 
 @Component({
   standalone: true,
@@ -20,19 +19,18 @@ import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
   templateUrl: './admin-library.component.html',
   styleUrls: ['./admin-library.component.scss'],
 })
-export class AdminLibraryComponent implements OnInit {
+export class AdminLibraryComponent implements OnInit, OnDestroy {
   selectedFileName: string = '';
   selectedFile: File | null = null;
   mediaList: Media[] = [];
   loading: boolean = true;
   error: string | null = null;
-  isPremium: boolean = false;
   advertisementsList: Advertisement[] = [];
+  private readonly onDestroy$ = new Subject();
 
   constructor(
     private mediaService: MediaService,
     private retryHelper: RetryHelperService,
-    private webSocketService: WebSocketService,
     private authService: AuthService,
     private advertisementsService: AdvertisementsService,
     private readonly libraryService: LibraryService
@@ -40,66 +38,43 @@ export class AdminLibraryComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMedia();
-
-    this.authService.checkIfPremiumUser();
-
-    this.authService.isPremium$.pipe(take(1)).subscribe((isPremium) => {
-      this.isPremium = isPremium;
-      if (!isPremium) {
-        this.loadAdvertisementsForUserCountry();
-      }
-    });
+    this.loadAdvertisementsForUserCountry();
   }
 
-  onTenantChange() {
-    this.loadMedia();
-  }
-
-  // 📌 Pobieranie listy plików
-  loadMedia(): void {
-    this.loading = true;
-
-    this.retryHelper.withRetry(this.libraryService.getFiles()).subscribe({
-      next: (data) => {
+  public loadMedia(): void {
+    this.retryHelper
+      .withRetry(this.libraryService.getFiles())
+      .pipe(
+        catchError(() => {
+          this.loading = false;
+          return EMPTY;
+        }),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe((data) => {
         this.mediaList = data;
         this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Błąd ładowania mediów:', err);
-        this.error = 'Nie udało się załadować mediów.';
-        this.loading = false;
-      },
-    });
+      });
   }
 
-  // Pobieranie reklam dla kraju tenanta
-
-  loadAdvertisementsForUserCountry(): void {
-    this.loading = true;
-    this.error = null;
-
+  public loadAdvertisementsForUserCountry(): void {
     this.authService
-      .getUserData()
+      .isPremiumUser()
       .pipe(
-        take(1),
-        switchMap((userData) => {
-          const country = userData.country;
-          return this.retryHelper.withRetry(
-            this.advertisementsService.getAdvertisements(country)
-          );
-        })
-      )
-      .subscribe({
-        next: (ads) => {
+        filter((isPremium) => !isPremium),
+        switchMap(() => this.authService.selectUserInfo()),
+        switchMap((userInfo) => this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(userInfo.country))),
+        tap((ads) => {
           this.advertisementsList = ads;
           this.loading = false;
-        },
-        error: (err) => {
-          console.error('❌ Błąd ładowania reklam:', err);
-          this.error = 'Nie udało się załadować reklam.';
+        }),
+        catchError(() => {
           this.loading = false;
-        },
-      });
+          return EMPTY;
+        }),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe();
   }
 
   // 📌 Obsługa wyboru pliku
@@ -140,9 +115,7 @@ export class AdminLibraryComponent implements OnInit {
 
   // 📌 Usuwanie pliku
   deleteMedia(id: string): void {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this media?'
-    );
+    const confirmed = window.confirm('Are you sure you want to delete this media?');
 
     if (confirmed) {
       this.mediaService.deleteFile(id).subscribe(
@@ -179,4 +152,8 @@ export class AdminLibraryComponent implements OnInit {
     return `${environment.publicUrl}${filePath}`;
   }
 
+  public ngOnDestroy(): void {
+    this.onDestroy$.next(void 0);
+    this.onDestroy$.complete();
+  }
 }

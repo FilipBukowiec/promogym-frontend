@@ -1,81 +1,36 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
-import { Announcement } from '../models/announcement.model';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AuthService } from '../auth/services/auth.service';
+import { Announcement } from '../models/announcement.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AnnouncementService {
   private apiUrl = `${environment.apiUrl}announcements`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  // 📌 Pobieranie wszystkich ogłoszeń dla danego tenant-a
-  fetchAnnouncements(): Observable<Announcement[]> {
-    return this.authService.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.get<Announcement[]>(this.apiUrl, { headers })
-      ),
-      catchError(error => {
-        console.error('❌ Błąd pobierania ogłoszeń:', error);
-        return of([]);
-      })
-    );
+  public fetchAnnouncements(): Observable<Announcement[]> {
+    return this.http.get<Announcement[]>(this.apiUrl).pipe(catchError(() => of([])));
   }
 
-  // 📌 Pobieranie jednego ogłoszenia
-  getAnnouncement(id: string): Observable<Announcement | null> {
-    return this.authService.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.get<Announcement>(`${this.apiUrl}/${id}`, { headers })
-      ),
-      catchError(error => {
-        console.error('❌ Błąd pobierania ogłoszenia:', error);
-        return of(null as any);
-      })
-    );
+  public getAnnouncement(id: string): Observable<Announcement | null> {
+    return this.http.get<Announcement>(`${this.apiUrl}/${id}`).pipe(catchError(() => of(null)));
   }
 
-  // 📌 Tworzenie ogłoszenia (z plikiem)
-  createAnnouncement(formData: FormData): Observable<Announcement | null> {
-    return this.authService.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.post<Announcement>(this.apiUrl, formData, { headers })
-      ),
-      catchError(error => {
-        console.error('❌ Błąd tworzenia ogłoszenia:', error);
-        return of(null);
-      })
-    );
+  public createAnnouncement(formData: FormData): Observable<Announcement | null> {
+    return this.http.post<Announcement>(this.apiUrl, formData).pipe(catchError(() => of(null)));
   }
 
-  // 📌 Aktualizacja ogłoszenia (z plikiem)
-  updateAnnouncement(id: string, formData: FormData): Observable<Announcement | null> {
-    return this.authService.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.put<Announcement>(`${this.apiUrl}/${id}`, formData, { headers })
-      ),
-      catchError(error => {
-        console.error('❌ Błąd aktualizacji ogłoszenia:', error);
-        return of(null);
-      })
-    );
+  public updateAnnouncement(id: string, formData: FormData): Observable<Announcement | null> {
+    return this.http.put<Announcement>(`${this.apiUrl}/${id}`, formData).pipe(catchError(() => of(null)));
   }
 
-  // 📌 Usuwanie ogłoszenia
-  deleteAnnouncement(id: string): Observable<Announcement | null> {
-    return this.authService.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.delete<Announcement>(`${this.apiUrl}/${id}`, { headers })
-      ),
-      catchError(error => {
-        console.error('❌ Błąd usuwania ogłoszenia:', error);
-        return of(null);
-      })
-    );
+  public deleteAnnouncement(id: string): Observable<Announcement | null> {
+    return this.http.delete<Announcement>(`${this.apiUrl}/${id}`).pipe(catchError(() => of(null)));
   }
 }

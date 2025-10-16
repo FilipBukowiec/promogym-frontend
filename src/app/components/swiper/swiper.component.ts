@@ -1,21 +1,14 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  AfterViewInit,
-  OnDestroy,
-} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { catchError, combineLatest, EMPTY, map, Subject, Subscription, take, takeUntil } from 'rxjs';
 import Swiper from 'swiper';
 import { Autoplay } from 'swiper/modules';
-import { MediaService } from '../../services/media.service';
-import { Media } from '../../models/media.model';
-import { LoaderComponent } from '../loader/loader.component';
-import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { UserSettingsService } from '../../services/user-settings.service';
-import { RetryHelperService } from '../../services/retry-helper.service';
-import { TenantChangeService } from '../../services/tenant-change.service';
 import { environment } from '../../../environments/environment';
+import { Media } from '../../models/media.model';
+import { MediaService } from '../../services/media.service';
+import { TenantChangeService } from '../../services/tenant-change.service';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { LoaderComponent } from '../loader/loader.component';
 
 Swiper.use([Autoplay]);
 
@@ -26,76 +19,62 @@ Swiper.use([Autoplay]);
   standalone: true,
   imports: [LoaderComponent, CommonModule],
 })
-export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SwiperComponent implements OnInit, OnDestroy {
   @Input() media: Media[] = [];
   private mySwiper!: Swiper;
   isLoading: boolean = true;
   private isVideoPlaying: boolean = false;
   pictureSlideDuration: number = 5;
-  private dataLoadSubscription: Subscription | null = null;
-  private mediaUpdateSubscription!: Subscription;
-  private tenantChangeSubscription!: Subscription;
+  private readonly onDestroy$ = new Subject();
 
-  constructor(
-    private mediaService: MediaService,
-    private userSettingsService: UserSettingsService,
-    private retryHelper: RetryHelperService,
-    private tenantChangeService: TenantChangeService,
-  ) { }
+  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) {}
 
-  ngOnInit(): void {
-    this.userSettingsService.getSettings().subscribe((settings) => {
+  public ngOnInit(): void {
+    this.watchRefreshMedia();
+    this.initPictureSlideDuration();
+    this.initSwiper();
+  }
+
+  private watchRefreshMedia(): void {
+    this.mediaService.refreshMedia().pipe(takeUntil(this.onDestroy$)).subscribe();
+  }
+
+  private initSwiper(): void {
+    combineLatest([this.mediaService.media$, this.tenantChangeService.tenantChanged$])
+      .pipe(
+        map((data) => data[0]),
+        catchError(() => {
+          this.isLoading = false;
+          return EMPTY;
+        }),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe((media) => {
+        if (!media || media.length === 0) {
+          throw new Error('Brak mediów do załadowania.');
+        }
+        this.media = media.sort((a, b) => a.order - b.order);
+        this.destroySwiper();
+        this.initializeSwiper();
+      });
+  }
+
+  private initPictureSlideDuration(): void {
+    this.userSettingsService.settings$.subscribe((settings) => {
       if (settings?.pictureSlideDuration) {
         this.pictureSlideDuration = settings.pictureSlideDuration;
       }
     });
-
-    this.mediaUpdateSubscription = this.mediaService.media$.subscribe(() => {
-      this.loadMediaData();
-    });
-
-    this.tenantChangeSubscription = this.tenantChangeService.tenantChanged$.subscribe(() => {
-      this.loadMediaData();
-    });
-
-    this.loadMediaData();
   }
 
-  private loadMediaData(): void {
-    this.isLoading = true;
-    if (this.dataLoadSubscription) {
-      this.dataLoadSubscription.unsubscribe();
-    }
-
-    this.dataLoadSubscription = this.retryHelper
-      .withRetry(this.mediaService.getFilesForSwiper())
-      .subscribe({
-        next: (media) => {
-          if (!media || media.length === 0) {
-            throw new Error('Brak mediów do załadowania.');
-          }
-
-          this.media = media.sort((a, b) => a.order - b.order);
-          this.destroySwiper();
-          this.initializeSwiper();
-        },
-        error: (error) => {
-          console.error('❌ Błąd podczas pobierania mediów:', error);
-          this.isLoading = false;
-        },
-      });
-  }
-
-  destroySwiper(): void {
+  public destroySwiper(): void {
     if (this.mySwiper) {
       this.mySwiper.destroy(true, true);
       this.mySwiper = null as any;
     }
   }
 
-  ngAfterViewInit(): void { }
-
-  initializeSwiper(): void {
+  public initializeSwiper(): void {
     const swiperWrapper = document.querySelector('.swiper-wrapper') as HTMLElement;
     if (!swiperWrapper) return;
 
@@ -150,7 +129,7 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  initializeSwiperInstance(): void {
+  public initializeSwiperInstance(): void {
     if (!this.mySwiper) {
       this.mySwiper = new Swiper('.swiper', {
         slidesPerView: 1,
@@ -220,14 +199,9 @@ export class SwiperComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  refreshSwiper(): void {
-    this.loadMediaData();
-  }
-
-  ngOnDestroy(): void {
-    this.dataLoadSubscription?.unsubscribe();
-    this.mediaUpdateSubscription?.unsubscribe();
-    this.tenantChangeSubscription?.unsubscribe();
+  public ngOnDestroy(): void {
+    this.onDestroy$.next(void 0);
+    this.onDestroy$.complete();
     this.mySwiper?.destroy(true, true);
   }
 }
