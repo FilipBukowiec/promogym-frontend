@@ -1,63 +1,41 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { BehaviorSubject, Observable, throwError } from "rxjs";
-import { environment } from "../../environments/environment";
-import { UserSettings } from "../models/user-settings.model";
-import { AuthService } from "./auth.service";
-import { switchMap, catchError, tap } from "rxjs/operators";
-import { Tenant } from "../models/tenant.model";
-import { RetryHelperService } from "./retry-helper.service";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { AuthService } from '../auth/services/auth.service';
+import { Tenant } from '../models/tenant.model';
+import { UserSettings } from '../models/user-settings.model';
+import { RetryHelperService } from './retry-helper.service';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class UserSettingsService {
   private apiUrl = `${environment.apiUrl}user-settings`;
   private settingsSubject = new BehaviorSubject<UserSettings | null>(null);
-  settings$ = this.settingsSubject.asObservable();
+  settings$ = this.settingsSubject.asObservable().pipe(filter((settings) => !!settings));
 
-  constructor(
-    private http: HttpClient,
-    private auth: AuthService,
-    private retryHelper: RetryHelperService,
-  ) {}
+  constructor(private http: HttpClient, private auth: AuthService, private retryHelper: RetryHelperService) {}
 
-  getSettings(): Observable<UserSettings> {
+  public initSettings(): Observable<UserSettings> {
     return this.retryHelper.withRetry(
-      this.auth.getAuthHeaders().pipe(
-        switchMap((headers) => {
-          return this.http
-            .get<UserSettings>(`${this.apiUrl}`, { headers })
-            .pipe(
-              tap((settings) => {
-                if (settings.country !== headers.get("country")) {
-                  console.log(
-                    `Zmiana kraju: ${settings.country} -> ${headers.get(
-                      "country"
-                    )}`
-                  );
-                  settings.country = headers.get("country") || "";
+      this.auth.selectCurrentTenant().pipe(
+        take(1),
+        switchMap((currentTenant) => {
+          return this.http.get<UserSettings>(`${this.apiUrl}`).pipe(
+            tap((settings) => {
+              if (settings.country !== currentTenant.country) {
+                settings.country = currentTenant.country || '';
 
-                  this.updateSettings(settings).subscribe({
-                    next: (updatedSettings) => {
-                      console.log(
-                        "Ustawienia zaktualizowane na serwerze:",
-                        updatedSettings
-                      );
-                      this.settingsSubject.next(updatedSettings);
-                    },
-                    error: (error) => {
-                      console.error(
-                        "Błąd podczas aktualizacji ustawień:",
-                        error
-                      );
-                    },
-                  });
-                }
+                // this.updateSettings(settings).subscribe((updatedSettings) => {
+                // this.settingsSubject.next(updatedSettings);
+                // });
+              }
 
-                this.settingsSubject.next(settings);
-              })
-            );
+              this.settingsSubject.next(settings);
+            })
+          );
         }),
         catchError((error) => {
           if (error.status === 404) {
@@ -70,114 +48,49 @@ export class UserSettingsService {
   }
 
   private createDefaultSettings(): Observable<UserSettings> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        const tenant_id = headers.get("tenant-id");
-        const country = headers.get("country");
+    return this.auth.selectCurrentTenant().pipe(
+      switchMap((currentTenant) => {
+        const tenant_id = currentTenant.tenant_id;
+        const country = currentTenant.country;
         const defaultSettings: UserSettings = {
-          tenant_id: tenant_id || "",
-          name: tenant_id || "Default Name",
-          language: "ENG",
-          country: country || "",
-          selectedRadioStream: "",
+          tenant_id: tenant_id || '',
+          name: tenant_id || 'Default Name',
+          language: 'ENG',
+          country: country || '',
+          selectedRadioStream: '',
           footerVisibilityRules: [],
           pictureSlideDuration: 15,
-          logoFilePath: "",
-          separatorFilePath: "",
+          logoFilePath: '',
+          separatorFilePath: '',
         };
 
-        return this.http
-          .post<UserSettings>(this.apiUrl, defaultSettings, { headers })
-          .pipe(
-            tap((createdSettings) => this.settingsSubject.next(createdSettings))
-          );
-      }),
-      catchError((error) => {
-        console.error("Błąd tworzenia domyślnych ustawień:", error);
-        return throwError(() => error);
+        return this.http.post<UserSettings>(this.apiUrl, defaultSettings).pipe(tap((createdSettings) => this.settingsSubject.next(createdSettings)));
       })
     );
   }
 
-  updateSettings(settings: UserSettings): Observable<UserSettings> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        const tenant_id = headers.get("tenant-id");
-        const country = headers.get("country");
+  public updateSettings(settings: UserSettings): Observable<UserSettings> {
+    return this.auth.selectCurrentTenant().pipe(
+      switchMap((currentTenant) => {
+        const tenant_id = currentTenant.tenant_id;
+        const country = currentTenant.country;
         const updatedSettings = { ...settings, tenant_id, country };
-        return this.http
-          .put<UserSettings>(this.apiUrl, updatedSettings, { headers })
-          .pipe(tap((newSettings) => this.settingsSubject.next(newSettings)));
-      }),
-      catchError((error) => {
-        console.error("Błąd aktualizacji ustawień:", error);
-        return throwError(() => error);
+        return this.http.put<UserSettings>(this.apiUrl, updatedSettings).pipe(tap((newSettings) => this.settingsSubject.next(newSettings)));
       })
     );
   }
 
-  observeSettings(): Observable<UserSettings | null> {
-    if (!this.settingsSubject.value) {
-      console.warn("🔄 settingsSubject jest null, pobieram ustawienia...");
-      return this.getSettings();
-    }
-    return this.settings$;
+  public uploadLogo(file: File, type: 'mainlogo' | 'separator'): Observable<UserSettings> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UserSettings>(`${this.apiUrl}/upload/${type}`, formData, {});
   }
 
-  uploadLogo(
-    file: File,
-    type: "mainlogo" | "separator"
-  ): Observable<UserSettings> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        return this.http
-          .post<UserSettings>(`${this.apiUrl}/upload/${type}`, formData, {
-            headers,
-          })
-          .pipe(
-            tap((updatedSettings) => {
-              this.settingsSubject.next(updatedSettings);
-            })
-          );
-      }),
-      catchError((error) => {
-        console.error(`Błąd uploadu logo (${type}):`, error);
-        return throwError(() => error);
-      })
-    );
+  public deleteLogo(type: 'mainlogo' | 'separator'): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/logo/${type}`);
   }
 
-  deleteLogo(type: "mainlogo" | "separator"): Observable<void> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        return this.http
-          .delete<void>(`${this.apiUrl}/logo/${type}`, { headers })
-          .pipe(
-            tap(() => {
-              this.getSettings().subscribe();
-            })
-          );
-      }),
-      catchError((error) => {
-        console.error(`Błąd usuwania logo (${type}):`, error);
-        return throwError(() => error);
-      })
-    );
+  public getAllTenants(): Observable<Tenant[]> {
+    return this.http.get<Tenant[]>(`${this.apiUrl}/tenants`);
   }
-
-  getAllTenants(): Observable<Tenant[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        return this.http.get<Tenant[]>(`${this.apiUrl}/tenants`, { headers });
-      }),
-      catchError((error) => {
-        console.error("Błąd pobierania listy tenantów:", error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-
 }

@@ -4,7 +4,7 @@ import { AdvertisementsService } from "../../services/advertisements.service";
 import { Advertisement } from "../../models/advertisement.model";
 import { AdminSettingsService } from "../../services/admin-settings.service";
 import { environment } from "../../../environments/environment";
-import { AuthService } from "../../services/auth.service";
+import { AuthService } from "../../auth/services/auth.service";
 import { MediaFileNamePipe } from "../../shared/pipes/media-file-name.pipe";
 
 @Component({
@@ -37,7 +37,7 @@ export class AdvertisementsComponent implements OnInit {
 
   loadAdminSettings(): void {
     console.log("📥 Ładowanie ustawień administracyjnych...");
-    this.adminSettingsService.getSettings().subscribe(
+    this.adminSettingsService.settings$.subscribe(
       (data) => {
         this.availableCountries = data.countries || [];
         console.log("✅ Dostępne kraje:", this.availableCountries);

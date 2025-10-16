@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Media } from '../models/media.model';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,61 +17,26 @@ export class LibraryService {
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
-  uploadFile(file: File): Observable<Media> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post<Media>(`${this.apiUrl}/upload`, formData, {
-          headers,
-        });
-      }),
-      catchError(this.handleError)
-    );
+  public uploadFile(file: File): Observable<Media> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<Media>(`${this.apiUrl}/upload`, formData);
   }
 
-  getFiles(): Observable<Media[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) => this.http.get<Media[]>(this.apiUrl, { headers })),
-      catchError(this.handleError)
-    );
+  public getFiles(): Observable<Media[]> {
+    return this.http.get<Media[]>(this.apiUrl);
   }
 
-  deleteFile(id: string): Observable<Media[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.delete<void>(`${this.apiUrl}/${id}`, { headers })
-      ),
-      switchMap(() => this.getFiles()),
-      catchError(this.handleError)
-    );
+  public deleteFile(id: string): Observable<Media[]> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(switchMap(() => this.getFiles()));
   }
 
-  moveFileUp(id: string): Observable<Media[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.put<void>(`${this.apiUrl}/move-up/${id}`, {}, { headers })
-      ),
-      switchMap(() => this.getFiles()),
-      catchError(this.handleError)
-    );
+  public moveFileUp(id: string): Observable<Media[]> {
+    return this.http.put<void>(`${this.apiUrl}/move-up/${id}`, {}).pipe(switchMap(() => this.getFiles()));
   }
 
-  moveFileDown(id: string): Observable<Media[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.put<void>(`${this.apiUrl}/move-down/${id}`, {}, { headers })
-      ),
-      switchMap(() => this.getFiles()),
-      catchError(this.handleError)
-    );
-  }
-
-  private handleError(error: any): Observable<never> {
-    console.error('Błąd w MediaService:', error);
-    return throwError(
-      () => new Error('Wystąpił problem z operacją na mediach.')
-    );
+  public moveFileDown(id: string): Observable<Media[]> {
+    return this.http.put<void>(`${this.apiUrl}/move-down/${id}`, {}).pipe(switchMap(() => this.getFiles()));
   }
 
   public addTenant(tenantId: string, id: string): Observable<void | null> {

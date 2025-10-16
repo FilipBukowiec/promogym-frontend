@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/services/auth.service';
 import { Sentence } from '../models/sentence.model';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -16,137 +16,52 @@ export class SentencesService {
   public sentencesSubject = new BehaviorSubject<Sentence[]>([]);
   sentences$ = this.sentencesSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private auth: AuthService,
-    private retryHelper: RetryHelperService
-  ) { }
+  constructor(private http: HttpClient, private auth: AuthService, private retryHelper: RetryHelperService) {}
 
-  getAllSentences(): Observable<Sentence[]> {
+  public getAllSentences(): Observable<Sentence[]> {
     return this.retryHelper.withRetry(
-      this.auth.getAuthHeaders().pipe(
-        switchMap((headers) =>
-          this.http.get<Sentence[]>(this.apiUrl, { headers })
-        ),
+      this.http.get<Sentence[]>(this.apiUrl).pipe(
         tap((sentences) => this.sentencesSubject.next(sentences)),
-        catchError((error) => {
-          console.error('Błąd pobierania sentencji', error);
-          return of([]);
-        })
+        catchError(() => of([]))
       )
     );
   }
 
-  getSentenceOfTheDay(): Observable<Sentence> {
-    return this.retryHelper.withRetry(
-      this.auth.getAuthHeaders().pipe(
-        switchMap((headers) =>
-          this.http.get<Sentence>(`${this.apiUrl}/daily`, { headers })
-        ),
-        catchError((error) => {
-          console.error('Błąd pobierania sentencji', error);
-          return of({} as Sentence);
-        })
-      )
+  public getSentenceOfTheDay(): Observable<Sentence> {
+    return this.retryHelper.withRetry(this.http.get<Sentence>(`${this.apiUrl}/daily`).pipe(catchError(() => of({} as Sentence))));
+  }
+
+  public moveUp(id: string): Observable<Sentence[]> {
+    return this.http.put<Sentence[]>(`${this.apiUrl}/${id}/move-up`, {}).pipe(
+      switchMap(() => this.getAllSentences()),
+      catchError(() => of([]))
     );
   }
 
-  moveUp(id: string): Observable<Sentence[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.put<Sentence[]>(
-          `${this.apiUrl}/${id}/move-up`,
-          {},
-          { headers }
-        ).pipe(switchMap(() => this.getAllSentences()))
-      ),
-
-      catchError((error) => {
-        console.error('Nie możne przesunąc w górę', error);
-        return of([]);
-      })
+  public moveDown(id: string): Observable<Sentence[]> {
+    return this.http.put<Sentence[]>(`${this.apiUrl}/${id}/move-down`, {}).pipe(
+      switchMap(() => this.getAllSentences()),
+      catchError(() => of([]))
     );
   }
 
-  moveDown(id: string): Observable<Sentence[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.put<Sentence[]>(
-          `${this.apiUrl}/${id}/move-down`,
-          {},
-          { headers }
-        ).pipe(switchMap(() => this.getAllSentences()))
-      ),
-
-      catchError((error) => {
-        console.error('Nie możne przesunąc w górę', error);
-        return of([]);
-      })
-    );
+  public addNewSentence(content: string): Observable<Sentence[]> {
+    return this.http.post<Sentence>(`${this.apiUrl}/single`, { content }).pipe(switchMap(() => this.getAllSentences()));
   }
 
-  addNewSentence(content: string): Observable<Sentence[]> {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http
-          .post<Sentence>(`${this.apiUrl}/single`, { content }, { headers })
-          .pipe(
-            switchMap(() => this.getAllSentences()) 
-          )
-      )
-    );
+  public addNewSentences(sentences: { content: string }[]) {
+    return this.http.post<Sentence[]>(`${this.apiUrl}/bulk`, sentences).pipe(switchMap(() => this.getAllSentences()));
   }
 
-  addNewSentences(sentences: { content: string }[]) {
-    return this.auth.getAuthHeaders().pipe(
-      switchMap((headers) =>
-        this.http.post<Sentence[]>(`${this.apiUrl}/bulk`, sentences, {headers})
-          .pipe(
-            switchMap(() => this.getAllSentences())
-
-          )))
+  public deleteAllSentences(): Observable<Sentence[]> {
+    return this.http.delete<Sentence[]>(`${this.apiUrl}/bulk`).pipe(switchMap(() => this.getAllSentences()));
   }
 
-
-
-
-
-
-
-  deleteAllSentences(): Observable<Sentence[]> {
-    return this.auth
-      .getAuthHeaders()
-      .pipe(
-        switchMap((headers) =>
-          this.http
-            .delete<Sentence[]>(`${this.apiUrl}/bulk`, { headers })
-            .pipe(switchMap(() => this.getAllSentences()))
-        )
-      );
+  public deleteSentence(id: string): Observable<Sentence[]> {
+    return this.http.delete<Sentence>(`${this.apiUrl}/${id}`).pipe(switchMap(() => this.getAllSentences()));
   }
 
-  deleteSentence(id: string): Observable<Sentence[]> {
-    return this.auth
-      .getAuthHeaders()
-      .pipe(
-        switchMap((headers) =>
-          this.http
-            .delete<Sentence>(`${this.apiUrl}/${id}`, { headers })
-            .pipe(switchMap(() => this.getAllSentences()))
-        )
-      );
+  public updateSentence(id: string, content: string): Observable<Sentence> {
+    return this.http.put<Sentence>(`${this.apiUrl}/${id}`, { content }).pipe(catchError((eror) => of({} as Sentence)));
   }
-
-updateSentence(id: string, content: string): Observable<Sentence> {
-  return this.auth.getAuthHeaders().pipe(
-    switchMap((headers) =>
-      this.http.put<Sentence>(`${this.apiUrl}/${id}`, { content }, { headers })
-    ),
-    catchError((error) => {
-      console.error('Błąd aktualizacji sentencji', error);
-      return of({} as Sentence); })
-  );
-}
-
-
 }

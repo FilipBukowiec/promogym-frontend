@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, switchMap, take, tap } from 'rxjs';
+import { map, Subject, switchMap, take, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Advertisement } from '../../models/advertisement.model';
 import { Media } from '../../models/media.model';
 import { AdvertisementsService } from '../../services/advertisements.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { LibraryService } from '../../services/library.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
 import { WebSocketService } from '../../services/websocket.service';
@@ -25,13 +25,13 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
   libraryIdsByTenant: string[] = [];
   loading: boolean = true;
   error: string | null = null;
-  
+  public readonly isNotPremium$ = this.authService.isPremiumUser().pipe(map((isPremium) => !isPremium));
   private readonly onDestroy$ = new Subject();
 
   constructor(
     private retryHelper: RetryHelperService,
     private webSocketService: WebSocketService,
-    public authService: AuthService,
+    private readonly authService: AuthService,
     private readonly libraryService: LibraryService
   ) {}
 
@@ -61,8 +61,6 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
   // 📌 Generowanie pełnej ścieżki do pliku
   getFullFilePath(filePath: string): string {
     return `${environment.publicUrl}${filePath}`;
@@ -73,33 +71,30 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
   }
 
   private getLibraryIdByTenantId(): void {
-    this.authService.selectedTenant$
+    this.authService
+      .selectCurrentTenant()
       .pipe(
-        switchMap((tenant) =>
-          this.libraryService.getLibraryByTenantId(tenant?.tenant_id as string)
-        ),
+        switchMap((tenant) => this.libraryService.getLibraryByTenantId(tenant?.tenant_id as string)),
         tap((data) => (this.libraryIdsByTenant = data.map((item) => item._id)))
       )
       .subscribe();
   }
 
   public addTenant(id: string): void {
-    this.authService.selectedTenant$
+    this.authService
+      .selectCurrentTenant()
       .pipe(
-        switchMap((tenant) =>
-          this.libraryService.addTenant(tenant?.tenant_id as string, id)
-        ),
+        switchMap((tenant) => this.libraryService.addTenant(tenant?.tenant_id as string, id)),
         take(1)
       )
       .subscribe();
   }
 
   public removeTenant(id: string): void {
-    this.authService.selectedTenant$
+    this.authService
+      .selectCurrentTenant()
       .pipe(
-        switchMap((tenant) =>
-          this.libraryService.removeTenant(tenant?.tenant_id as string, id)
-        ),
+        switchMap((tenant) => this.libraryService.removeTenant(tenant?.tenant_id as string, id)),
         take(1)
       )
       .subscribe();

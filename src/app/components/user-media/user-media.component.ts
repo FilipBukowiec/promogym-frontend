@@ -1,18 +1,16 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { MediaService } from '../../services/media.service';
 import { CommonModule } from '@angular/common';
-import { Media } from '../../models/media.model';
-import { WebSocketService } from '../../services/websocket.service';
-import { RetryHelperService } from '../../services/retry-helper.service';
-import { LoaderComponent } from '../loader/loader.component';
+import { Component, OnInit } from '@angular/core';
+import { of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../services/auth.service';
-import { AdvertisementsService } from '../../services/advertisements.service';
-import { Advertisement } from '../../models/advertisement.model'
-import { Observable, of, switchMap} from 'rxjs';
-import { AdvertisementsComponent } from "../advertisements/advertisements.component";
-import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
+import { AuthService } from '../../auth/services/auth.service';
+import { Advertisement } from '../../models/advertisement.model';
+import { Media } from '../../models/media.model';
+import { MediaService } from '../../services/media.service';
+import { RetryHelperService } from '../../services/retry-helper.service';
+import { WebSocketService } from '../../services/websocket.service';
 import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
+import { LoaderComponent } from '../loader/loader.component';
+import { UserAdvertisementsComponent } from '../user-advertisements/user-advertisements.component';
 
 @Component({
   standalone: true,
@@ -22,8 +20,6 @@ import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
   styleUrls: ['./user-media.component.scss'],
 })
 export class UserMediaComponent implements OnInit {
-
-
   selectedFileName: string = '';
   selectedFile: File | null = null;
   mediaList: Media[] = [];
@@ -31,43 +27,45 @@ export class UserMediaComponent implements OnInit {
   error: string | null = null;
   advertisementsList: Advertisement[] = [];
 
-  constructor(private mediaService: MediaService, private retryHelper: RetryHelperService, private webSocketService: WebSocketService, public authService: AuthService, private advertisementsService: AdvertisementsService) { }
+  constructor(
+    private mediaService: MediaService,
+    private retryHelper: RetryHelperService,
+    private webSocketService: WebSocketService,
+    public authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
 
-    this.authService.selectedTenant$
+    this.authService
+      .selectCurrentTenant()
       .pipe(
-        switchMap(tenant => {
+        switchMap((tenant) => {
           if (!tenant) return of([]);
           this.loading = true;
           return this.retryHelper.withRetry(this.mediaService.getFiles());
         })
       )
       .subscribe({
-        next: data => {
+        next: (data) => {
           this.mediaList = data;
           this.loading = false;
         },
-        error: err => {
+        error: (err) => {
           console.error('❌ Błąd ładowania mediów:', err);
           this.error = 'Nie udało się załadować mediów.';
           this.loading = false;
-        }
+        },
       });
-    
   }
-
-
 
   loadMedia(): void {
     this.loading = true;
 
     this.retryHelper.withRetry(this.mediaService.getFiles()).subscribe({
       next: (data) => {
-
         this.mediaList = data;
-        this.loading = false
+        this.loading = false;
       },
       error: (err) => {
         console.error('❌ Błąd ładowania mediów:', err);
@@ -77,9 +75,6 @@ export class UserMediaComponent implements OnInit {
     });
   }
 
-
-
-
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
@@ -88,18 +83,17 @@ export class UserMediaComponent implements OnInit {
       const maxSize = 50 * 1024 * 1024;
 
       if (file.size > maxSize) {
-        alert("The file is too large! Maximum allowed size is 50 MB.");
+        alert('The file is too large! Maximum allowed size is 50 MB.');
         this.selectedFile = null;
         this.selectedFileName = '';
-        input.value = "";
-        return
+        input.value = '';
+        return;
       }
       this.selectedFile = file;
       this.selectedFileName = file.name;
-    }
-    else {
+    } else {
       this.selectedFile = null;
-      this.selectedFileName = "";
+      this.selectedFileName = '';
     }
   }
 
@@ -121,7 +115,7 @@ export class UserMediaComponent implements OnInit {
     if (confirmed) {
       this.mediaService.deleteFile(id).subscribe(
         () => {
-          this.mediaList = this.mediaList.filter(media => media._id !== id);
+          this.mediaList = this.mediaList.filter((media) => media._id !== id);
           this.loadMedia();
         },
         (error) => {
@@ -131,7 +125,6 @@ export class UserMediaComponent implements OnInit {
       );
     }
   }
-
 
   moveUp(id: string): void {
     this.mediaService.moveFileUp(id).subscribe(
@@ -153,10 +146,5 @@ export class UserMediaComponent implements OnInit {
 
   liveUpdate(): void {
     this.webSocketService.requestMediaUpdate();
-
   }
-
-
-
-
 }

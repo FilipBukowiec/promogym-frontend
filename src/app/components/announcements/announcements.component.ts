@@ -1,20 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { AnnouncementService } from '../../services/announcement.service';
 import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service'; // Import AuthService
+import { AuthService } from '../../auth/services/auth.service'; // Import AuthService
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  standalone:true,
+  standalone: true,
   imports: [FormsModule, CommonModule],
   selector: 'app-announcements',
   templateUrl: './announcements.component.html',
-  styleUrls: ['./announcements.component.scss']
+  styleUrls: ['./announcements.component.scss'],
 })
 export class AnnouncementsComponent implements OnInit {
-
   description: string = ''; // Właściwość description
   oneTimeDate: string = ''; // Właściwość oneTimeDate
   // FormData dla ogłoszenia
@@ -30,21 +29,17 @@ export class AnnouncementsComponent implements OnInit {
   selectedDays: boolean[] = new Array(7).fill(false);
   selectedHours: boolean[] = new Array(24).fill(false);
   selectedMinutes: boolean[] = new Array(60).fill(false);
-  
+
   // Możliwe wartości dla dni, godzin i minut
   daysOfWeek = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
   hours = Array.from({ length: 24 }, (_, i) => i);
   minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  constructor(
-    private announcementService: AnnouncementService, 
-    private fb: FormBuilder,
-    private authService: AuthService 
-  ) {
+  constructor(private announcementService: AnnouncementService, private fb: FormBuilder, private authService: AuthService) {
     this.announcementForm = this.fb.group({
       description: [''],
       scheduleType: ['oneTime'],
-      oneTimeDate: ['']
+      oneTimeDate: [''],
     });
   }
 
@@ -59,7 +54,7 @@ export class AnnouncementsComponent implements OnInit {
 
   // Pobranie listy ogłoszeń
   loadAnnouncements() {
-    this.announcementService.fetchAnnouncements().subscribe(data => {
+    this.announcementService.fetchAnnouncements().subscribe((data) => {
       this.announcementList = data;
     });
   }
@@ -82,19 +77,12 @@ export class AnnouncementsComponent implements OnInit {
       formData.append('oneTimeDate', this.announcementForm.value.oneTimeDate);
     }
 
-    // Pobranie nagłówków z tokenem
-    this.authService.getAuthHeaders().subscribe((headers: HttpHeaders) => {
-      const requestOptions = { headers: headers };
-
-      this.announcementService.createAnnouncement(formData).subscribe(() => {
-        this.loadAnnouncements();
-      });
-    });
+    this.announcementService.createAnnouncement(formData).subscribe(() => this.loadAnnouncements());
   }
 
   // Pobranie indeksów zaznaczonych checkboxów
   private getSelectedIndexes(array: boolean[]): number[] {
-    return array.map((value, index) => value ? index : -1).filter(index => index !== -1);
+    return array.map((value, index) => (value ? index : -1)).filter((index) => index !== -1);
   }
 
   // Pobranie czasu emisji ogłoszenia
@@ -110,15 +98,6 @@ export class AnnouncementsComponent implements OnInit {
     });
   }
 }
-
-
-
-
-
-
-
-
-
 
 // import { Component, OnInit, OnDestroy } from '@angular/core';
 // import { CommonModule } from '@angular/common';

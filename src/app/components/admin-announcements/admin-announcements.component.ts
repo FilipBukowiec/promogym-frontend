@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AnnouncementService } from '../../services/announcement.service';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Announcement } from '../../models/announcement.model';
 
@@ -10,7 +10,7 @@ import { Announcement } from '../../models/announcement.model';
   imports: [FormsModule, CommonModule],
   selector: 'app-announcements',
   templateUrl: './admin-announcements.component.html',
-  styleUrls: ['./admin-announcements.component.scss']
+  styleUrls: ['./admin-announcements.component.scss'],
 })
 export class AdminAnnouncementsComponent implements OnInit {
   description: string = '';
@@ -31,10 +31,7 @@ export class AdminAnnouncementsComponent implements OnInit {
   hours = Array.from({ length: 24 }, (_, i) => i);
   minutes = Array.from({ length: 60 }, (_, i) => i);
 
-  constructor(
-    private announcementService: AnnouncementService,
-    private authService: AuthService
-  ) { }
+  constructor(private announcementService: AnnouncementService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadAnnouncements();
@@ -49,8 +46,8 @@ export class AdminAnnouncementsComponent implements OnInit {
 
   loadAnnouncements(): void {
     this.announcementService.fetchAnnouncements().subscribe({
-      next: data => this.announcementList = data,
-      error: err => console.error('Błąd pobierania ogłoszeń:', err)
+      next: (data) => (this.announcementList = data),
+      error: (err) => console.error('Błąd pobierania ogłoszeń:', err),
     });
   }
 
@@ -62,45 +59,25 @@ export class AdminAnnouncementsComponent implements OnInit {
     formData.append('description', this.description);
     formData.append('scheduleType', this.scheduleType);
 
-if (this.scheduleType === 'cyclic') {
-  formData.append(
-    'selectedDays', 
-    this.daysOption === 'allDays' 
-      ? JSON.stringify([]) 
-      : JSON.stringify(this.getSelectedIndexes(this.selectedDays))
-  );
-  formData.append(
-    'selectedHours', 
-    this.hoursOption === 'allHours' 
-      ? JSON.stringify([]) 
-      : JSON.stringify(this.getSelectedIndexes(this.selectedHours))
-  );
-  formData.append(
-    'selectedMinutes', 
-    this.minutesOption === 'allMinutes' 
-      ? JSON.stringify([]) 
-      : JSON.stringify(this.getSelectedIndexes(this.selectedMinutes))
-  );
-
+    if (this.scheduleType === 'cyclic') {
+      formData.append('selectedDays', this.daysOption === 'allDays' ? JSON.stringify([]) : JSON.stringify(this.getSelectedIndexes(this.selectedDays)));
+      formData.append('selectedHours', this.hoursOption === 'allHours' ? JSON.stringify([]) : JSON.stringify(this.getSelectedIndexes(this.selectedHours)));
+      formData.append(
+        'selectedMinutes',
+        this.minutesOption === 'allMinutes' ? JSON.stringify([]) : JSON.stringify(this.getSelectedIndexes(this.selectedMinutes))
+      );
     } else {
       formData.append('scheduledTime', this.scheduledTime);
     }
 
     // Przykład pobrania nagłówków - dostosuj, jeśli potrzebujesz przekazać je do serwisu
-    this.authService.getAuthHeaders().subscribe(headers => {
-      // Jeśli Twój AnnouncementService wymaga nagłówków, to musisz to przekazać w metodzie createAnnouncement
-      // np. this.announcementService.createAnnouncement(formData, headers).subscribe(...)
-      this.announcementService.createAnnouncement(formData).subscribe(() => {
-        this.loadAnnouncements();
-      });
-    }
-    );
+    this.announcementService.createAnnouncement(formData).subscribe(() => {
+      this.loadAnnouncements();
+    });
   }
 
   private getSelectedIndexes(arr: boolean[]): number[] {
-    return arr
-      .map((selected, idx) => (selected ? idx : -1))
-      .filter(idx => idx !== -1);
+    return arr.map((selected, idx) => (selected ? idx : -1)).filter((idx) => idx !== -1);
   }
 
   getScheduledTime(announcement: Announcement): string {

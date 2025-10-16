@@ -85,7 +85,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   loadSettings(): void {
     this.loading = true;
     this.retryHelper
-      .withRetry(this.userSettingsService.getSettings())
+      .withRetry(this.userSettingsService.settings$)
       .subscribe({
         next: (response) => {
           if (!response) {

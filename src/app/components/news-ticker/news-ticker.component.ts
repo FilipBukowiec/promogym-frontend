@@ -42,7 +42,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Pobieranie ustawień użytkownika
     this.settingsSubscription = this.retryHelper
-      .withRetry(this.userSettingsService.getSettings())
+      .withRetry(this.userSettingsService.settings$)
       .subscribe({
         next: (settings) => {
           this.userSettings = settings;
@@ -59,7 +59,7 @@ export class NewsTickerComponent implements AfterViewInit, OnDestroy {
     this.tenantChangeSubscription =
       this.tenantChangeService.tenantChanged$.subscribe(() => {
         this.retryHelper
-          .withRetry(this.userSettingsService.getSettings())
+          .withRetry(this.userSettingsService.settings$)
           .subscribe({
             next: (settings) => {
               this.userSettings = settings;
