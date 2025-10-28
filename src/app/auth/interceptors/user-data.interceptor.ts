@@ -1,12 +1,12 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { iif, switchMap, take } from 'rxjs';
+import { combineLatest, iif, switchMap, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const userDataInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  return authService.isAdmin().pipe(
-    switchMap((isAdmin) => iif(() => isAdmin, authService.selectCurrentTenant().pipe(take(1)), authService.selectUserInfo())),
+  return combineLatest([authService.isAdmin(), authService.isKiosk()]).pipe(
+    switchMap(([isAdmin, isKiosk]) => iif(() => isAdmin || isKiosk, authService.selectCurrentTenant().pipe(take(1)), authService.selectUserInfo())),
     switchMap((data) => {
       if (data) {
         const cloned = req.clone({
