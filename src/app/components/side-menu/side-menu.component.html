@@ -37,18 +37,25 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['start']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas" (click)="onStartClick($event)">
+          <a class="nav-link" [routerLink]="['start']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas" (click)="onStartClick()">
             <span *ngIf="isOnStartPage$ | async"> <i class="bi bi-arrow-clockwise"></i> Refresh app </span>
             <span *ngIf="!(isOnStartPage$ | async)"> <i class="bi bi-google-play"></i> Start app </span>
           </a>
         </li>
 
+        @if (isKiosk$ | async) {
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['kiosk-settings']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
+            <i class="bi bi-kanban"></i>Kiosk</a
+          >
+        </li>
+        } @else {
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['management']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
             <i class="bi bi-kanban"></i>Management</a
           >
         </li>
-
+        }
         <li *ngIf="isAdmin$ | async" class="nav-item">
           <a href="" class="nav-link" [routerLink]="['admin']" routerLinkActive="router-link-active" data-bs-dismiss="offcanvas">
             <i class="bi bi-person-fill"></i>Admin</a

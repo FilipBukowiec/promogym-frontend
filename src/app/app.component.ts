@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { combineLatest, switchMap, take } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { combineLatest, filter, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { AuthService } from './auth/services/auth.service';
 import { AdminSettingsService } from './services/admin-settings.service';
 import { UserSettingsService } from './services/user-settings.service';
@@ -11,20 +11,29 @@ import { UserSettingsService } from './services/user-settings.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  private readonly onDestroy$ = new Subject();
   constructor(
     private readonly authService: AuthService,
     private readonly userSettingsService: UserSettingsService,
-    private readonly adminSettings: AdminSettingsService
+    private readonly adminSettings: AdminSettingsService,
+    private readonly router: Router
   ) {}
 
   public ngOnInit(): void {
-    this.initToken();
     this.initSettings();
+    this.initKioskMode();
   }
 
-  private initToken(): void {
-    this.authService.initToken().pipe(take(1)).subscribe();
+  private initKioskMode(): void {
+    this.authService
+      .isKiosk()
+      .pipe(
+        filter((isKiosk) => isKiosk),
+        tap(() => this.router.navigate(['dashboard', 'start'])),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe();
   }
 
   private initSettings(): void {
@@ -35,5 +44,10 @@ export class AppComponent implements OnInit {
         switchMap(() => combineLatest([this.userSettingsService.initSettings(), this.adminSettings.initSettings()]))
       )
       .subscribe();
+  }
+
+  public ngOnDestroy(): void {
+    this.onDestroy$.next(void 0);
+    this.onDestroy$.complete();
   }
 }

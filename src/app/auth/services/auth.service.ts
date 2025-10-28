@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { jwtDecode } from 'jwt-decode';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
+import { CookieService } from 'ngx-cookie-service';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { filter, map, take, tap } from 'rxjs/operators';
 import { Tenant } from '../../models/tenant.model';
 import { Role } from '../enums/role.enum';
 import { DecodedToken, UserInfo } from '../interfaces/auth.interface';
@@ -11,23 +12,21 @@ import { DecodedToken, UserInfo } from '../interfaces/auth.interface';
   providedIn: 'root',
 })
 export class AuthService {
-  private isPremiumSubject = new BehaviorSubject<boolean>(false);
-  public isPremium$ = this.isPremiumSubject.asObservable();
-
   private readonly currentTenant$ = new BehaviorSubject<Tenant>(null);
   private readonly userInfo$ = new BehaviorSubject<UserInfo>(null);
-  private readonly token$ = new BehaviorSubject<string>(null);
 
-  constructor(private readonly auth0Service: Auth0Service) {}
+  constructor(private readonly auth0Service: Auth0Service, private readonly cookieService: CookieService) {}
 
   public initUserInfo(): Observable<UserInfo> {
     return combineLatest([this.auth0Service.getAccessTokenSilently(), this.auth0Service.user$]).pipe(
       map(([token, user]) => {
         const decodedToken = jwtDecode(token) as DecodedToken;
+        const kioskTenantId = localStorage.getItem('tenant_id');
+        const kioskCountry = localStorage.getItem('country');
         return {
-          country: decodedToken.country,
+          country: !!kioskCountry ? kioskCountry : decodedToken.country,
           roles: decodedToken['https://promogym.com/roles'] as Role[],
-          tenant_id: decodedToken.tenant_id,
+          tenant_id: !!kioskTenantId ? kioskTenantId : decodedToken.tenant_id,
           email: user?.email || '',
         };
       }),
@@ -37,24 +36,16 @@ export class AuthService {
     );
   }
 
-  public initToken(): Observable<string> {
-    return this.auth0Service.getAccessTokenSilently().pipe(tap((token) => this.dispatchToken(token)));
-  }
-
-  public selectToken(): Observable<string> {
-    return this.token$.asObservable();
-  }
-
-  public dispatchToken(token: string): void {
-    this.token$.next(token);
-  }
-
   public isPremiumUser(): Observable<boolean> {
     return this.selectUserInfo().pipe(map((userInfo) => userInfo?.roles.includes(Role.PremiumUser) || false));
   }
 
   public isAdmin(): Observable<boolean> {
     return this.selectUserInfo().pipe(map((userInfo) => userInfo?.roles.includes(Role.Admin) || false));
+  }
+
+  public isKiosk(): Observable<boolean> {
+    return this.selectUserInfo().pipe(map((userInfo) => userInfo?.roles.includes(Role.Kiosk) || false));
   }
 
   private dispatchUserInfo(userInfo: UserInfo): void {
@@ -70,6 +61,6 @@ export class AuthService {
   }
 
   public selectCurrentTenant(): Observable<Tenant> {
-    return this.currentTenant$.asObservable();
+    return this.currentTenant$.asObservable().pipe(filter((currentTenant) => !!currentTenant));
   }
 }

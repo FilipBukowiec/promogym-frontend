@@ -17,6 +17,7 @@ import { UserMediaComponent } from './components/user-media/user-media.component
 import { UserNewsComponent } from './components/user-news/user-news.component';
 import { UserSettingsComponent } from './components/user-settings/user-settings.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
+import { KioskSettingsComponent } from './kiosk/pages/kiosk-settings/kiosk-settings.component';
 
 export const routes: Routes = [
   {
@@ -76,6 +77,10 @@ export const routes: Routes = [
           { path: 'user-library', component: UserLibraryComponent },
           { path: '', redirectTo: 'user-settings', pathMatch: 'full' },
         ],
+      },
+      {
+        path: 'kiosk-settings',
+        component: KioskSettingsComponent,
       },
     ],
   },

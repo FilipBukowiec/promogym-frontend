@@ -5,7 +5,6 @@ import { switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/auth.service';
 import { News } from '../models/news.model'; // Import modelu News
-import { RetryHelperService } from './retry-helper.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,14 +15,14 @@ export class NewsService {
   private newsSubject = new BehaviorSubject<News[]>([]);
   news$ = this.newsSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService, private retryHelper: RetryHelperService) {}
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
   public refreshNews(): Observable<News[]> {
     return this.getNewsByTenant().pipe(tap((news) => this.newsSubject.next(news)));
   }
 
   public getNewsByTenant(): Observable<News[]> {
-    return this.retryHelper.withRetry(this.http.get<News[]>(this.apiUrl));
+    return this.http.get<News[]>(this.apiUrl);
   }
 
   public addNews(content: string): Observable<News> {

@@ -16,39 +16,37 @@ export class UserSettingsService {
   private settingsSubject = new BehaviorSubject<UserSettings | null>(null);
   settings$ = this.settingsSubject.asObservable().pipe(filter((settings) => !!settings));
 
-  constructor(private http: HttpClient, private auth: AuthService, private retryHelper: RetryHelperService) {}
+  constructor(private http: HttpClient, private readonly authService: AuthService) {}
 
   public initSettings(): Observable<UserSettings> {
-    return this.retryHelper.withRetry(
-      this.auth.selectCurrentTenant().pipe(
-        take(1),
-        switchMap((currentTenant) => {
-          return this.http.get<UserSettings>(`${this.apiUrl}`).pipe(
-            tap((settings) => {
-              if (settings.country !== currentTenant.country) {
-                settings.country = currentTenant.country || '';
+    return this.authService.selectCurrentTenant().pipe(
+      take(1),
+      switchMap((currentTenant) => {
+        return this.http.get<UserSettings>(`${this.apiUrl}`).pipe(
+          tap((settings) => {
+            if (settings.country !== currentTenant.country) {
+              settings.country = currentTenant.country || '';
 
-                // this.updateSettings(settings).subscribe((updatedSettings) => {
-                // this.settingsSubject.next(updatedSettings);
-                // });
-              }
+              // this.updateSettings(settings).subscribe((updatedSettings) => {
+              // this.settingsSubject.next(updatedSettings);
+              // });
+            }
 
-              this.settingsSubject.next(settings);
-            })
-          );
-        }),
-        catchError((error) => {
-          if (error.status === 404) {
-            return this.createDefaultSettings();
-          }
-          return throwError(() => error);
-        })
-      )
+            this.settingsSubject.next(settings);
+          })
+        );
+      }),
+      catchError((error) => {
+        if (error.status === 404) {
+          return this.createDefaultSettings();
+        }
+        return throwError(() => error);
+      })
     );
   }
 
   private createDefaultSettings(): Observable<UserSettings> {
-    return this.auth.selectCurrentTenant().pipe(
+    return this.authService.selectCurrentTenant().pipe(
       switchMap((currentTenant) => {
         const tenant_id = currentTenant.tenant_id;
         const country = currentTenant.country;
@@ -70,7 +68,8 @@ export class UserSettingsService {
   }
 
   public updateSettings(settings: UserSettings): Observable<UserSettings> {
-    return this.auth.selectCurrentTenant().pipe(
+    return this.authService.selectCurrentTenant().pipe(
+      take(1),
       switchMap((currentTenant) => {
         const tenant_id = currentTenant.tenant_id;
         const country = currentTenant.country;

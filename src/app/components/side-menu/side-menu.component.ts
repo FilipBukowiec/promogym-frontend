@@ -1,19 +1,18 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { FullscreenService } from '../../services/fullscreen.service';
-import { DataService } from '../../services/data.service';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { RadioStreamService } from '../../services/radio-stream.service';
-import { UserSettingsService } from '../../services/user-settings.service';
-import { UserSettings } from '../../models/user-settings.model';
-import { AuthService } from '../../auth/services/auth.service';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { debounce, debounceTime, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { AuthService } from '../../auth/services/auth.service';
 import { Tenant } from '../../models/tenant.model';
-import { TenantChangeService } from '../../services/tenant-change.service';
+import { UserSettings } from '../../models/user-settings.model';
+import { DataService } from '../../services/data.service';
+import { FullscreenService } from '../../services/fullscreen.service';
+import { RadioStreamService } from '../../services/radio-stream.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
+import { TenantChangeService } from '../../services/tenant-change.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
@@ -23,13 +22,15 @@ import { WebSocketService } from '../../services/websocket.service';
   templateUrl: './side-menu.component.html',
   styleUrls: ['./side-menu.component.scss'],
 })
-export class SideMenuComponent implements AfterViewInit {
+export class SideMenuComponent implements AfterViewInit, OnDestroy {
   public readonly isAdmin$ = this.authService.isAdmin();
+  public readonly isKiosk$ = this.authService.isKiosk();
   isOnStartPage$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   shouldRefresh$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false); // <-- Zmienione na BehaviorSubject
   isFullscreen$: Observable<boolean>;
   isStreamPlaying$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   userSettings$: Observable<UserSettings | null>;
+  private readonly onDestroy$ = new Subject();
   // isAnnouncementPlaying$: Observable<boolean>;
 
   tenants: Tenant[] = [];
@@ -57,17 +58,19 @@ export class SideMenuComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.retryHelperService
-      .withRetry(this.userSettingsService.getAllTenants())
+    this.userSettingsService
+      .getAllTenants()
       .pipe(
+        take(1),
         tap((tenants) => (this.tenants = tenants)),
-        switchMap(() => this.userSettings$),
+        switchMap(() => this.userSettings$.pipe(take(1))),
         tap((settings) => {
           if (settings?.tenant_id) {
             const matchingTenant = this.tenants.find((tenant) => tenant.tenant_id === settings.tenant_id);
 
             if (matchingTenant) {
               this.selectedTenant = matchingTenant;
+              console.log('tutaj 1');
               this.authService.dispatchCurrentTenant(matchingTenant);
               console.log('✅ Domyślny tenant ustawiony:', matchingTenant.tenant_id);
             } else {
@@ -93,6 +96,21 @@ export class SideMenuComponent implements AfterViewInit {
     });
   }
 
+  private initKioskMode(): void {
+    this.authService
+      .isKiosk()
+      .pipe(
+        debounceTime(2000),
+        filter((isKiosk) => isKiosk),
+        tap(() => {
+          this.navigateToStart();
+          this.toggleFullscreen();
+        }),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe();
+  }
+
   onTenantChange(newTenant: Tenant) {
     const previousTenant = this.selectedTenant;
     console.log('🟡 Poprzedni tenant:', previousTenant);
@@ -105,7 +123,9 @@ export class SideMenuComponent implements AfterViewInit {
     this.tenantChangeService.notifyTenantChanged();
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+    this.initKioskMode();
+  }
 
   toggleFullscreen(): void {
     this.fullscreenService.toggleFullscreen();
@@ -140,10 +160,9 @@ export class SideMenuComponent implements AfterViewInit {
     }
   }
 
-  onStartClick(event: MouseEvent): void {
+  onStartClick(): void {
     if (this.isOnStartPage$.value) {
       this.refreshComponents(['swiper', 'footer']);
-      event.preventDefault();
     } else {
       this.navigateToStart();
     }
@@ -173,5 +192,10 @@ export class SideMenuComponent implements AfterViewInit {
     this.auth0Service.logout({
       logoutParams: { returnTo: document.location.origin },
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.onDestroy$.next(void 0);
+    this.onDestroy$.complete();
   }
 }
