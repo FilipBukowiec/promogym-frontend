@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Tenant } from '../../../models/tenant.model';
 import { TenantChangeService } from '../../../services/tenant-change.service';
 import { UserSettingsService } from '../../../services/user-settings.service';
 import { WebSocketService } from '../../../services/websocket.service';
-import { CommonModule } from '@angular/common';
-import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-kiosk-settings',
@@ -19,7 +18,6 @@ export class KioskSettingsComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly webSocketService = inject(WebSocketService);
   private readonly tenantChangeService = inject(TenantChangeService);
-  private readonly cookieService = inject(CookieService);
   private readonly onDestroy$ = new Subject();
   public tenants: Tenant[] = [];
   public selectedTenant: Tenant | null = null;

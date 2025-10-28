@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { jwtDecode } from 'jwt-decode';
-import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { Tenant } from '../../models/tenant.model';
@@ -15,7 +14,7 @@ export class AuthService {
   private readonly currentTenant$ = new BehaviorSubject<Tenant>(null);
   private readonly userInfo$ = new BehaviorSubject<UserInfo>(null);
 
-  constructor(private readonly auth0Service: Auth0Service, private readonly cookieService: CookieService) {}
+  constructor(private readonly auth0Service: Auth0Service) {}
 
   public initUserInfo(): Observable<UserInfo> {
     return combineLatest([this.auth0Service.getAccessTokenSilently(), this.auth0Service.user$]).pipe(
