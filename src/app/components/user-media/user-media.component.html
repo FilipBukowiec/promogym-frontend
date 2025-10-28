@@ -82,7 +82,7 @@
     </table>
   </section>
 
-  @if(!(authService.isPremium$ | async)){
+  @if(!(isPremium$ | async)){
   <section>
     <app-user-advertisements></app-user-advertisements>
   </section>

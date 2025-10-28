@@ -1,0 +1,75 @@
+@use "../../../../styles/variables.scss" as *;
+
+.kiosk-settings {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding: 5rem;
+  &__title {
+    font-size: 24px;
+    color: $secondaryColor;
+  }
+}
+
+i {
+  font-size: 2rem;
+}
+
+i:hover {
+  color: $accentColor;
+}
+
+button {
+  color: $secondaryColor;
+  font-size: 1rem;
+}
+
+button:hover {
+  color: $accentColor;
+}
+
+a {
+  color: $secondaryColor !important;
+  display: flex;
+}
+
+.navbar-toggler {
+  background-color: transparent !important;
+}
+
+.navbar-toggler:hover {
+  opacity: 1 !important;
+}
+
+.dropdown-toggle {
+  background-color: grey;
+  border: none;
+  color: black;
+}
+
+.dropdown-toggle:hover {
+  background-color: $accentColor;
+  color: $secondaryColor;
+}
+
+.dropdown-item {
+  color: red !important;
+}
+
+.dropdown {
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  position: relative; /* Ustawiamy relative, żeby child elementy mogły być pozycjonowane absolutnie względem niego */
+}
+
+/* Styl dla menu dropdown */
+.dropdown-menu {
+  background-color: rgb(255, 255, 255);
+  position: absolute; /* Pozycjonujemy menu absolutnie względem dropdown */
+  top: 100% !important; /* Ustawiamy menu bezpośrednio poniżej przycisku */
+  left: 50% !important; /* Ustawiamy lewy brzeg menu na 50% szerokości kontenera */
+  transform: translateX(-50%) !important; /* Przesuwamy menu o połowę jego szerokości w lewo, aby je wyśrodkować */
+  width: auto; /* Możesz ustawić konkretną szerokość, jeśli to konieczne */
+}

@@ -1,0 +1,15 @@
+<main class="kiosk-settings">
+  <h1 class="kiosk-settings__title">Set tenant</h1>
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+      {{ selectedTenant?.tenant_id || "Choose tenant" }}
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      @for (tenant of tenants; track tenant) {
+      <li>
+        <a class="dropdown-item" (click)="onTenantChange(tenant)"> {{ tenant.tenant_id }} ({{ tenant.country }}) </a>
+      </li>
+      }
+    </ul>
+  </div>
+</main>

@@ -1,34 +1,34 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { Subscription } from "rxjs";
-import { UserSettingsService } from "../../services/user-settings.service";
-import { AdminSettingsService } from "../../services/admin-settings.service";
-import { RadioStreamService } from "../../services/radio-stream.service";
-import { RetryHelperService } from "../../services/retry-helper.service";
-import { UserSettings } from "../../models/user-settings.model";
-import { LoaderComponent } from "../loader/loader.component";
-import { environment } from "../../../environments/environment";
-import { WebSocketService } from "../../services/websocket.service";
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { lastValueFrom, Subscription } from 'rxjs';
+import { UserSettingsService } from '../../services/user-settings.service';
+import { AdminSettingsService } from '../../services/admin-settings.service';
+import { RadioStreamService } from '../../services/radio-stream.service';
+import { RetryHelperService } from '../../services/retry-helper.service';
+import { UserSettings } from '../../models/user-settings.model';
+import { LoaderComponent } from '../loader/loader.component';
+import { environment } from '../../../environments/environment';
+import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
-  selector: "app-user-settings",
+  selector: 'app-user-settings',
   standalone: true,
   imports: [CommonModule, FormsModule, LoaderComponent],
-  templateUrl: "./user-settings.component.html",
-  styleUrls: ["./user-settings.component.scss"],
+  templateUrl: './user-settings.component.html',
+  styleUrls: ['./user-settings.component.scss'],
 })
 export class UserSettingsComponent implements OnInit, OnDestroy {
   userSettings: UserSettings = {
-    tenant_id: "",
-    language: "",
-    country: "",
-    name: "",
-    selectedRadioStream: "",
+    tenant_id: '',
+    language: '',
+    country: '',
+    name: '',
+    selectedRadioStream: '',
     footerVisibilityRules: [],
     pictureSlideDuration: 0,
-    logoFilePath: "",
-    separatorFilePath: "",
+    logoFilePath: '',
+    separatorFilePath: '',
   };
 
   tempLogoFile: File | null = null;
@@ -66,15 +66,13 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe(
-      (index) => {
-        this.currentPlayingStreamIndex = index;
-      }
-    );
+    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
+      this.currentPlayingStreamIndex = index;
+    });
   }
 
   onTenantChange() {
-    console.log("🔄 Tenant zmieniony – przeładowuję dane...");
+    console.log('🔄 Tenant zmieniony – przeładowuję dane...');
     this.loadSettings(); // albo inna metoda
   }
 
@@ -84,24 +82,22 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   loadSettings(): void {
     this.loading = true;
-    this.retryHelper
-      .withRetry(this.userSettingsService.settings$)
-      .subscribe({
-        next: (response) => {
-          if (!response) {
-            this.error = "Brak danych użytkownika.";
-            console.warn("❗ Brak danych ustawień użytkownika.");
-            return;
-          }
-          this.userSettings = response;
-          this.loading = false;
-        },
-        error: (error) => {
-          this.loading = false;
-          this.error = "Nie udało się załadować ustawień użytkownika.";
-          console.error("❌ Błąd podczas pobierania ustawień:", error);
-        },
-      });
+    this.retryHelper.withRetry(this.userSettingsService.settings$).subscribe({
+      next: (response) => {
+        if (!response) {
+          this.error = 'Brak danych użytkownika.';
+          console.warn('❗ Brak danych ustawień użytkownika.');
+          return;
+        }
+        this.userSettings = response;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = 'Nie udało się załadować ustawień użytkownika.';
+        console.error('❌ Błąd podczas pobierania ustawień:', error);
+      },
+    });
   }
 
   getAdminSettings(): void {
@@ -127,11 +123,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   addFooterVisibilityRule(): void {
     if (this.newStartMinute === null || this.newEndMinute === null) {
-      alert("Please select both start and end minutes.");
+      alert('Please select both start and end minutes.');
       return;
     }
     if (this.newStartMinute >= this.newEndMinute) {
-      alert("Start time must be less than end time.");
+      alert('Start time must be less than end time.');
       return;
     }
 
@@ -152,11 +148,11 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     const rule = this.userSettings.footerVisibilityRules[index];
 
     if (rule.startMinute === null || rule.endMinute === null) {
-      alert("Both start and end minutes must be selected.");
+      alert('Both start and end minutes must be selected.');
       return;
     }
     if (rule.startMinute >= rule.endMinute) {
-      alert("Start minute must be less than end minute.");
+      alert('Start minute must be less than end minute.');
       return;
     }
 
@@ -164,9 +160,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   }
 
   deleteFooterVisibilityRule(index: number): void {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this Footer Visibility Rule?"
-    );
+    const confirmDelete = confirm('Are you sure you want to delete this Footer Visibility Rule?');
     if (confirmDelete) {
       this.userSettings.footerVisibilityRules.splice(index, 1);
     }
@@ -174,33 +168,30 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   async saveSettings(): Promise<void> {
     try {
+      debugger;
       if (this.logoMarkedForDeletion) {
-        await this.userSettingsService.deleteLogo("mainlogo").toPromise();
+        await lastValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
         this.logoMarkedForDeletion = false;
         this.tempLogoPreviewUrl = null;
       }
 
       if (this.separatorMarkedForDeletion) {
-        await this.userSettingsService.deleteLogo("separator").toPromise();
+        await lastValueFrom(this.userSettingsService.deleteLogo('separator'));
         this.separatorMarkedForDeletion = false;
         this.tempSeparatorPreviewUrl = null;
       }
 
       if (this.tempLogoFile) {
         if (this.userSettings.logoFilePath) {
-          await this.userSettingsService.deleteLogo("mainlogo").toPromise();
+          await lastValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
         }
 
-        const res = await this.userSettingsService
-          .uploadLogo(this.tempLogoFile, "mainlogo")
-          .toPromise();
+        const res = await lastValueFrom(this.userSettingsService.uploadLogo(this.tempLogoFile, 'mainlogo'));
 
         if (res) {
           this.userSettings = res;
           if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `${environment.publicUrl}${
-              this.userSettings.logoFilePath
-            }?t=${Date.now()}`;
+            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath}?t=${Date.now()}`;
           }
         }
 
@@ -209,19 +200,15 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
       if (this.tempSeparatorFile) {
         if (this.userSettings.separatorFilePath) {
-          await this.userSettingsService.deleteLogo("separator").toPromise();
+          await lastValueFrom(this.userSettingsService.deleteLogo('separator'));
         }
 
-        const res = await this.userSettingsService
-          .uploadLogo(this.tempSeparatorFile, "separator")
-          .toPromise();
+        const res = await lastValueFrom(this.userSettingsService.uploadLogo(this.tempSeparatorFile, 'separator'));
 
         if (res) {
           this.userSettings = res;
           if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${
-              this.userSettings.separatorFilePath
-            }?t=${Date.now()}`;
+            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath}?t=${Date.now()}`;
           }
         }
 
@@ -230,17 +217,17 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
       this.userSettingsService.updateSettings(this.userSettings).subscribe({
         next: () => {
-          alert("Settings saved successfully");
+          alert('Settings saved successfully');
           this.loadSettings();
         },
         error: (error) => {
-          console.error("Błąd podczas zapisywania", error);
-          alert("Błąd podczas zapisywania ustawień. Spróbuj ponownie później.");
+          console.error('Błąd podczas zapisywania', error);
+          alert('Błąd podczas zapisywania ustawień. Spróbuj ponownie później.');
         },
       });
     } catch (err) {
-      console.error("Błąd podczas zapisu:", err);
-      alert("Błąd podczas zapisu. Spróbuj ponownie.");
+      console.error('Błąd podczas zapisu:', err);
+      alert('Błąd podczas zapisu. Spróbuj ponownie.');
     }
   }
 
@@ -251,13 +238,13 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   playRadioStream(): void {}
 
-  onFileSelected(event: Event, type: "mainlogo" | "separator"): void {
+  onFileSelected(event: Event, type: 'mainlogo' | 'separator'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const url = URL.createObjectURL(file);
 
-      if (type === "mainlogo") {
+      if (type === 'mainlogo') {
         this.tempLogoFile = file;
         this.tempLogoPreviewUrl = url;
       } else {
@@ -269,22 +256,20 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteLogo(type: "mainlogo" | "separator"): void {
-    const confirmed = confirm(
-      `Are you sure you want to mark the ${type} logo for deletion?`
-    );
+  deleteLogo(type: 'mainlogo' | 'separator'): void {
+    const confirmed = confirm(`Are you sure you want to mark the ${type} logo for deletion?`);
     if (!confirmed) return;
 
-    if (type === "mainlogo") {
+    if (type === 'mainlogo') {
       this.logoMarkedForDeletion = true;
-      this.userSettings.logoFilePath = "";
+      this.userSettings.logoFilePath = '';
       this.tempLogoPreviewUrl = null;
       this.tempLogoFile = null;
     }
 
-    if (type === "separator") {
+    if (type === 'separator') {
       this.separatorMarkedForDeletion = true;
-      this.userSettings.separatorFilePath = "";
+      this.userSettings.separatorFilePath = '';
       this.tempSeparatorPreviewUrl = null;
       this.tempSeparatorFile = null;
     }
@@ -292,6 +277,5 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
-    
   }
 }
