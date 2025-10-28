@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, switchMap, take, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/auth.service';
 import { Tenant } from '../models/tenant.model';
 import { UserSettings } from '../models/user-settings.model';
-import { RetryHelperService } from './retry-helper.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,22 +19,19 @@ export class UserSettingsService {
 
   public initSettings(): Observable<UserSettings> {
     return this.authService.selectCurrentTenant().pipe(
-      take(1),
+      distinctUntilChanged(),
       switchMap((currentTenant) => {
         return this.http.get<UserSettings>(`${this.apiUrl}`).pipe(
           tap((settings) => {
             if (settings.country !== currentTenant.country) {
               settings.country = currentTenant.country || '';
-
-              // this.updateSettings(settings).subscribe((updatedSettings) => {
-              // this.settingsSubject.next(updatedSettings);
-              // });
             }
-
             this.settingsSubject.next(settings);
           })
         );
       }),
+      switchMap((settings) => this.updateSettings(settings)),
+      tap((updatedSettings) => this.settingsSubject.next(updatedSettings)),
       catchError((error) => {
         if (error.status === 404) {
           return this.createDefaultSettings();
