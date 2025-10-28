@@ -70,9 +70,9 @@ export class MediaService {
         })
       );
 
-    return combineLatest([this.auth.isPremiumUser(), this.auth.selectCurrentTenant()]).pipe(
-      switchMap(([isPremium, currentTenant]) =>
-        iif(() => isPremium, premiumRequest$(currentTenant.tenant_id), nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country))
+    return combineLatest([this.auth.isStandardUser(), this.auth.selectCurrentTenant()]).pipe(
+      switchMap(([isStandardUser, currentTenant]) =>
+        iif(() => isStandardUser, nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country), premiumRequest$(currentTenant.tenant_id))
       )
     );
   }
