@@ -9,7 +9,6 @@ export const userDataInterceptor: HttpInterceptorFn = (req, next) => {
     switchMap(([isAdmin, isKiosk]) => iif(() => isAdmin || isKiosk, authService.selectCurrentTenant().pipe(take(1)), authService.selectUserInfo())),
     switchMap((data) => {
       if (data) {
-        console.log(req);
         const cloned = req.clone({
           setHeaders: {
             'tenant-id': data.tenant_id,
