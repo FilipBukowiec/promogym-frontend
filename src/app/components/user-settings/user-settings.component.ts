@@ -10,6 +10,7 @@ import { UserSettings } from '../../models/user-settings.model';
 import { LoaderComponent } from '../loader/loader.component';
 import { environment } from '../../../environments/environment';
 import { WebSocketService } from '../../services/websocket.service';
+import { FacebookService } from '../../services/facebook.service';
 
 @Component({
   selector: 'app-user-settings',
@@ -60,8 +61,9 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     public radioStreamService: RadioStreamService,
     private cdr: ChangeDetectorRef,
     private retryHelper: RetryHelperService,
-    private webSocketService: WebSocketService
-  ) {}
+    private webSocketService: WebSocketService,
+    private facebookService: FacebookService
+  ) { }
 
   ngOnInit(): void {
     this.loadSettings();
@@ -236,7 +238,7 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     this.selectedRadioIndex = selectedElement.selectedIndex;
   }
 
-  playRadioStream(): void {}
+  playRadioStream(): void { }
 
   onFileSelected(event: Event, type: 'mainlogo' | 'separator'): void {
     const input = event.target as HTMLInputElement;
@@ -275,7 +277,20 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     }
   }
 
+
+  async facebooklogin() {
+    try {
+      const userToken = await this.facebookService.login();
+      console.log('User token:', userToken);
+    } catch (err) {
+      console.error('Login failed', err);
+    }
+
+  }
+
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
   }
+
+
 }
