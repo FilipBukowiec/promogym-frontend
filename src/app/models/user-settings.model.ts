@@ -20,4 +20,6 @@ export interface UserSettings {
   // location?: Location;
 logoFilePath: string;
 separatorFilePath: string;
+enableFbModule: boolean;
+
 }

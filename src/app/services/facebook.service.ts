@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Story } from '../models/story.model';
+import { FacebookPage, FacebookStory } from '../models/facebook.model';
+import { environment } from '../../environments/environment';
+
 
 declare const FB: any;
 
@@ -10,12 +12,9 @@ declare const FB: any;
   providedIn: 'root'
 })
 export class FacebookService {
-  private apiUrl = 'http://localhost:3000/facebook/stories';
+  private apiUrl = `${environment.apiUrl}facebook`;
 
   constructor(private httpClient: HttpClient) { }
-
-
-
 
   waitForFBInit(): Promise<void> {
     return new Promise((resolve) => {
@@ -24,7 +23,6 @@ export class FacebookService {
       }
     })
   }
-
 
 
   async login(): Promise<string> {
@@ -39,12 +37,21 @@ export class FacebookService {
         }
       },
         {
-          scope: 'pages_show_list,pages_read_engagement,pages_read_user_content'
+          scope: 'pages_show_list,pages_read_engagement,pages_read_user_content,business_management'
         })
     })
   }
 
-  getStories(userToken: string, pageId: string): Observable<Story[]> {
-    return this.httpClient.post<Story[]>(this.apiUrl, { userToken, pageId })
+  getPages(userToken: string): Observable<FacebookPage[]> {
+    return this.httpClient.get<FacebookPage[]>(`${this.apiUrl}/pages`, {
+      params: { userToken: userToken }
+    });
+  }
+
+
+  getStories(userToken: string, pageId: string): Observable<FacebookStory[]> {
+    return this.httpClient.get<FacebookStory[]>(`${this.apiUrl}/stories`, {
+      params: { userToken, pageId }
+    });
   }
 }
