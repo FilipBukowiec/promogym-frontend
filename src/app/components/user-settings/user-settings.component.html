@@ -13,7 +13,7 @@
 
     <button (click)="liveUpdate()">Live update</button>
   </section>
-  
+
   <section>
     <h2>Settings guide tutorial</h2>
     <br />
@@ -51,12 +51,7 @@
       <tr>
         <td>
           <label for="radioSelect">Selected radio stream:</label><br />
-          <select 
-            class="radio-name" 
-            id="radioSelect" 
-            [(ngModel)]="userSettings().selectedRadioStream" 
-            (change)="updateSelectedIndex($event)"
-          >
+          <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings().selectedRadioStream" (change)="updateSelectedIndex($event)">
             <option [disabled]="true" value="">Select radio stream</option>
             <option *ngFor="let radio of radioStreamList(); let i = index" [value]="radio.url">
               {{ radio.description }}
@@ -104,44 +99,63 @@
       </tr>
     </table>
 
-
     <table>
-      <caption>Access for facebook module</caption>
+      <caption>
+        Access for facebook module
+      </caption>
       <tr>
-        <td>
+        <td colspan="2" class="dupa">
           <label for="enableFb">Enable Facebook module</label>
-          <input 
-            id="enableFb" 
-            type="checkbox" 
-            [(ngModel)]="userSettings().enableFbModule"
-          >
+          <input id="enableFb" type="checkbox" [(ngModel)]="userSettings().enableFacebookModule" />
         </td>
       </tr>
-      <tr>
+
+@if(userSettings().enableFacebookModule){
+  <tr>
+    <td>Aktualna strona: 
+      @if(userSettings().selectedFacebookPage !== null 
+          && userSettings().selectedFacebookPage !== '' 
+          && userSettings().selectedFacebookPage !== undefined){ 
+        
+        {{ userSettings().selectedFacebookPage }}
+      } @else { 
+        You should get acces and choose the facebook page
+      }
+    </td>
+  </tr>
+ <tr>
         <td>
-            <button (click)="facebooklogin()">Login to Facebook to get actual page access</button>
-            <div *ngIf="error()" style="color: red; margin-top: 5px;">{{ error() }}</div>
+          <button (click)="facebooklogin()">Login to Facebook to get actual page access</button>
+          <div *ngIf="error()" style="color: red; margin-top: 5px">{{ error() }}</div>
         </td>
       </tr>
 
       @if(fbUserToken() && fbPages().length > 0){
-        <tr>
-          <td>
-            <label for="fbPageSelect">Choose the page to show in the slider</label><br>
-            
-            <select id="fbPageSelect" [(ngModel)]="selectedPageId">
-               <option value="" disabled selected>Select available page</option>
-               <option *ngFor="let page of fbPages()" [value]="page.id">
-                 {{ page.name }}
-               </option>
-            </select> 
-          </td>
+      <tr>
+        <td>
+          <label for="fbPageSelect">Choose the page to show in the slider</label><br />
 
-          <td>
-            <button (click)="saveSettings()">Set access to database</button>
-          </td>
+          <select id="fbPageSelect" [(ngModel)]="selectedFacebookPage" (ngModelChange)="onPageSelected($event)">
+            <option *ngFor="let page of fbPages()" [ngValue]="page">
+              {{ page.name }}
+            </option>
+          </select>
+        </td>
         </tr>
       }
+
+
+
+
+
+
+}
+
+
+
+ 
+
+     
     </table>
 
     <table>
@@ -190,9 +204,7 @@
               <option *ngFor="let minute of time" [value]="minute">{{ minute }}</option>
             </select>
           </ng-container>
-          <ng-template #displayRule>
-            Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }}
-          </ng-template>
+          <ng-template #displayRule> Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }} </ng-template>
         </td>
         <td>
           <div class="icon-container">

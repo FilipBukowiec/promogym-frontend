@@ -56,7 +56,10 @@ export class UserSettingsService {
           pictureSlideDuration: 15,
           logoFilePath: '',
           separatorFilePath: '',
-          enableFbModule: false,
+          enableFacebookModule: false,
+          selectedFacebookPage: null,
+          facebookPageId: null,
+          facebookPageAccess: null
         };
 
         return this.http.post<UserSettings>(this.apiUrl, defaultSettings).pipe(tap((createdSettings) => this.settingsSubject.next(createdSettings)));

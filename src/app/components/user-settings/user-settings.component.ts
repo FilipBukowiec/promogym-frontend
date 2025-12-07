@@ -28,7 +28,7 @@ export class UserSettingsComponent implements OnInit {
   private userSettingsService = inject(UserSettingsService);
   private adminSettingsService = inject(AdminSettingsService);
   // radioStreamService musi być public, aby był dostępny w szablonie (.html)
-  public radioStreamService = inject(RadioStreamService); 
+  public radioStreamService = inject(RadioStreamService);
   private retryHelper = inject(RetryHelperService);
   private webSocketService = inject(WebSocketService);
   private facebookService = inject(FacebookService);
@@ -36,7 +36,7 @@ export class UserSettingsComponent implements OnInit {
   public environmentPublicUrl = environment.publicUrl;
 
   // --- STAN APLIKACJI (SYGNAŁY) ---
-  
+
   // 1. Główne Ustawienia (Zawsze Sygnał)
   userSettings = signal<UserSettings>({
     tenant_id: '',
@@ -48,14 +48,17 @@ export class UserSettingsComponent implements OnInit {
     pictureSlideDuration: 0,
     logoFilePath: '',
     separatorFilePath: '',
-    enableFbModule: false,
+    enableFacebookModule: false,
+    selectedFacebookPage: null,
+    facebookPageAccess: null,
+    facebookPageId: null,
   });
 
   // 2. Stan UI i Pól Tymczasowych
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   editUserName = signal<boolean>(false);
-  
+
   // Pliki i Podglądy (Sygnały)
   tempLogoFile = signal<File | null>(null);
   tempSeparatorFile = signal<File | null>(null);
@@ -63,45 +66,37 @@ export class UserSettingsComponent implements OnInit {
   tempSeparatorPreviewUrl = signal<string | null>(null);
   logoMarkedForDeletion = signal<boolean>(false);
   separatorMarkedForDeletion = signal<boolean>(false);
-  
+
   // Pola formularzy tymczasowych (Sygnały)
   newStartMinute = signal<number | null>(null);
   newEndMinute = signal<number | null>(null);
   editFooterVisibilityIndex = signal<number | null>(null);
-  
+
   // 3. Dane Administracyjne i Strumienie (Sygnały)
   languages = signal<string[]>([]);
   radioStreamList = signal<{ url: string; description: string }[]>([]);
-  
+
   // selectedRadioIndex, fbPages, fbUserToken muszą być Sygnałami!
-  selectedRadioIndex = signal<number | null>(null); 
+  selectedRadioIndex = signal<number | null>(null);
   fbPages = signal<FacebookPage[]>([]);
   fbUserToken = signal<string | null>(null);
-  selectedPageId = signal<string | null>(null); // Dodajemy do wiązania w HTML
+  selectedFacebookPage = signal<FacebookPage | null>(null); // Dodajemy do wiązania w HTML
 
   // Konwersja RxJS Observable na Sygnał (automatyczne zarządzanie subskrypcją)
   currentPlayingStreamIndex = toSignal(this.radioStreamService.currentPlayingStreamIndexState$, { initialValue: null });
 
-
   // Stała tablica minut
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
-
 
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    // Brak subskrypcji tutaj, ponieważ currentPlayingStreamIndex używa toSignal
   }
-
-  // W Sygnałach nie jest potrzebne, usunęliśmy implementację OnDestroy
-  // ngOnDestroy(): void { } 
 
   onTenantChange() {
     console.log('🔄 Tenant zmieniony – przeładowuję dane...');
     this.loadSettings();
   }
-
-  // --- LOGIKA POBIERANIA DANYCH ---
 
   loadSettings(): void {
     this.loading.set(true);
@@ -120,7 +115,7 @@ export class UserSettingsComponent implements OnInit {
         this.loading.set(false);
         this.error.set('Nie udało się załadować ustawień.');
         console.error('❌ Błąd podczas pobierania ustawień:', err);
-      }
+      },
     });
   }
 
@@ -131,7 +126,7 @@ export class UserSettingsComponent implements OnInit {
           this.languages.set(adminSettings.languages || []);
           this.radioStreamList.set(adminSettings.radioStreamList || []);
         }
-      }
+      },
     });
   }
 
@@ -148,9 +143,9 @@ export class UserSettingsComponent implements OnInit {
   updateSelectedIndex(event: Event): void {
     const selectedElement = event.target as HTMLSelectElement;
     // Aktualizujemy Sygnał
-    this.selectedRadioIndex.set(selectedElement.selectedIndex); 
+    this.selectedRadioIndex.set(selectedElement.selectedIndex);
   }
-  
+
   // ... reszta prostych metod (playRadioStream)
 
   // --- ZARZĄDZANIE REGUŁAMI STOPKI (Mutacja tablic wewnątrz Sygnału) ---
@@ -169,12 +164,9 @@ export class UserSettingsComponent implements OnInit {
     }
 
     // Używamy .update() do bezpiecznej mutacji obiektu wewnątrz Sygnału
-    this.userSettings.update(current => ({
+    this.userSettings.update((current) => ({
       ...current,
-      footerVisibilityRules: [
-        ...current.footerVisibilityRules,
-        { startMinute: start, endMinute: end }
-      ]
+      footerVisibilityRules: [...current.footerVisibilityRules, { startMinute: start, endMinute: end }],
     }));
 
     this.newStartMinute.set(null);
@@ -192,7 +184,7 @@ export class UserSettingsComponent implements OnInit {
 
   deleteFooterVisibilityRule(index: number): void {
     if (confirm('Are you sure you want to delete this Footer Visibility Rule?')) {
-      this.userSettings.update(current => {
+      this.userSettings.update((current) => {
         const newRules = [...current.footerVisibilityRules];
         newRules.splice(index, 1);
         return { ...current, footerVisibilityRules: newRules };
@@ -221,18 +213,18 @@ export class UserSettingsComponent implements OnInit {
   deleteLogo(type: 'mainlogo' | 'separator'): void {
     if (!confirm(`Are you sure you want to mark the ${type} logo for deletion?`)) return;
 
-    this.userSettings.update(settings => {
-        if (type === 'mainlogo') {
-            this.logoMarkedForDeletion.set(true);
-            this.tempLogoPreviewUrl.set(null);
-            this.tempLogoFile.set(null);
-            return { ...settings, logoFilePath: '' };
-        } else {
-            this.separatorMarkedForDeletion.set(true);
-            this.tempSeparatorPreviewUrl.set(null);
-            this.tempSeparatorFile.set(null);
-            return { ...settings, separatorFilePath: '' };
-        }
+    this.userSettings.update((settings) => {
+      if (type === 'mainlogo') {
+        this.logoMarkedForDeletion.set(true);
+        this.tempLogoPreviewUrl.set(null);
+        this.tempLogoFile.set(null);
+        return { ...settings, logoFilePath: '' };
+      } else {
+        this.separatorMarkedForDeletion.set(true);
+        this.tempSeparatorPreviewUrl.set(null);
+        this.tempSeparatorFile.set(null);
+        return { ...settings, separatorFilePath: '' };
+      }
     });
   }
 
@@ -240,7 +232,7 @@ export class UserSettingsComponent implements OnInit {
 
   async saveSettings(): Promise<void> {
     this.loading.set(true);
-    
+
     try {
       // 1. Obsługa usuwania logo (aktualizacja Sygnałów po sukcesie)
       if (this.logoMarkedForDeletion()) {
@@ -257,37 +249,39 @@ export class UserSettingsComponent implements OnInit {
       const logoFile = this.tempLogoFile();
       if (logoFile) {
         if (this.userSettings().logoFilePath) {
-             try { await firstValueFrom(this.userSettingsService.deleteLogo('mainlogo')); } catch(e) {}
+          try {
+            await firstValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
+          } catch (e) {}
         }
-        
+
         const res = await firstValueFrom(this.userSettingsService.uploadLogo(logoFile, 'mainlogo'));
         if (res) {
-            this.userSettings.set(res);
-            this.tempLogoPreviewUrl.set(`${this.environmentPublicUrl}${res.logoFilePath}?t=${Date.now()}`);
+          this.userSettings.set(res);
+          this.tempLogoPreviewUrl.set(`${this.environmentPublicUrl}${res.logoFilePath}?t=${Date.now()}`);
         }
         this.tempLogoFile.set(null);
       }
-      
+
       const sepFile = this.tempSeparatorFile();
       if (sepFile) {
         if (this.userSettings().separatorFilePath) {
-             try { await firstValueFrom(this.userSettingsService.deleteLogo('separator')); } catch(e) {}
+          try {
+            await firstValueFrom(this.userSettingsService.deleteLogo('separator'));
+          } catch (e) {}
         }
         const res = await firstValueFrom(this.userSettingsService.uploadLogo(sepFile, 'separator'));
         if (res) {
-             this.userSettings.set(res);
-             this.tempSeparatorPreviewUrl.set(`${this.environmentPublicUrl}${res.separatorFilePath}?t=${Date.now()}`);
+          this.userSettings.set(res);
+          this.tempSeparatorPreviewUrl.set(`${this.environmentPublicUrl}${res.separatorFilePath}?t=${Date.now()}`);
         }
         this.tempSeparatorFile.set(null);
       }
 
-
       // 3. Zapis głównych ustawień
       await firstValueFrom(this.userSettingsService.updateSettings(this.userSettings()));
-      
-      alert('Settings saved successfully');
-      this.loadSettings(); 
 
+      alert('Settings saved successfully');
+      this.loadSettings();
     } catch (err) {
       console.error('Save error:', err);
       alert('Error saving settings.');
@@ -302,27 +296,48 @@ export class UserSettingsComponent implements OnInit {
     this.error.set(null);
     this.loading.set(true);
 
-    this.facebookService.login() // Promise
-      .then(userToken => {
+    this.facebookService
+      .login() // Promise
+      .then((userToken) => {
         this.fbUserToken.set(userToken); // Zapis tokenu do Sygnału
 
-        this.facebookService.getPages(userToken).subscribe({ // Observable
-            next: (pages) => {
-                this.fbPages.set(pages); // Zapis stron do Sygnału
-                this.loading.set(false);
-            },
-            error: (err) => {
-                this.error.set('Błąd pobierania stron FB.');
-                this.loading.set(false);
-                console.error('❌ Błąd w subskrypcji stron:', err);
-            }
+        this.facebookService.getPages(userToken).subscribe({
+          // Observable
+          next: (pages) => {
+            this.fbPages.set(pages); // Zapis stron do Sygnału
+            this.loading.set(false);
+            console.log('nowe strony:', pages);
+          },
+          error: (err) => {
+            this.error.set('Błąd pobierania stron FB.');
+            this.loading.set(false);
+            console.error('❌ Błąd w subskrypcji stron:', err);
+          },
         });
       })
-      .catch(err => {
-          this.error.set('Logowanie FB anulowane lub nieudane.');
-          this.loading.set(false);
-          console.error('❌ Błąd w logowaniu (Promise):', err);
+      .catch((err) => {
+        this.error.set('Logowanie FB anulowane lub nieudane.');
+        this.loading.set(false);
+        console.error('❌ Błąd w logowaniu (Promise):', err);
       });
+  }
+
+  onPageSelected(selectedPage: FacebookPage | null): void {
+    this.selectedFacebookPage.set(selectedPage);
+    this.userSettings.update((current) => {
+      if (selectedPage) {
+        return { ...current, selectedFacebookPage: selectedPage.name, facebookPageAccess: selectedPage.page_token, facebookPageId: selectedPage.id };
+      } else {
+        return {
+          ...current,
+          selectedFacebookPage: null,
+          facebookPageAccess: null,
+          facebookPageId: null,
+        };
+      }
+    });
+
+    console.log('✅ Ustawienia FB zaktualizowane lokalnie:', this.userSettings());
   }
 
   liveUpdate(): void {
