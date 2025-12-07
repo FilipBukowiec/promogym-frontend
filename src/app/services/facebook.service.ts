@@ -48,9 +48,8 @@ export class FacebookService {
   }
 
   getPages(userToken: string): Observable<FacebookPage[]> {
-    return this.httpClient.get<FacebookPage[]>(`${this.apiUrl}/pages`, {
-      params: { userToken: userToken },
-    });
+   const body = { userToken: userToken };
+    return this.httpClient.post<FacebookPage[]>(`${this.apiUrl}/pages`, body);
   }
 
   getStories(pageToken: string, pageId: string): Observable<FacebookStory[]> {
