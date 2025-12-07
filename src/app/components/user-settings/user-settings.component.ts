@@ -12,7 +12,7 @@ import { RetryHelperService } from '../../services/retry-helper.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { FacebookService } from '../../services/facebook.service';
 import { UserSettings } from '../../models/user-settings.model';
-import { FacebookPage } from '../../models/facebook.model';
+import { FacebookPage, FacebookStory } from '../../models/facebook.model';
 import { LoaderComponent } from '../loader/loader.component';
 import { environment } from '../../../environments/environment';
 
@@ -52,6 +52,7 @@ export class UserSettingsComponent implements OnInit {
     selectedFacebookPage: null,
     facebookPageAccess: null,
     facebookPageId: null,
+    facebookPageAdress: null,
   });
 
   // 2. Stan UI i Pól Tymczasowych
@@ -326,19 +327,36 @@ export class UserSettingsComponent implements OnInit {
     this.selectedFacebookPage.set(selectedPage);
     this.userSettings.update((current) => {
       if (selectedPage) {
-        return { ...current, selectedFacebookPage: selectedPage.name, facebookPageAccess: selectedPage.page_token, facebookPageId: selectedPage.id };
+        return { ...current, selectedFacebookPage: selectedPage.name, facebookPageAccess: selectedPage.page_token, facebookPageId: selectedPage.id, facebookPageAdress:selectedPage.link };
       } else {
         return {
           ...current,
           selectedFacebookPage: null,
           facebookPageAccess: null,
           facebookPageId: null,
+          facebookPageAdress: null,
         };
       }
     });
 
     console.log('✅ Ustawienia FB zaktualizowane lokalnie:', this.userSettings());
   }
+
+getFacebookStories(pageToken: string, pageId: string): void {
+   this.facebookService.getStories(pageToken, pageId).subscribe({
+    next: (stories: FacebookStory[]) => {
+      console.log('Liczba Stories:', stories.length);
+      console.log(stories)
+    },
+    error: (err) => {
+      console.error('❌ Błąd podczas pobierania Stories:', err);
+    },
+    complete: () => {
+      console.log('Pobieranie Stories zakończone.');
+    }
+   })
+
+}
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();

@@ -59,7 +59,8 @@ export class UserSettingsService {
           enableFacebookModule: false,
           selectedFacebookPage: null,
           facebookPageId: null,
-          facebookPageAccess: null
+          facebookPageAccess: null,
+          facebookPageAdress: null
         };
 
         return this.http.post<UserSettings>(this.apiUrl, defaultSettings).pipe(tap((createdSettings) => this.settingsSubject.next(createdSettings)));

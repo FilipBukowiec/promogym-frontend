@@ -1,9 +1,6 @@
 export interface FacebookStory {
-    postId: string;
-    status: string;
-    medaType: 'photo' | 'video';
+    mediaType: 'photo' | 'video';
     mediaUrl: string;
-    storyUrl: string;
 }
 
 
@@ -12,5 +9,6 @@ export interface FacebookPage {
     name: string;
     page_token: string;
     category?: string;
+    link?: string
 
 }

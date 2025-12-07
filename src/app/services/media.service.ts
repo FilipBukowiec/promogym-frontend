@@ -7,6 +7,7 @@ import { AuthService } from '../auth/services/auth.service';
 import { Advertisement } from '../models/advertisement.model';
 import { Library } from '../models/library.model';
 import { Media } from '../models/media.model';
+import { FacebookStory } from '../models/facebook.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,7 @@ export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
   private apiUrl3 = `${environment.apiUrl}library`;
+  private apiUrl4 = `${environment.apiUrl}stories`
 
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
@@ -37,7 +39,9 @@ export class MediaService {
 
   public getFilesForSwiper(): Observable<Media[]> {
     const premiumRequest$ = (tenantId: string) =>
-      zip([this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`), this.http.get<Media[]>(this.apiUrl)]).pipe(
+      zip([
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`), 
+        this.http.get<Media[]>(this.apiUrl)]).pipe(
         map(([media, library]) => {
           const lastOrder = media.length > 0 ? Math.max(...media.map((item) => item.order)) : 0;
           const libraryAsMedia = library.map((item, index) => ({
@@ -50,6 +54,7 @@ export class MediaService {
       );
     const nonPremiumRequest$ = (tenantId: string, country: string) =>
       zip([
+        // tu chce dodać stories
         this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
         this.http.get<Media[]>(this.apiUrl),
         this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`),

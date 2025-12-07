@@ -21,5 +21,6 @@ export interface UserSettings {
   enableFacebookModule: boolean;
   selectedFacebookPage: string | null;
   facebookPageAccess: string | null;
-  facebookPageId: string | null
+  facebookPageId: string | null;
+  facebookPageAdress: string | null
 }
