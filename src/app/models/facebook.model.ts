@@ -1,14 +1,15 @@
 export interface FacebookStory {
-    mediaType: 'photo' | 'video';
-    mediaUrl: string;
+  fileType: string;
+  mediaUrl: string;
+  filePath: string;
+  isStory: boolean;
+  storyMediaType: 'video' | 'photo';
 }
 
-
 export interface FacebookPage {
-    id: string;
-    name: string;
-    page_token: string;
-    category?: string;
-    link?: string
-
+  id: string;
+  name: string;
+  page_token: string;
+  category?: string;
+  link?: string;
 }

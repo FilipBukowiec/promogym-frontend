@@ -59,7 +59,7 @@ export class MediaService {
         this.http.get<Media[]>(this.apiUrl),
         this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`),
       ]).pipe(
-        map(([media, ads, library]) => {
+        map(([library, media, ads, ]) => {
           const lastOrder = media.length > 0 ? Math.max(...media.map((item) => item.order)) : 0;
           const adsAsMedia = ads.map((ad, index) => ({
             ...ad,
