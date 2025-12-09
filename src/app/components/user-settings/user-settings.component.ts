@@ -358,6 +358,22 @@ getFacebookStories(pageToken: string, pageId: string): void {
 
 }
 
+getRandomStory(pageToken: string, pageId: string): void {
+   this.facebookService.getRandomStory(pageToken, pageId).subscribe({
+    next: (story: FacebookStory) => {
+     
+      console.log(story)
+    },
+    error: (err) => {
+      console.error('❌ Błąd podczas pobierania Stories:', err);
+    },
+    complete: () => {
+      console.log('Pobieranie Stories zakończone.');
+    }
+   })
+
+}
+
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();
   }

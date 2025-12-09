@@ -56,4 +56,9 @@ export class FacebookService {
     const body = { pageToken, pageId };
     return this.httpClient.post<FacebookStory[]>(`${this.apiUrl}/stories`, body);
   }
+  getRandomStory(pageToken: string, pageId: string): Observable<FacebookStory> {
+    const body = { pageToken, pageId };
+    return this.httpClient.post<FacebookStory>(`${this.apiUrl}/stories/random`, body);
+  }
+
 }
