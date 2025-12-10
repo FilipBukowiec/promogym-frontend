@@ -74,7 +74,8 @@ export class SwiperComponent implements OnInit, OnDestroy {
     }
   }
 
-  public initializeSwiper(): void {
+public initializeSwiper(): void {
+    // ... (inicjalizacja i definicja loadedMediaCount, checkIfAllMediaLoaded) ...
     const swiperWrapper = document.querySelector('.swiper-wrapper') as HTMLElement;
     if (!swiperWrapper) return;
 
@@ -89,45 +90,59 @@ export class SwiperComponent implements OnInit, OnDestroy {
         this.initializeSwiperInstance();
       }
     };
-
+    
+    // START PĘTLI
     this.media.forEach((element) => {
-      const slide = document.createElement('div');
-      slide.classList.add('swiper-slide');
-      const filePath = `${environment.publicUrl}${element.filePath}`;
+        const slide = document.createElement('div');
+        slide.classList.add('swiper-slide');
 
-      if (element.filePath.endsWith('.mp4') || element.filePath.endsWith('.mov')) {
-        const videoElement = document.createElement('video');
-        videoElement.src = filePath;
-        videoElement.muted = true;
-        videoElement.setAttribute('playsinline', '');
-        // videoElement.setAttribute('autoplay', '');
-        videoElement.setAttribute('preload', 'auto');
-        videoElement.style.width = '100vw';
-        videoElement.style.height = '100%';
-        videoElement.style.objectFit = 'cover';
-        slide.appendChild(videoElement);
+        // Zmienna, którą będziemy używać w <video> lub <img>
+        let filePath: string; 
 
-        videoElement.addEventListener('loadeddata', () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        });
-      } else {
-        const imgElement = document.createElement('img');
-        imgElement.src = filePath;
-        imgElement.style.width = '100vw';
-        imgElement.style.height = '100%';
-        imgElement.style.objectFit = 'cover';
-        slide.appendChild(imgElement);
+        // SPRAWDZENIE OPARTY O ISTNIENIE I WARTOŚĆ 'isStory'
+        if (element.isStory) {
+            // 1. STORY (isStory jest true): URL jest już kompletny (z tokenami FB/IG)
+            filePath = element.filePath; 
+        } else {
+            // 2. LOKALNE MEDIA (isStory jest false lub undefined): Dodajemy prefiks
+            filePath = `${environment.publicUrl}${element.filePath}`; 
+        }
 
-        imgElement.onload = () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        };
-      }
+        // --- DALSZA LOGIKA (NIEZMIENIONA) ---
+        const isVideo = element.fileType.startsWith('video/');
 
-      swiperWrapper.appendChild(slide);
+        if (isVideo) { 
+            const videoElement = document.createElement('video');
+            videoElement.src = filePath;
+            videoElement.muted = true;
+            videoElement.setAttribute('playsinline', '');
+            videoElement.setAttribute('preload', 'auto');
+            videoElement.style.width = '100vw';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'cover';
+            slide.appendChild(videoElement);
+
+            videoElement.addEventListener('loadeddata', () => {
+                loadedMediaCount++;
+                checkIfAllMediaLoaded();
+            });
+        } else {
+            const imgElement = document.createElement('img');
+            imgElement.src = filePath;
+            imgElement.style.width = '100vw';
+            imgElement.style.height = '100%';
+            imgElement.style.objectFit = 'cover';
+            slide.appendChild(imgElement);
+
+            imgElement.onload = () => {
+                loadedMediaCount++;
+                checkIfAllMediaLoaded();
+            };
+        }
+
+        swiperWrapper.appendChild(slide);
     });
-  }
+}
 
   public initializeSwiperInstance(): void {
     if (!this.mySwiper) {

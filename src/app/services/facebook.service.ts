@@ -12,7 +12,7 @@ declare const FB: any;
 export class FacebookService {
   private apiUrl = `${environment.apiUrl}facebook`;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
 
   waitForFBInit(): Promise<void> {
     return new Promise((resolve) => {
@@ -48,7 +48,7 @@ export class FacebookService {
   }
 
   getPages(userToken: string): Observable<FacebookPage[]> {
-   const body = { userToken: userToken };
+    const body = { userToken: userToken };
     return this.httpClient.post<FacebookPage[]>(`${this.apiUrl}/pages`, body);
   }
 
@@ -56,9 +56,10 @@ export class FacebookService {
     const body = { pageToken, pageId };
     return this.httpClient.post<FacebookStory[]>(`${this.apiUrl}/stories`, body);
   }
+
+
   getRandomStory(pageToken: string, pageId: string): Observable<FacebookStory> {
     const body = { pageToken, pageId };
-    return this.httpClient.post<FacebookStory>(`${this.apiUrl}/stories/random`, body);
+    return this.httpClient.post<FacebookStory>(`${this.apiUrl}/stories/random`, body)
   }
-
 }

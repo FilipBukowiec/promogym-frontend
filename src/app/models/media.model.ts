@@ -6,5 +6,4 @@ export interface Media {
   order: number;
   tenant_id?: string;
   isStory?: boolean;
-  storyMediaType?: 'video' | 'photo';
 }

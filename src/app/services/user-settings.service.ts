@@ -15,7 +15,7 @@ export class UserSettingsService {
   private settingsSubject = new BehaviorSubject<UserSettings | null>(null);
   settings$ = this.settingsSubject.asObservable().pipe(filter((settings) => !!settings));
 
-  constructor(private http: HttpClient, private readonly authService: AuthService) {}
+  constructor(private http: HttpClient, private readonly authService: AuthService, ) {}
 
   public initSettings(): Observable<UserSettings> {
     return this.authService.selectCurrentTenant().pipe(
