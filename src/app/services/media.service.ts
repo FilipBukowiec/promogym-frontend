@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, forkJoin, iif, Observable, of, zip } from 'rxjs';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, iif, Observable, of, zip } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/auth.service';
 import { Advertisement } from '../models/advertisement.model';
@@ -22,7 +22,7 @@ export class MediaService {
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService, private readonly userSettingsService: UserSettingsService) {}
+  constructor(private http: HttpClient, private auth: AuthService, private readonly userSettingsService: UserSettingsService) { }
 
   public refreshMedia(): Observable<Media[]> {
     return this.getFilesForSwiper().pipe(tap((media) => this.mediaSubject.next(media)));
@@ -39,19 +39,19 @@ export class MediaService {
   }
 
   public getFilesForSwiper(): Observable<Media[]> {
-    let shouldFetchStories = false; 
 
-    const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string) => {
-      const storiesRequest$ = shouldFetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]); 
+    const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string, fetchStories: boolean) => {
+      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]);
+
       return zip([
-        this.http.get<Media[]>(this.apiUrl), 
-        storiesRequest$, 
-        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`), 
+        this.http.get<Media[]>(this.apiUrl),
+        storiesRequest$,
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
       ]).pipe(
         map(([media, stories, library]) => {
           const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
 
-          let currentOrder = 0; 
+          let currentOrder = 0;
 
           const storiesAsMedia = safeStories.map((story) => ({
             ...(story as Media),
@@ -60,15 +60,13 @@ export class MediaService {
             order: (currentOrder += 1),
           }));
 
-        
           const initialMediaOrder = currentOrder;
           let mediaCurrentOrder = initialMediaOrder;
 
           const mediaWithNewOrder = media.map((m) => ({
             ...m,
-           
             order: mediaCurrentOrder++,
-          })); 
+          }));
 
           const libraryAsMedia = library.map((item) => ({
             ...(item as Media),
@@ -76,26 +74,25 @@ export class MediaService {
             order: (mediaCurrentOrder += 1),
           }));
 
-        
           return [...storiesAsMedia, ...mediaWithNewOrder, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
-    }; 
+    };
 
-    const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string) => {
-      const storiesRequest$ = shouldFetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]);
+    const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string, fetchStories: boolean) => {
+      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]);
+
       return zip([
-        this.http.get<Media[]>(this.apiUrl), 
-        this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`), 
-        storiesRequest$, 
-        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`), 
+        this.http.get<Media[]>(this.apiUrl),
+        this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`),
+        storiesRequest$,
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
       ]).pipe(
         map(([media, ads, stories, library]) => {
 
           const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
 
-        
-          let currentOrder = 0; 
+          let currentOrder = 0;
           const storiesAsMedia = safeStories.map((story) => ({
             ...(story as Media),
             tenant_id: 'default_tenant',
@@ -103,13 +100,11 @@ export class MediaService {
             order: (currentOrder += 1),
           }));
 
-      
           const initialMediaOrder = currentOrder;
           let mediaCurrentOrder = initialMediaOrder;
 
           const mediaWithNewOrder = media.map((m) => ({
             ...m,
-           
             order: mediaCurrentOrder++,
           }));
 
@@ -117,7 +112,7 @@ export class MediaService {
             ...(ad as Media),
             tenant_id: 'default_tenant',
             order: (mediaCurrentOrder += 1),
-          })); 
+          }));
 
           const libraryAsMedia = library.map((item) => ({
             ...(item as Media),
@@ -128,18 +123,26 @@ export class MediaService {
           return [...storiesAsMedia, ...mediaWithNewOrder, ...adsAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
-    }; 
+    };
 
-    return combineLatest([this.auth.isPremiumUser(), this.auth.selectCurrentTenant(), this.userSettingsService.settings$.pipe(take(1))]).pipe(
+    return combineLatest([
+      this.auth.isPremiumUser(),
+      this.auth.selectCurrentTenant(),
+      this.userSettingsService.settings$.pipe(
+        filter(settings => !!settings) 
+      )
+    ]).pipe(
       switchMap(([isPremium, currentTenant, settings]) => {
         const isModuleEnabled = settings.enableFacebookModule;
         const pageToken = settings.facebookPageAccess;
         const pageId = settings.facebookPageId;
-        shouldFetchStories = isModuleEnabled && !!pageToken && !!pageId;
+
+        const shouldFetchStories = isModuleEnabled && !!pageToken && !!pageId;
+
         return iif(
           () => isPremium,
-          premiumRequest$(currentTenant.tenant_id, pageToken, pageId),
-          nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country, pageToken, pageId)
+          premiumRequest$(currentTenant.tenant_id, pageToken, pageId, shouldFetchStories),
+          nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country, pageToken, pageId, shouldFetchStories)
         );
       })
     );

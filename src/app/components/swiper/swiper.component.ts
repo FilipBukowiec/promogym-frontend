@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { catchError, combineLatest, EMPTY, map, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { catchError, EMPTY, filter, Subject, takeUntil } from 'rxjs';
 import Swiper from 'swiper';
 import { Autoplay } from 'swiper/modules';
 import { environment } from '../../../environments/environment';
@@ -27,32 +27,35 @@ export class SwiperComponent implements OnInit, OnDestroy {
   pictureSlideDuration: number = 5;
   private readonly onDestroy$ = new Subject();
 
-  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) {}
+  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) { }
 
   public ngOnInit(): void {
-    this.watchRefreshMedia();
     this.initPictureSlideDuration();
     this.initSwiper();
+    this.watchRefreshMedia();
   }
 
   private watchRefreshMedia(): void {
-    this.mediaService.refreshMedia().pipe(takeUntil(this.onDestroy$)).subscribe();
+    this.mediaService.refreshMedia().pipe(takeUntil(this.onDestroy$)).subscribe({
+      error: (err) => {
+        console.error('Błąd ładowania mediów:', err);
+        this.isLoading = false;
+      }
+    });
   }
 
   private initSwiper(): void {
-    combineLatest([this.mediaService.media$, this.tenantChangeService.tenantChanged$])
+    this.mediaService.media$
       .pipe(
-        map((data) => data[0]),
-        catchError(() => {
+        filter(media => media && media.length > 0),
+        catchError((err) => {
+          console.error('Błąd w inicjalizacji Swipera:', err);
           this.isLoading = false;
           return EMPTY;
         }),
         takeUntil(this.onDestroy$)
       )
       .subscribe((media) => {
-        if (!media || media.length === 0) {
-          throw new Error('Brak mediów do załadowania.');
-        }
         this.media = media.sort((a, b) => a.order - b.order);
         this.destroySwiper();
         this.initializeSwiper();
@@ -74,8 +77,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
     }
   }
 
-public initializeSwiper(): void {
-    // ... (inicjalizacja i definicja loadedMediaCount, checkIfAllMediaLoaded) ...
+  public initializeSwiper(): void {
     const swiperWrapper = document.querySelector('.swiper-wrapper') as HTMLElement;
     if (!swiperWrapper) return;
 
@@ -90,85 +92,86 @@ public initializeSwiper(): void {
         this.initializeSwiperInstance();
       }
     };
-    
-    // START PĘTLI
+
     this.media.forEach((element) => {
-        const slide = document.createElement('div');
-        slide.classList.add('swiper-slide');
+      const slide = document.createElement('div');
+      slide.classList.add('swiper-slide');
 
-        // Zmienna, którą będziemy używać w <video> lub <img>
-        let filePath: string; 
+      let filePath: string;
 
-        // SPRAWDZENIE OPARTY O ISTNIENIE I WARTOŚĆ 'isStory'
-        if (element.isStory) {
-            // 1. STORY (isStory jest true): URL jest już kompletny (z tokenami FB/IG)
-            filePath = element.filePath; 
-        } else {
-            // 2. LOKALNE MEDIA (isStory jest false lub undefined): Dodajemy prefiks
-            filePath = `${environment.publicUrl}${element.filePath}`; 
-        }
+      if (element.isStory) {
+        filePath = element.filePath;
+      } else {
+        filePath = `${environment.publicUrl}${element.filePath}`;
+      }
 
-        // --- DALSZA LOGIKA (NIEZMIENIONA) ---
-        const isVideo = element.fileType.startsWith('video/');
+      const isVideo = element.fileType.startsWith('video/');
 
-        if (isVideo) { 
-            const videoElement = document.createElement('video');
-            videoElement.src = filePath;
-            videoElement.muted = true;
-            videoElement.setAttribute('playsinline', '');
-            videoElement.setAttribute('preload', 'auto');
-            videoElement.style.width = '100vw';
-            videoElement.style.height = '100%';
-            videoElement.style.objectFit = 'cover';
-            slide.appendChild(videoElement);
+      if (isVideo) {
+        const videoElement = document.createElement('video');
+        videoElement.src = filePath;
+        videoElement.muted = true;
+        videoElement.setAttribute('playsinline', '');
+        videoElement.setAttribute('preload', 'auto');
+        videoElement.style.width = '100vw';
+        videoElement.style.height = '100%';
+        videoElement.style.objectFit = 'cover';
+        slide.appendChild(videoElement);
 
-            videoElement.addEventListener('loadeddata', () => {
-                loadedMediaCount++;
-                checkIfAllMediaLoaded();
-            });
-        } else {
-            const imgElement = document.createElement('img');
-            imgElement.src = filePath;
-            imgElement.style.width = '100vw';
-            imgElement.style.height = '100%';
-            imgElement.style.objectFit = 'cover';
-            slide.appendChild(imgElement);
+        videoElement.addEventListener('loadeddata', () => {
+          loadedMediaCount++;
+          checkIfAllMediaLoaded();
+        });
+        videoElement.addEventListener('error', () => {
+          loadedMediaCount++;
+          checkIfAllMediaLoaded();
+        });
+      } else {
+        const imgElement = document.createElement('img');
+        imgElement.src = filePath;
+        imgElement.style.width = '100vw';
+        imgElement.style.height = '100%';
+        imgElement.style.objectFit = 'cover';
+        slide.appendChild(imgElement);
 
-            imgElement.onload = () => {
-                loadedMediaCount++;
-                checkIfAllMediaLoaded();
-            };
-        }
+        imgElement.onload = () => {
+          loadedMediaCount++;
+          checkIfAllMediaLoaded();
+        };
+        imgElement.onerror = () => {
+          loadedMediaCount++;
+          checkIfAllMediaLoaded();
+        };
+      }
 
-        swiperWrapper.appendChild(slide);
+      swiperWrapper.appendChild(slide);
     });
-}
+  }
 
   public initializeSwiperInstance(): void {
-    if (!this.mySwiper) {
-      this.mySwiper = new Swiper('.swiper', {
-        slidesPerView: 1,
-        loop: true,
-        autoplay: {
-          delay: 60 * 60 * 1000, // 1 godzina – ręczna kontrola przejść
-          disableOnInteraction: false,
-        },
-        speed: 800,
-        effect: 'fade',
-        fadeEffect: {
-          crossFade: true,
-        },
-        allowTouchMove: true,
-        on: {
-          slideChangeTransitionStart: () => {
-            this.handleSlideChange();
-          },
-        },
-      });
+    if (this.mySwiper) return;
 
-      // Obsługa pierwszego slajdu
-      this.handleSlideChange();
-    }
+    this.mySwiper = new Swiper('.swiper', {
+      slidesPerView: 1,
+      loop: true,
+      autoplay: {
+        delay: 60 * 60 * 1000,
+        disableOnInteraction: false,
+      },
+      speed: 800,
+      effect: 'fade',
+      fadeEffect: {
+        crossFade: true,
+      },
+      allowTouchMove: true,
+      on: {
+        slideChangeTransitionStart: () => {
+          this.handleSlideChange();
+        },
+      },
+    });
+
+    this.handleSlideChange();
   }
 
   private handleSlideChange(): void {
