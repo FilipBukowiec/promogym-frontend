@@ -30,9 +30,22 @@ export class SwiperComponent implements OnInit, OnDestroy {
   constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) { }
 
   public ngOnInit(): void {
-    this.initPictureSlideDuration();
+    this.watchUserSettings();
     this.initSwiper();
     this.watchRefreshMedia();
+  }
+
+  private watchUserSettings(): void {
+    this.userSettingsService.settings$
+      .pipe(
+        filter(settings => !!settings),
+        takeUntil(this.onDestroy$)
+      )
+      .subscribe((settings) => {
+        if (settings?.pictureSlideDuration !== undefined) {
+          this.pictureSlideDuration = settings.pictureSlideDuration;
+        }
+      });
   }
 
   private watchRefreshMedia(): void {
@@ -60,14 +73,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
         this.destroySwiper();
         this.initializeSwiper();
       });
-  }
-
-  private initPictureSlideDuration(): void {
-    this.userSettingsService.settings$.subscribe((settings) => {
-      if (settings?.pictureSlideDuration) {
-        this.pictureSlideDuration = settings.pictureSlideDuration;
-      }
-    });
   }
 
   public destroySwiper(): void {
