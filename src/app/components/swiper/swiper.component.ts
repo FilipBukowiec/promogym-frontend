@@ -27,7 +27,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
   pictureSlideDuration: number = 5;
   private readonly onDestroy$ = new Subject();
 
-  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) { }
+  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) {}
 
   public ngOnInit(): void {
     this.watchUserSettings();
@@ -105,75 +105,124 @@ export class SwiperComponent implements OnInit, OnDestroy {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
       const storyImgPath = 'assets/images/cf.jpg';
-      const header = document.createElement('span');
       let filePath: string;
-
-      const gradientPath = 'assets/images/gradient.png'
+      let loadedElement: HTMLVideoElement | HTMLImageElement; // Dodane dla ujednoliconej obsługi ładowania
 
       if (element.isStory) {
-        // slide.style.backgroundImage = `url('${storyImgPath}')`;
-        // slide.style.backgroundSize = 'cover';
-        // slide.style.backgroundPosition = 'center';
-       slide.style.backgroundColor = "black"
-       
-        // 2. Tworzenie i stylizowanie SPAN/Opisu
+        // 🟢 LOGIKA DLA STORY
+
+        // TWORZENIE KONTENERA DLA CENTROWANIA I RAMKI
+        const box = document.createElement('div');
+        box.style.width = '100vw';
+        box.style.height = '100%';
+        box.style.backgroundColor = 'black';
+        box.style.display = 'flex';
+        box.style.justifyContent = 'center';
+        box.style.alignItems = 'flex-start';
+        // box.style.gap = '10px'
+        box.style.paddingTop='30px';
+        slide.appendChild(box);
+
+        // ... (Reszta stylów slajdu i storyHeader) ...
+        slide.style.backgroundImage = `url('${storyImgPath}')`;
+        slide.style.backgroundSize = 'cover';
+        slide.style.backgroundPosition = 'center';
+
+        // ... (tworzenie storyHeader i slide.appendChild(storyHeader)) ...
         const storyHeader = document.createElement('span');
-        storyHeader.textContent = 'Fajne Story!'; // Tutaj Twój opis
+        storyHeader.textContent = 'Fajne Story!';
         storyHeader.style.position = 'absolute';
         storyHeader.style.top = '10px';
-        storyHeader.style.left = '10px';
+        storyHeader.style.left = '10%';
         storyHeader.style.color = 'white';
-        storyHeader.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        storyHeader.style.backgroundColor = 'rgba(251, 0, 0, 0.5)';
         storyHeader.style.padding = '5px 10px';
         storyHeader.style.borderRadius = '5px';
-        storyHeader.style.zIndex = '10'; // Upewnienie się, że jest nad obrazem/wideo
-
-        // 3. Dodanie SPAN do SLIDE'u
+        storyHeader.style.zIndex = '10';
         slide.appendChild(storyHeader);
 
-        // Ścieżka dla zawartości Story (jeśli jest wideo/obrazek wewnątrz)
         filePath = element.filePath;
+        const isVideo = element.fileType.startsWith('video/');
+
+        if (isVideo) {
+          const videoElement = document.createElement('video');
+          videoElement.src = filePath;
+          videoElement.muted = true;
+          videoElement.setAttribute('playsinline', '');
+          videoElement.setAttribute('preload', 'auto');
+
+          videoElement.style.maxWidth = '100%';
+          videoElement.style.maxHeight = '100%';
+          videoElement.style.objectFit = 'contain';
+          videoElement.style.border = '8px solid grey';
+          videoElement.style.borderRadius = '25px';
+
+          box.appendChild(videoElement);
+          loadedElement = videoElement; // Zapisz element do obsługi ładowania
+        } else {
+          // 🚨 POPRAWKA! Dodano obsługę obrazków w Story
+          const imgElement = document.createElement('img');
+          imgElement.src = filePath;
+
+          imgElement.style.maxWidth = '100%';
+          imgElement.style.maxHeight = '100%';
+          imgElement.style.objectFit = 'contain';
+          imgElement.style.border = '10px solid grey';
+          imgElement.style.borderRadius = '20px';
+
+          box.appendChild(imgElement); // Dodaj obraz do boxa (kontenera)
+          loadedElement = imgElement; // Zapisz element do obsługi ładowania
+        }
       } else {
+        // 🔵 LOGIKA DLA STANDARDOWYCH SLIDE'ÓW
         filePath = `${environment.publicUrl}${element.filePath}`;
+        const isVideo = element.fileType.startsWith('video/');
+
+        if (isVideo) {
+          const videoElement = document.createElement('video');
+          videoElement.src = filePath;
+          videoElement.muted = true;
+          videoElement.setAttribute('playsinline', '');
+          videoElement.setAttribute('preload', 'auto');
+          videoElement.style.width = '100vw';
+          videoElement.style.height = '100%';
+          videoElement.style.objectFit = 'cover';
+          slide.appendChild(videoElement);
+          loadedElement = videoElement;
+        } else {
+          const imgElement = document.createElement('img');
+          imgElement.src = filePath;
+          imgElement.style.width = '100vw';
+          imgElement.style.height = '100%';
+          // 🚨 POPRAWKA! Usuń element.isStory ? 'contain' : 'cover',
+          // ponieważ jesteśmy w bloku "NIE Story", więc zawsze powinno być 'cover'.
+          imgElement.style.objectFit = 'cover';
+          slide.appendChild(imgElement);
+          loadedElement = imgElement;
+        }
       }
 
-      const isVideo = element.fileType.startsWith('video/');
-
-      if (isVideo) {
-        const videoElement = document.createElement('video');
-        videoElement.src = filePath;
-        videoElement.muted = true;
-        videoElement.setAttribute('playsinline', '');
-        videoElement.setAttribute('preload', 'auto');
-        videoElement.style.width = '100vw';
-        videoElement.style.height = '100%';
-        videoElement.style.objectFit = element.isStory ? 'contain' : 'cover';
-        slide.appendChild(videoElement);
-
-        videoElement.addEventListener('loadeddata', () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        });
-        videoElement.addEventListener('error', () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        });
-      } else {
-        const imgElement = document.createElement('img');
-        imgElement.src = filePath;
-        imgElement.style.width = '100vw';
-        imgElement.style.height = '100%';
-        imgElement.style.objectFit = element.isStory ? 'contain' : 'cover';
-        slide.appendChild(imgElement);
-
-        imgElement.onload = () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        };
-        imgElement.onerror = () => {
-          loadedMediaCount++;
-          checkIfAllMediaLoaded();
-        };
+      // Ujednolicona obsługa ładowania mediów (przeniesiona poza if/else)
+      if (loadedElement) {
+        if (loadedElement instanceof HTMLVideoElement) {
+          loadedElement.addEventListener('loadeddata', () => {
+            loadedMediaCount++;
+            checkIfAllMediaLoaded();
+          });
+          loadedElement.addEventListener('error', () => {
+            loadedMediaCount++;
+            checkIfAllMediaLoaded();
+          });
+        } else if (loadedElement instanceof HTMLImageElement) {
+          loadedElement.onload = () => {
+            loadedMediaCount++;
+            checkIfAllMediaLoaded();
+          };
+          loadedElement.onerror = () => {
+            loadedMediaCount++;
+            checkIfAllMediaLoaded();
+          };
+        }
       }
 
       swiperWrapper.appendChild(slide);
