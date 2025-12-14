@@ -2,10 +2,8 @@
 <section>
   <h1>General settings</h1>
   <span class="description">
-    Remember, after adding new settings, you must press the 'Save settings' button. From that moment, each device will
-    be activated with the new settings.
-    However, if you want to change the settings on devices that are currently in use, click the 'Live update' button.
-    This will reload the application on those
+    Remember, after adding new settings, you must press the 'Save settings' button. From that moment, each device will be activated with the new settings.
+    However, if you want to change the settings on devices that are currently in use, click the 'Live update' button. This will reload the application on those
     devices.
   </span>
 
@@ -15,10 +13,14 @@
 <section>
   <h2>Settings guide tutorial</h2>
   <br />
-  <iframe src="https://www.youtube.com/embed/2rWON_h9hhQ?si=SvEzB9haoFVoqGw6" title="YouTube video player"
+  <iframe
+    src="https://www.youtube.com/embed/2rWON_h9hhQ?si=SvEzB9haoFVoqGw6"
+    title="YouTube video player"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
 </section>
 
 <section>
@@ -26,8 +28,10 @@
     <caption>
       <h2>General settings</h2>
     </caption>
+<tr><td colspan="3"><h3>Main settings</h3></td></tr>
+
     <tr>
-      <td>
+      <td colspan="2">
         <label for=""> User name:</label>
         <br />
         @if(!editUserName()){
@@ -41,8 +45,7 @@
         <div class="icon-container">
           @if(!editUserName()){
           <i class="bi bi-pencil-fill" (click)="editUserNameField()"></i>
-          }
-          @else{
+          } @else{
           <i class="bi bi-floppy-fill" (click)="saveUserName()"></i>
           }
         </div>
@@ -50,34 +53,40 @@
     </tr>
 
     <tr>
-      <td>
+      <td colspan="2">
         <label for="radioSelect">Selected radio stream:</label><br />
-        <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings().selectedRadioStream"
-          (change)="updateSelectedIndex($event)">
+        <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings().selectedRadioStream" (change)="updateSelectedIndex($event)">
           <option [disabled]="true" value="">Select radio stream</option>
           @for(radio of radioStreamList(); track radio.url; let i = $index){
           <option [value]="radio.url">
             {{ radio.description }}
-          </option>}
+          </option>
+          }
         </select>
       </td>
 
       <td>
         <br />
         <div class="icon-container">
-          <i *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex() !== selectedRadioIndex()"
-            class="bi bi-play-fill" (click)="
+          <i
+            *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex() !== selectedRadioIndex()"
+            class="bi bi-play-fill"
+            (click)="
               radioStreamService.playRadioStream(
                 userSettings().selectedRadioStream || '',
                 radioStreamService.userSettingsAudio$,
                 [radioStreamService.adminSettingsAudio$, radioStreamService.sideMenuAudio$],
                 selectedRadioIndex() ?? undefined
               )
-            ">
+            "
+          >
           </i>
 
-          <i *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex() === selectedRadioIndex()"
-            class="bi bi-stop-fill" (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)">
+          <i
+            *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex() === selectedRadioIndex()"
+            class="bi bi-stop-fill"
+            (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)"
+          >
           </i>
         </div>
       </td>
@@ -94,69 +103,85 @@
         seconds per slide
       </td>
     </tr>
-  </table>
-
-  <table>
-    <caption>
-      Access for facebook module
-    </caption>
     <tr>
-      <td colspan="2" class="dupa">
+      <td colspan="3"><hr /></td>
+    </tr>
+    <tr>
+      <td colspan="3"><h3>Access for facebook module</h3></td>
+    </tr>
+    <tr>
+      <td colspan="2">
         <label for="enableFb">Enable Facebook module</label>
-        <input id="enableFb" type="checkbox" [(ngModel)]="userSettings().enableFacebookModule" />
+      </td>
+      <td class="buttons">
+        <div class="icon-container">
+          <input id="enableFb" type="checkbox" [(ngModel)]="userSettings().enableFacebookModule" />
+        </div>
       </td>
     </tr>
 
     @if(userSettings().enableFacebookModule){
     <tr>
-      <td>
-        Aktualna strona: @if(userSettings().selectedFacebookPage !== null && userSettings().selectedFacebookPage !== ''
-        && userSettings().selectedFacebookPage
+      <td colspan="2">
+        Aktualna strona: @if(userSettings().selectedFacebookPage !== null && userSettings().selectedFacebookPage !== '' && userSettings().selectedFacebookPage
         !== undefined){
 
         {{ userSettings().selectedFacebookPage }}
         } @else { You should get acces and choose the facebook page }
       </td>
-    </tr>
-    <tr>
       <td>
-        <button (click)="facebooklogin()">Login to Facebook to get actual page access</button>
-        @if(error()){
-        <div style="color: red; margin-top: 5px">{{ error() }}</div>
-        }
+        <div class="icon-container">
+          <button (click)="facebooklogin()">Login Facebook</button>
+          @if(error()){
+          <div style="color: red; margin-top: 5px">{{ error() }}</div>
+          }
+        </div>
       </td>
     </tr>
+    <tr></tr>
 
     @if(fbUserToken() && fbPages().length > 0){
     <tr>
       <td>
-        <label for="fbPageSelect">Choose the Facebook page to display stories in the slider.</label><br />
+        <label for="fbPageSelect">Choose the Facebook page to display stories in the slider.</label>
+      </td>
 
-        <select id="fbPageSelect" [(ngModel)]="selectedFacebookPage" (ngModelChange)="onPageSelected($event)">
-          @for(page of fbPages(); track page.id){
-          <option [ngValue]="page">
-            {{ page.name }}
-          </option>
-          }
-        </select>
+      <td>
+        <div class="icon-container">
+          <select id="fbPageSelect" [(ngModel)]="selectedFacebookPage" (ngModelChange)="onPageSelected($event)">
+            @for(page of fbPages(); track page.id){
+            <option [ngValue]="page">
+              {{ page.name }}
+            </option>
+            }
+          </select>
+        </div>
       </td>
     </tr>
     } }
+<tr><td colspan="3"><hr></td>
+</tr>
 
-    <button (click)="getFacebookStories(userSettings().facebookPageAccess, userSettings().facebookPageId)">click to show list of stories</button>
-    <button (click)="getRandomStory(userSettings().facebookPageAccess, userSettings().facebookPageId)">dawaj wybrane story</button>
-  </table>
+    <tr>
+      <td colspan="3" class="test">
+        <span>-----------------------------------------------</span><br />
+        <span>tu jest tylko testowo zeby (sprawdzać) logować pobrane story. pozniej sie to usunie</span>
 
-  <table>
-    <caption>
-      <h2>Footer newsbar option</h2>
-    </caption>
+        <button (click)="getFacebookStories(userSettings().facebookPageAccess, userSettings().facebookPageId)">click to show list of stories</button>
+        <button (click)="getRandomStory(userSettings().facebookPageAccess, userSettings().facebookPageId)">dawaj wybrane story</button>
+      </td>
+    </tr>
+     <tr>
+      <td colspan="3"><hr /></td>
+    </tr>
+    <tr>
+      <td colspan="3"><h3>Footer newsbar option</h3></td>
+    </tr>
     <tr>
       <td>Main footer logo</td>
       <td>
         <span *ngIf="tempLogoPreviewUrl() || userSettings().logoFilePath">
-          <img [src]="tempLogoPreviewUrl() || environmentPublicUrl + userSettings().logoFilePath" alt="Main logo"
-            class="logo-preview" />
+          <img [src]="tempLogoPreviewUrl() || environmentPublicUrl + userSettings().logoFilePath" alt="Main logo" class="logo-preview" />
         </span>
       </td>
       <td>
@@ -171,8 +196,7 @@
       <td>Separator logo (white background)</td>
       <td>
         <span *ngIf="tempSeparatorPreviewUrl() || userSettings().separatorFilePath">
-          <img [src]="tempSeparatorPreviewUrl() || environmentPublicUrl + userSettings().separatorFilePath"
-            alt="Separator logo" class="logo-preview" />
+          <img [src]="tempSeparatorPreviewUrl() || environmentPublicUrl + userSettings().separatorFilePath" alt="Separator logo" class="logo-preview" />
         </span>
       </td>
       <td>
@@ -181,6 +205,8 @@
           <i class="bi bi-trash3-fill" *ngIf="userSettings().separatorFilePath" (click)="deleteLogo('separator')"></i>
         </div>
       </td>
+    </tr>
+    <tr><td colspan="3"><hr></td>
     </tr>
 
     <tr *ngFor="let rule of userSettings().footerVisibilityRules; let i = index">
@@ -195,8 +221,7 @@
             <option *ngFor="let minute of time" [value]="minute">{{ minute }}</option>
           </select>
         </ng-container>
-        <ng-template #displayRule> Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }}
-        </ng-template>
+        <ng-template #displayRule> Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }} </ng-template>
       </td>
       <td>
         <div class="icon-container">

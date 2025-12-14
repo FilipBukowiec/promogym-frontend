@@ -38,7 +38,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
   private watchUserSettings(): void {
     this.userSettingsService.settings$
       .pipe(
-        filter(settings => !!settings),
+        filter((settings) => !!settings),
         takeUntil(this.onDestroy$)
       )
       .subscribe((settings) => {
@@ -49,18 +49,21 @@ export class SwiperComponent implements OnInit, OnDestroy {
   }
 
   private watchRefreshMedia(): void {
-    this.mediaService.refreshMedia().pipe(takeUntil(this.onDestroy$)).subscribe({
-      error: (err) => {
-        console.error('Błąd ładowania mediów:', err);
-        this.isLoading = false;
-      }
-    });
+    this.mediaService
+      .refreshMedia()
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe({
+        error: (err) => {
+          console.error('Błąd ładowania mediów:', err);
+          this.isLoading = false;
+        },
+      });
   }
 
   private initSwiper(): void {
     this.mediaService.media$
       .pipe(
-        filter(media => media && media.length > 0),
+        filter((media) => media && media.length > 0),
         catchError((err) => {
           console.error('Błąd w inicjalizacji Swipera:', err);
           this.isLoading = false;
@@ -101,10 +104,34 @@ export class SwiperComponent implements OnInit, OnDestroy {
     this.media.forEach((element) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
-
+      const storyImgPath = 'assets/images/cf.jpg';
+      const header = document.createElement('span');
       let filePath: string;
 
+      const gradientPath = 'assets/images/gradient.png'
+
       if (element.isStory) {
+        // slide.style.backgroundImage = `url('${storyImgPath}')`;
+        // slide.style.backgroundSize = 'cover';
+        // slide.style.backgroundPosition = 'center';
+       slide.style.backgroundColor = "black"
+       
+        // 2. Tworzenie i stylizowanie SPAN/Opisu
+        const storyHeader = document.createElement('span');
+        storyHeader.textContent = 'Fajne Story!'; // Tutaj Twój opis
+        storyHeader.style.position = 'absolute';
+        storyHeader.style.top = '10px';
+        storyHeader.style.left = '10px';
+        storyHeader.style.color = 'white';
+        storyHeader.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        storyHeader.style.padding = '5px 10px';
+        storyHeader.style.borderRadius = '5px';
+        storyHeader.style.zIndex = '10'; // Upewnienie się, że jest nad obrazem/wideo
+
+        // 3. Dodanie SPAN do SLIDE'u
+        slide.appendChild(storyHeader);
+
+        // Ścieżka dla zawartości Story (jeśli jest wideo/obrazek wewnątrz)
         filePath = element.filePath;
       } else {
         filePath = `${environment.publicUrl}${element.filePath}`;
@@ -120,7 +147,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
         videoElement.setAttribute('preload', 'auto');
         videoElement.style.width = '100vw';
         videoElement.style.height = '100%';
-        videoElement.style.objectFit = 'cover';
+        videoElement.style.objectFit = element.isStory ? 'contain' : 'cover';
         slide.appendChild(videoElement);
 
         videoElement.addEventListener('loadeddata', () => {
@@ -136,7 +163,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
         imgElement.src = filePath;
         imgElement.style.width = '100vw';
         imgElement.style.height = '100%';
-        imgElement.style.objectFit = 'cover';
+        imgElement.style.objectFit = element.isStory ? 'contain' : 'cover';
         slide.appendChild(imgElement);
 
         imgElement.onload = () => {
