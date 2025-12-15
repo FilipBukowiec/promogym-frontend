@@ -101,46 +101,122 @@ export class SwiperComponent implements OnInit, OnDestroy {
       }
     };
 
+    const adjustStoryRendering = (mediaElement: HTMLVideoElement | HTMLImageElement, slideElement: HTMLElement, isStory: boolean) => {
+      // Jeśli to NIE jest story, nic nie rób (zostaw domyślne style z pętli głównej)
+      if (!isStory) return;
+
+      let mediaWidth: number;
+      let mediaHeight: number;
+
+      // Pobierz wymiary
+      if (mediaElement instanceof HTMLVideoElement) {
+        mediaWidth = mediaElement.videoWidth;
+        mediaHeight = mediaElement.videoHeight;
+      } else {
+        mediaWidth = mediaElement.naturalWidth;
+        mediaHeight = mediaElement.naturalHeight;
+      }
+
+      const isHorizontal = mediaWidth > mediaHeight;
+
+      // 1. SCENARIUSZ: SZERSZE NIŻ WYŻSZE (Traktuj jak !story)
+      if (isHorizontal) {
+        // Upewnij się, że element jest bezpośrednio w slide (nie w boxie)
+        if (mediaElement.parentElement !== slideElement) {
+          slideElement.appendChild(mediaElement);
+          // Ewentualnie usuń box jeśli istnieje i jest pusty
+          const oldBox = slideElement.querySelector('.media-box');
+          if (oldBox) oldBox.remove();
+        }
+
+        // 🚨 CZYSZCZENIE: Usuwanie stylów i headera z trybu telefonu (Vertical)
+        const oldHeader = slideElement.querySelector('.story-header');
+        if (oldHeader) oldHeader.remove();
+        slideElement.style.display = '';
+        slideElement.style.alignItems = '';
+        slideElement.style.justifyContent = '';
+        slideElement.style.paddingBottom = ''; // Reset paddingu
+
+        // Reset stylów ramki (gdyby były wcześniej nadane)
+        mediaElement.style.border = 'none';
+        mediaElement.style.borderRadius = '0';
+        mediaElement.style.borderImageSource = 'none';
+        mediaElement.style.marginTop = '0';
+
+        // Style Fullscreen Cover (jak w !story)
+        mediaElement.style.width = '100vw';
+        mediaElement.style.height = '100%';
+        mediaElement.style.objectFit = 'cover';
+      }
+      // 2. SCENARIUSZ: WYŻSZE NIŻ SZERSZE (Twórz Box, Ramkę i Flex-Start)
+      else {
+        // Sprawdź czy box już istnieje
+        let box = slideElement.querySelector('.media-box') as HTMLElement;
+
+        // 🚨 1. STYLE SLIDE'u: Definiowanie obszaru roboczego 93vh
+        // Rodzic (slideElement) staje się kontenerem Flex do centrowania BOXA.
+        slideElement.style.display = 'flex';
+        slideElement.style.justifyContent = 'center';
+        slideElement.style.alignItems = 'center';
+
+        // 2. Tworzenie HEADERA (Tylko dla trybu telefonu)
+        let storyHeader = slideElement.querySelector('.story-header') as HTMLElement;
+        if (!storyHeader) {
+          storyHeader = document.createElement('span');
+          storyHeader.classList.add('story-header');
+          storyHeader.textContent = 'Fajne Story!';
+          storyHeader.style.position = 'absolute';
+          storyHeader.style.top = '10px';
+          storyHeader.style.left = '10%';
+          storyHeader.style.color = 'white';
+          storyHeader.style.backgroundColor = 'rgba(251, 0, 0, 0.5)';
+          storyHeader.style.padding = '5px 10px';
+          storyHeader.style.borderRadius = '5px';
+          storyHeader.style.zIndex = '10';
+          slideElement.appendChild(storyHeader);
+        }
+
+        // 3. Tworzenie KONTENERA 'BOX' (Obszar roboczy 93vh)
+        if (!box) {
+          box = document.createElement('div');
+          box.classList.add('media-box');
+
+          box.style.width = '100vw';
+          box.style.height = '100%';
+box.style.border = "1px solid red"
+          box.style.display = 'flex';
+          box.style.justifyContent = 'center';
+          box.style.alignItems = 'center';
+box.style.paddingBottom = '7vh'
+          slideElement.appendChild(box);
+        }
+
+        // 4. Przenieś element media do boxa
+        if (mediaElement.parentElement !== box) {
+          box.appendChild(mediaElement);
+        }
+
+        // 5. Style Elementu (Telefon)
+        mediaElement.style.maxWidth = '100%';
+
+        mediaElement.style.maxHeight = '85%';
+        mediaElement.style.width = 'auto';
+        mediaElement.style.height = 'auto';
+        mediaElement.style.objectFit = 'contain';
+        mediaElement.style.border = '5px solid grey';
+        mediaElement.style.borderRadius = '25px';
+      }
+    };
+
+    // --- GŁÓWNA PĘTLA ---
     this.media.forEach((element) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
-      const storyImgPath = 'assets/images/cf.jpg';
+      // const storyImgPath = 'assets/images/cf.jpg';
       let filePath: string;
-      let loadedElement: HTMLVideoElement | HTMLImageElement; // Dodane dla ujednoliconej obsługi ładowania
+      let loadedElement: HTMLVideoElement | HTMLImageElement | null = null;
 
       if (element.isStory) {
-        // 🟢 LOGIKA DLA STORY
-
-        // TWORZENIE KONTENERA DLA CENTROWANIA I RAMKI
-        const box = document.createElement('div');
-        box.style.width = '100vw';
-        box.style.height = '100%';
-        box.style.backgroundColor = 'black';
-        box.style.display = 'flex';
-        box.style.justifyContent = 'center';
-        box.style.alignItems = 'flex-start';
-        // box.style.gap = '10px'
-        box.style.paddingTop='30px';
-        slide.appendChild(box);
-
-        // ... (Reszta stylów slajdu i storyHeader) ...
-        slide.style.backgroundImage = `url('${storyImgPath}')`;
-        slide.style.backgroundSize = 'cover';
-        slide.style.backgroundPosition = 'center';
-
-        // ... (tworzenie storyHeader i slide.appendChild(storyHeader)) ...
-        const storyHeader = document.createElement('span');
-        storyHeader.textContent = 'Fajne Story!';
-        storyHeader.style.position = 'absolute';
-        storyHeader.style.top = '10px';
-        storyHeader.style.left = '10%';
-        storyHeader.style.color = 'white';
-        storyHeader.style.backgroundColor = 'rgba(251, 0, 0, 0.5)';
-        storyHeader.style.padding = '5px 10px';
-        storyHeader.style.borderRadius = '5px';
-        storyHeader.style.zIndex = '10';
-        slide.appendChild(storyHeader);
-
         filePath = element.filePath;
         const isVideo = element.fileType.startsWith('video/');
 
@@ -150,31 +226,16 @@ export class SwiperComponent implements OnInit, OnDestroy {
           videoElement.muted = true;
           videoElement.setAttribute('playsinline', '');
           videoElement.setAttribute('preload', 'auto');
-
-          videoElement.style.maxWidth = '100%';
-          videoElement.style.maxHeight = '100%';
-          videoElement.style.objectFit = 'contain';
-          videoElement.style.border = '8px solid grey';
-          videoElement.style.borderRadius = '25px';
-
-          box.appendChild(videoElement);
-          loadedElement = videoElement; // Zapisz element do obsługi ładowania
+          slide.appendChild(videoElement);
+          loadedElement = videoElement;
         } else {
-          // 🚨 POPRAWKA! Dodano obsługę obrazków w Story
           const imgElement = document.createElement('img');
           imgElement.src = filePath;
-
-          imgElement.style.maxWidth = '100%';
-          imgElement.style.maxHeight = '100%';
-          imgElement.style.objectFit = 'contain';
-          imgElement.style.border = '10px solid grey';
-          imgElement.style.borderRadius = '20px';
-
-          box.appendChild(imgElement); // Dodaj obraz do boxa (kontenera)
-          loadedElement = imgElement; // Zapisz element do obsługi ładowania
+          slide.appendChild(imgElement);
+          loadedElement = imgElement;
         }
       } else {
-        // 🔵 LOGIKA DLA STANDARDOWYCH SLIDE'ÓW
+        // 🔵 LOGIKA DLA STANDARDOWYCH SLIDE'ÓW (!STORY) - BEZ ZMIAN
         filePath = `${environment.publicUrl}${element.filePath}`;
         const isVideo = element.fileType.startsWith('video/');
 
@@ -184,45 +245,57 @@ export class SwiperComponent implements OnInit, OnDestroy {
           videoElement.muted = true;
           videoElement.setAttribute('playsinline', '');
           videoElement.setAttribute('preload', 'auto');
+
+          // Standardowe style cover
           videoElement.style.width = '100vw';
           videoElement.style.height = '100%';
           videoElement.style.objectFit = 'cover';
+
           slide.appendChild(videoElement);
           loadedElement = videoElement;
         } else {
           const imgElement = document.createElement('img');
           imgElement.src = filePath;
+
+          // Standardowe style cover
           imgElement.style.width = '100vw';
           imgElement.style.height = '100%';
-          // 🚨 POPRAWKA! Usuń element.isStory ? 'contain' : 'cover',
-          // ponieważ jesteśmy w bloku "NIE Story", więc zawsze powinno być 'cover'.
           imgElement.style.objectFit = 'cover';
+
           slide.appendChild(imgElement);
           loadedElement = imgElement;
         }
       }
 
-      // Ujednolicona obsługa ładowania mediów (przeniesiona poza if/else)
+      // --- OBSŁUGA ŁADOWANIA I URUCHOMIENIE LOGIKI WYMIARÓW ---
       if (loadedElement) {
+        const handleMediaLoaded = () => {
+          // Tu jest cała magia: sprawdzamy wymiary i decydujemy czy tworzyć box, czy robić fullscreen
+          if (element.isStory) {
+            adjustStoryRendering(loadedElement as HTMLVideoElement | HTMLImageElement, slide, true);
+          }
+
+          loadedMediaCount++;
+          checkIfAllMediaLoaded();
+        };
+
         if (loadedElement instanceof HTMLVideoElement) {
-          loadedElement.addEventListener('loadeddata', () => {
-            loadedMediaCount++;
-            checkIfAllMediaLoaded();
-          });
+          loadedElement.addEventListener('loadeddata', handleMediaLoaded, { once: true });
           loadedElement.addEventListener('error', () => {
             loadedMediaCount++;
             checkIfAllMediaLoaded();
           });
         } else if (loadedElement instanceof HTMLImageElement) {
-          loadedElement.onload = () => {
-            loadedMediaCount++;
-            checkIfAllMediaLoaded();
-          };
+          loadedElement.onload = handleMediaLoaded;
           loadedElement.onerror = () => {
             loadedMediaCount++;
             checkIfAllMediaLoaded();
           };
         }
+      } else {
+        // Fallback gdyby loadedElement był null (np. nieobsługiwany typ)
+        loadedMediaCount++;
+        checkIfAllMediaLoaded();
       }
 
       swiperWrapper.appendChild(slide);
