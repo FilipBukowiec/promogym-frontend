@@ -17,7 +17,7 @@ export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
   private apiUrl3 = `${environment.apiUrl}library`;
-  private apiUrl4 = `${environment.apiUrl}facebook/stories/random`;
+  private apiUrl4 = `${environment.apiUrl}facebook/stories`;
 
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();

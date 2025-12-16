@@ -27,7 +27,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
   pictureSlideDuration: number = 5;
   private readonly onDestroy$ = new Subject();
 
-  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) {}
+  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) { }
 
   public ngOnInit(): void {
     this.watchUserSettings();
@@ -176,18 +176,29 @@ export class SwiperComponent implements OnInit, OnDestroy {
           slideElement.appendChild(storyHeader);
         }
 
+        // const socialMedia =document.createElement("img");
+        //   socialMedia.src = "assets/images/like.gif";
+        //   socialMedia.style.height = "80vh";
+        //   socialMedia.style.position = "absolute";
+        //   socialMedia.style.right = "15%";
+        //   socialMedia.style.opacity = "0.5"
+        //   slideElement.appendChild(socialMedia)
+
         // 3. Tworzenie KONTENERA 'BOX' (Obszar roboczy 93vh)
         if (!box) {
           box = document.createElement('div');
           box.classList.add('media-box');
-
           box.style.width = '100vw';
-          box.style.height = '100%';
-box.style.border = "1px solid red"
+          box.style.height = '100vh';
+          box.style.backgroundImage = 'url("assets/images/sm_bg.jpg")';
+          box.style.backgroundPosition = 'center';
+          box.style.backgroundSize = "cover"
+
+          // box.style.border = '1px solid red';
           box.style.display = 'flex';
           box.style.justifyContent = 'center';
           box.style.alignItems = 'center';
-box.style.paddingBottom = '7vh'
+          box.style.paddingBottom = '10vh';
           slideElement.appendChild(box);
         }
 
@@ -199,12 +210,16 @@ box.style.paddingBottom = '7vh'
         // 5. Style Elementu (Telefon)
         mediaElement.style.maxWidth = '100%';
 
-        mediaElement.style.maxHeight = '85%';
+        mediaElement.style.maxHeight = '90%';
         mediaElement.style.width = 'auto';
         mediaElement.style.height = 'auto';
         mediaElement.style.objectFit = 'contain';
-        mediaElement.style.border = '5px solid grey';
-        mediaElement.style.borderRadius = '25px';
+        mediaElement.style.borderRadius = '25px'; 
+        mediaElement.style.boxShadow = `
+  0 -5px 15px 0 #00E5FF, 
+  0 5px 25px 0 #D53AFF, 
+  0 0 10px rgba(255, 255, 255, 0.5)
+`;
       }
     };
 
