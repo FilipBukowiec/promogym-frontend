@@ -52,14 +52,14 @@ export class FacebookService {
     return this.httpClient.post<FacebookPage[]>(`${this.apiUrl}/pages`, body);
   }
 
-  getStories(pageToken: string, pageId: string): Observable<FacebookStory[]> {
-    const body = { pageToken, pageId };
+  getStories(pageToken: string, pageId: string, includeSharedStories: boolean = false): Observable<FacebookStory[]> {
+    const body = { pageToken, pageId, includeSharedStories };
     return this.httpClient.post<FacebookStory[]>(`${this.apiUrl}/stories`, body);
   }
 
 
-  getRandomStory(pageToken: string, pageId: string): Observable<FacebookStory> {
-    const body = { pageToken, pageId };
+  getRandomStory(pageToken: string, pageId: string, includeSharedStories: boolean = false): Observable<FacebookStory> {
+    const body = { pageToken, pageId, includeSharedStories };
     return this.httpClient.post<FacebookStory>(`${this.apiUrl}/stories/random`, body)
   }
 }

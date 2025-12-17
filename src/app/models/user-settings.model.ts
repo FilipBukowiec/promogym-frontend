@@ -19,6 +19,7 @@ export interface UserSettings {
   logoFilePath: string;
   separatorFilePath: string;
   enableFacebookModule: boolean;
+  includeSharedStories: boolean;
   selectedFacebookPage: string | null;
   facebookPageAccess: string | null;
   facebookPageId: string | null;

@@ -21,17 +21,18 @@ Swiper.use([Autoplay]);
 })
 export class SwiperComponent implements OnInit, OnDestroy {
   @Input() media: Media[] = [];
+
   private mySwiper!: Swiper;
-  isLoading: boolean = true;
   private isVideoPlaying: boolean = false;
-  pictureSlideDuration: number = 5;
-  private readonly onDestroy$ = new Subject();
   private pictureTimer: any;
+  private readonly onDestroy$ = new Subject();
+
+  public isLoading: boolean = true;
+  public pictureSlideDuration: number = 5;
 
   constructor(
     private mediaService: MediaService,
     private userSettingsService: UserSettingsService,
-    private tenantChangeService: TenantChangeService
   ) {}
 
   public ngOnInit(): void {
@@ -152,6 +153,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
 
         const oldHeader = slideElement.querySelector('.story-header');
         if (oldHeader) oldHeader.remove();
+
         slideElement.style.display = '';
         slideElement.style.alignItems = '';
         slideElement.style.justifyContent = '';
@@ -161,7 +163,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
         mediaElement.style.borderRadius = '0';
         mediaElement.style.borderImageSource = 'none';
         mediaElement.style.marginTop = '0';
-
         mediaElement.style.width = '100vw';
         mediaElement.style.height = '100%';
         mediaElement.style.objectFit = 'cover';
@@ -204,6 +205,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
     this.media.forEach((element) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
+
       let filePath: string;
       let loadedElement: HTMLVideoElement | HTMLImageElement | null = null;
 
@@ -299,7 +301,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
       },
       allowTouchMove: true,
       on: {
-        slideChangeTransitionEnd: () => {
+        slideChangeTransitionStart: () => {
           this.handleSlideChange();
         },
       },
@@ -309,7 +311,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
   }
 
   private handleSlideChange(): void {
-    // Zawsze czyścimy stary timer na początku zmiany slajdu
     if (this.pictureTimer) {
       clearTimeout(this.pictureTimer);
       this.pictureTimer = null;
@@ -337,7 +338,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
       this.isVideoPlaying = false;
       this.mySwiper.autoplay.stop();
 
-      // Ustawiamy nowy timer i zapisujemy referencję
       this.pictureTimer = setTimeout(() => {
         if (!this.isVideoPlaying) {
           this.mySwiper.slideNext();

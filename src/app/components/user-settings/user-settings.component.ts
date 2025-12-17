@@ -49,6 +49,7 @@ export class UserSettingsComponent implements OnInit {
     logoFilePath: '',
     separatorFilePath: '',
     enableFacebookModule: false,
+    includeSharedStories: false,
     selectedFacebookPage: null,
     facebookPageAccess: null,
     facebookPageId: null,
@@ -342,8 +343,8 @@ export class UserSettingsComponent implements OnInit {
     console.log('✅ Ustawienia FB zaktualizowane lokalnie:', this.userSettings());
   }
 
-getFacebookStories(pageToken: string, pageId: string): void {
-   this.facebookService.getStories(pageToken, pageId).subscribe({
+getFacebookStories(pageToken: string, pageId: string, includeSharedStories:boolean = false): void {
+   this.facebookService.getStories(pageToken, pageId, includeSharedStories).subscribe({
     next: (stories: FacebookStory[]) => {
       console.log('Liczba Stories:', stories.length);
       console.log(stories)
@@ -358,8 +359,8 @@ getFacebookStories(pageToken: string, pageId: string): void {
 
 }
 
-getRandomStory(pageToken: string, pageId: string): void {
-   this.facebookService.getRandomStory(pageToken, pageId).subscribe({
+getRandomStory(pageToken: string, pageId: string, includeSharedStories: boolean = false): void {
+   this.facebookService.getRandomStory(pageToken, pageId, includeSharedStories).subscribe({
     next: (story: FacebookStory) => {
      
       console.log(story)

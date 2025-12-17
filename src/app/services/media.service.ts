@@ -40,8 +40,8 @@ export class MediaService {
 
   public getFilesForSwiper(): Observable<Media[]> {
 
-    const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string, fetchStories: boolean) => {
-      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]);
+    const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
+      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared }) : of([] as FacebookStory[]);
 
       return zip([
         this.http.get<Media[]>(this.apiUrl),
@@ -79,8 +79,8 @@ export class MediaService {
       );
     };
 
-    const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string, fetchStories: boolean) => {
-      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId }) : of([] as FacebookStory[]);
+    const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
+      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared }) : of([] as FacebookStory[]);
 
       return zip([
         this.http.get<Media[]>(this.apiUrl),
@@ -136,13 +136,14 @@ export class MediaService {
         const isModuleEnabled = settings.enableFacebookModule;
         const pageToken = settings.facebookPageAccess;
         const pageId = settings.facebookPageId;
+        const includeShared = settings.includeSharedStories || false;
 
         const shouldFetchStories = isModuleEnabled && !!pageToken && !!pageId;
 
         return iif(
           () => isPremium,
-          premiumRequest$(currentTenant.tenant_id, pageToken, pageId, shouldFetchStories),
-          nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country, pageToken, pageId, shouldFetchStories)
+          premiumRequest$(currentTenant.tenant_id, pageToken, pageId, shouldFetchStories, includeShared),
+          nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country, pageToken, pageId, shouldFetchStories, includeShared)
         );
       })
     );

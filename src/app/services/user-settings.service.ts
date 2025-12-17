@@ -57,6 +57,7 @@ export class UserSettingsService {
           logoFilePath: '',
           separatorFilePath: '',
           enableFacebookModule: false,
+          includeSharedStories: false,
           selectedFacebookPage: null,
           facebookPageId: null,
           facebookPageAccess: null,

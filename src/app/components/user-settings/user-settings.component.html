@@ -121,6 +121,19 @@
     </tr>
 
     @if(userSettings().enableFacebookModule){
+
+       
+    <tr><td colspan="2">Enable shared stories (from other users)
+
+    </td> <td class="buttons">
+        <div class="icon-container">
+          <input id="enableSharedStories" type="checkbox" [(ngModel)]="userSettings().includeSharedStories" />
+        </div>
+      </td></tr>
+
+      @if(userSettings().includeSharedStories){
+        <tr><td colspan="3"><Span style="color: red;">Please note: Displaying shared content outside of Facebook may require explicit permission from the original owner.</Span></td></tr>
+      }
     <tr>
       <td colspan="2">
         Aktualna strona: @if(userSettings().selectedFacebookPage !== null && userSettings().selectedFacebookPage !== '' && userSettings().selectedFacebookPage
@@ -137,7 +150,7 @@
           }
         </div>
       </td>
-    </tr>
+   
     <tr></tr>
 
     @if(fbUserToken() && fbPages().length > 0){
@@ -167,8 +180,8 @@
         <span>-----------------------------------------------</span><br />
         <span>tu jest tylko testowo zeby (sprawdzać) logować pobrane story. pozniej sie to usunie</span>
 
-        <button (click)="getFacebookStories(userSettings().facebookPageAccess, userSettings().facebookPageId)">click to show list of stories</button>
-        <button (click)="getRandomStory(userSettings().facebookPageAccess, userSettings().facebookPageId)">dawaj wybrane story</button>
+        <button (click)="getFacebookStories(userSettings().facebookPageAccess, userSettings().facebookPageId, userSettings().includeSharedStories)">click to show list of stories</button>
+        <button (click)="getRandomStory(userSettings().facebookPageAccess, userSettings().facebookPageId, userSettings().includeSharedStories)">dawaj wybrane story</button>
       </td>
     </tr>
      <tr>
