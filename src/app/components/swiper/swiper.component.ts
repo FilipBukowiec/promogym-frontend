@@ -26,8 +26,13 @@ export class SwiperComponent implements OnInit, OnDestroy {
   private isVideoPlaying: boolean = false;
   pictureSlideDuration: number = 5;
   private readonly onDestroy$ = new Subject();
+  private pictureTimer: any;
 
-  constructor(private mediaService: MediaService, private userSettingsService: UserSettingsService, private tenantChangeService: TenantChangeService) { }
+  constructor(
+    private mediaService: MediaService,
+    private userSettingsService: UserSettingsService,
+    private tenantChangeService: TenantChangeService
+  ) {}
 
   public ngOnInit(): void {
     this.watchUserSettings();
@@ -79,6 +84,10 @@ export class SwiperComponent implements OnInit, OnDestroy {
   }
 
   public destroySwiper(): void {
+    if (this.pictureTimer) {
+      clearTimeout(this.pictureTimer);
+      this.pictureTimer = null;
+    }
     if (this.mySwiper) {
       this.mySwiper.destroy(true, true);
       this.mySwiper = null as any;
@@ -101,14 +110,29 @@ export class SwiperComponent implements OnInit, OnDestroy {
       }
     };
 
-    const adjustStoryRendering = (mediaElement: HTMLVideoElement | HTMLImageElement, slideElement: HTMLElement, isStory: boolean) => {
-      // Jeśli to NIE jest story, nic nie rób (zostaw domyślne style z pętli głównej)
+    const adjustStoryRendering = (
+      mediaElement: HTMLVideoElement | HTMLImageElement,
+      slideElement: HTMLElement,
+      isStory: boolean
+    ) => {
       if (!isStory) return;
+
+      let community_logo = slideElement.querySelector('.community') as HTMLImageElement;
+      if (!community_logo) {
+        community_logo = document.createElement('img');
+        community_logo.classList.add('community');
+        community_logo.src = '/assets/images/community.gif';
+        community_logo.style.height = '70px';
+        community_logo.style.position = 'absolute';
+        community_logo.style.top = '10px';
+        community_logo.style.right = '20px';
+        community_logo.style.zIndex = '10';
+        slideElement.appendChild(community_logo);
+      }
 
       let mediaWidth: number;
       let mediaHeight: number;
 
-      // Pobierz wymiary
       if (mediaElement instanceof HTMLVideoElement) {
         mediaWidth = mediaElement.videoWidth;
         mediaHeight = mediaElement.videoHeight;
@@ -119,72 +143,35 @@ export class SwiperComponent implements OnInit, OnDestroy {
 
       const isHorizontal = mediaWidth > mediaHeight;
 
-      // 1. SCENARIUSZ: SZERSZE NIŻ WYŻSZE (Traktuj jak !story)
       if (isHorizontal) {
-        // Upewnij się, że element jest bezpośrednio w slide (nie w boxie)
         if (mediaElement.parentElement !== slideElement) {
           slideElement.appendChild(mediaElement);
-          // Ewentualnie usuń box jeśli istnieje i jest pusty
           const oldBox = slideElement.querySelector('.media-box');
           if (oldBox) oldBox.remove();
         }
 
-        // 🚨 CZYSZCZENIE: Usuwanie stylów i headera z trybu telefonu (Vertical)
         const oldHeader = slideElement.querySelector('.story-header');
         if (oldHeader) oldHeader.remove();
         slideElement.style.display = '';
         slideElement.style.alignItems = '';
         slideElement.style.justifyContent = '';
-        slideElement.style.paddingBottom = ''; // Reset paddingu
+        slideElement.style.paddingBottom = '';
 
-        // Reset stylów ramki (gdyby były wcześniej nadane)
         mediaElement.style.border = 'none';
         mediaElement.style.borderRadius = '0';
         mediaElement.style.borderImageSource = 'none';
         mediaElement.style.marginTop = '0';
 
-        // Style Fullscreen Cover (jak w !story)
         mediaElement.style.width = '100vw';
         mediaElement.style.height = '100%';
         mediaElement.style.objectFit = 'cover';
-      }
-      // 2. SCENARIUSZ: WYŻSZE NIŻ SZERSZE (Twórz Box, Ramkę i Flex-Start)
-      else {
-        // Sprawdź czy box już istnieje
+      } else {
         let box = slideElement.querySelector('.media-box') as HTMLElement;
 
-        // 🚨 1. STYLE SLIDE'u: Definiowanie obszaru roboczego 93vh
-        // Rodzic (slideElement) staje się kontenerem Flex do centrowania BOXA.
         slideElement.style.display = 'flex';
         slideElement.style.justifyContent = 'center';
         slideElement.style.alignItems = 'center';
 
-        // 2. Tworzenie HEADERA (Tylko dla trybu telefonu)
-        let storyHeader = slideElement.querySelector('.story-header') as HTMLElement;
-        if (!storyHeader) {
-          storyHeader = document.createElement('span');
-          storyHeader.classList.add('story-header');
-          storyHeader.textContent = 'Fajne Story!';
-          storyHeader.style.position = 'absolute';
-          storyHeader.style.top = '10px';
-          storyHeader.style.left = '10%';
-          storyHeader.style.color = 'white';
-          storyHeader.style.backgroundColor = 'rgba(251, 0, 0, 0.5)';
-          storyHeader.style.padding = '5px 10px';
-          storyHeader.style.borderRadius = '5px';
-          storyHeader.style.zIndex = '10';
-          slideElement.appendChild(storyHeader);
-        }
-
-        // const socialMedia =document.createElement("img");
-        //   socialMedia.src = "assets/images/like.gif";
-        //   socialMedia.style.height = "80vh";
-        //   socialMedia.style.position = "absolute";
-        //   socialMedia.style.right = "15%";
-        //   socialMedia.style.opacity = "0.5"
-        //   slideElement.appendChild(socialMedia)
-
-        // 3. Tworzenie KONTENERA 'BOX' (Obszar roboczy 93vh)
         if (!box) {
           box = document.createElement('div');
           box.classList.add('media-box');
@@ -192,9 +179,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
           box.style.height = '100vh';
           box.style.backgroundImage = 'url("assets/images/sm_bg.jpg")';
           box.style.backgroundPosition = 'center';
-          box.style.backgroundSize = "cover"
-
-          // box.style.border = '1px solid red';
+          box.style.backgroundSize = 'cover';
           box.style.display = 'flex';
           box.style.justifyContent = 'center';
           box.style.alignItems = 'center';
@@ -202,32 +187,23 @@ export class SwiperComponent implements OnInit, OnDestroy {
           slideElement.appendChild(box);
         }
 
-        // 4. Przenieś element media do boxa
         if (mediaElement.parentElement !== box) {
           box.appendChild(mediaElement);
         }
 
-        // 5. Style Elementu (Telefon)
         mediaElement.style.maxWidth = '100%';
-
         mediaElement.style.maxHeight = '90%';
         mediaElement.style.width = 'auto';
         mediaElement.style.height = 'auto';
         mediaElement.style.objectFit = 'contain';
-        mediaElement.style.borderRadius = '25px'; 
-        mediaElement.style.boxShadow = `
-  0 -5px 15px 0 #00E5FF, 
-  0 5px 25px 0 #D53AFF, 
-  0 0 10px rgba(255, 255, 255, 0.5)
-`;
+        mediaElement.style.borderRadius = '25px';
+        mediaElement.style.boxShadow = `0 -5px 15px 0 #00E5FF, 0 5px 25px 0 #D53AFF, 0 0 10px rgba(255, 255, 255, 0.5)`;
       }
     };
 
-    // --- GŁÓWNA PĘTLA ---
     this.media.forEach((element) => {
       const slide = document.createElement('div');
       slide.classList.add('swiper-slide');
-      // const storyImgPath = 'assets/images/cf.jpg';
       let filePath: string;
       let loadedElement: HTMLVideoElement | HTMLImageElement | null = null;
 
@@ -250,7 +226,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
           loadedElement = imgElement;
         }
       } else {
-        // 🔵 LOGIKA DLA STANDARDOWYCH SLIDE'ÓW (!STORY) - BEZ ZMIAN
         filePath = `${environment.publicUrl}${element.filePath}`;
         const isVideo = element.fileType.startsWith('video/');
 
@@ -260,36 +235,27 @@ export class SwiperComponent implements OnInit, OnDestroy {
           videoElement.muted = true;
           videoElement.setAttribute('playsinline', '');
           videoElement.setAttribute('preload', 'auto');
-
-          // Standardowe style cover
           videoElement.style.width = '100vw';
           videoElement.style.height = '100%';
           videoElement.style.objectFit = 'cover';
-
           slide.appendChild(videoElement);
           loadedElement = videoElement;
         } else {
           const imgElement = document.createElement('img');
           imgElement.src = filePath;
-
-          // Standardowe style cover
           imgElement.style.width = '100vw';
           imgElement.style.height = '100%';
           imgElement.style.objectFit = 'cover';
-
           slide.appendChild(imgElement);
           loadedElement = imgElement;
         }
       }
 
-      // --- OBSŁUGA ŁADOWANIA I URUCHOMIENIE LOGIKI WYMIARÓW ---
       if (loadedElement) {
         const handleMediaLoaded = () => {
-          // Tu jest cała magia: sprawdzamy wymiary i decydujemy czy tworzyć box, czy robić fullscreen
           if (element.isStory) {
             adjustStoryRendering(loadedElement as HTMLVideoElement | HTMLImageElement, slide, true);
           }
-
           loadedMediaCount++;
           checkIfAllMediaLoaded();
         };
@@ -308,7 +274,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
           };
         }
       } else {
-        // Fallback gdyby loadedElement był null (np. nieobsługiwany typ)
         loadedMediaCount++;
         checkIfAllMediaLoaded();
       }
@@ -334,7 +299,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
       },
       allowTouchMove: true,
       on: {
-        slideChangeTransitionStart: () => {
+        slideChangeTransitionEnd: () => {
           this.handleSlideChange();
         },
       },
@@ -344,41 +309,36 @@ export class SwiperComponent implements OnInit, OnDestroy {
   }
 
   private handleSlideChange(): void {
+    // Zawsze czyścimy stary timer na początku zmiany slajdu
+    if (this.pictureTimer) {
+      clearTimeout(this.pictureTimer);
+      this.pictureTimer = null;
+    }
+
     const currentSlide = this.mySwiper.slides[this.mySwiper.activeIndex];
+    if (!currentSlide) return;
+
     const video = currentSlide.querySelector('video') as HTMLVideoElement;
 
     if (video) {
       this.mySwiper.autoplay.stop();
+      this.isVideoPlaying = true;
       video.currentTime = 0;
-      video.muted = true;
-      video.setAttribute('playsinline', '');
-      video.setAttribute('autoplay', '');
-      video.setAttribute('preload', 'auto');
+      video.play().catch((err) => {
+        console.error('Błąd wideo:', err);
+        this.mySwiper.slideNext();
+      });
 
-      video
-        .play()
-        .then(() => {
-          this.isVideoPlaying = true;
-        })
-        .catch((err) => {
-          console.error('Błąd odtwarzania wideo:', err);
-          this.isVideoPlaying = false;
-          this.mySwiper.slideNext();
-        });
-
-      video.addEventListener(
-        'ended',
-        () => {
-          this.isVideoPlaying = false;
-          this.mySwiper.slideNext();
-        },
-        { once: true }
-      );
+      video.onended = () => {
+        this.isVideoPlaying = false;
+        this.mySwiper.slideNext();
+      };
     } else {
       this.isVideoPlaying = false;
       this.mySwiper.autoplay.stop();
 
-      setTimeout(() => {
+      // Ustawiamy nowy timer i zapisujemy referencję
+      this.pictureTimer = setTimeout(() => {
         if (!this.isVideoPlaying) {
           this.mySwiper.slideNext();
         }
@@ -387,8 +347,14 @@ export class SwiperComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
+    if (this.pictureTimer) {
+      clearTimeout(this.pictureTimer);
+      this.pictureTimer = null;
+    }
     this.onDestroy$.next(void 0);
     this.onDestroy$.complete();
-    this.mySwiper?.destroy(true, true);
+    if (this.mySwiper) {
+      this.mySwiper.destroy(true, true);
+    }
   }
 }
