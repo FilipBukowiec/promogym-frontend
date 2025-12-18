@@ -119,7 +119,9 @@ export class SideMenuComponent implements AfterViewInit, OnDestroy {
     this.selectedTenant = newTenant;
     this.authService.dispatchCurrentTenant(newTenant);
 
-    this.webSocketService.changeRoomForTenant(previousTenant, newTenant);
+// To Kryzsiek niżej zakomentowałem, moim zdaniem niepożądane zachowanie, ponieważ zmiana tenanta dawała sygnał do websocketu i jeśli jakiś user na tym roomie był to go przeładowyało. otwórz sobie drugie okno i to zobacz mając odpalonego swipera.
+
+    // this.webSocketService.changeRoomForTenant(previousTenant, newTenant); 
     this.tenantChangeService.notifyTenantChanged();
   }
 

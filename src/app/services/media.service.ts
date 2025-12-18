@@ -22,10 +22,16 @@ export class MediaService {
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService, private readonly userSettingsService: UserSettingsService) { }
+  constructor(
+    private http: HttpClient, 
+    private auth: AuthService, 
+    private readonly userSettingsService: UserSettingsService
+  ) {}
 
   public refreshMedia(): Observable<Media[]> {
-    return this.getFilesForSwiper().pipe(tap((media) => this.mediaSubject.next(media)));
+    return this.getFilesForSwiper().pipe(
+      tap((media) => this.mediaSubject.next(media))
+    );
   }
 
   public uploadFile(file: File): Observable<Media> {
@@ -39,20 +45,29 @@ export class MediaService {
   }
 
   public getFilesForSwiper(): Observable<Media[]> {
-
+    
+    // --- LOGIKA DLA UŻYTKOWNIKA PREMIUM ---
     const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
-      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared }) : of([] as FacebookStory[]);
+      const storiesRequest$ = fetchStories
+        ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared })
+        : of([] as FacebookStory[]);
 
       return zip([
-        this.http.get<Media[]>(this.apiUrl),
-        storiesRequest$,
-        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
+        this.http.get<Media[]>(this.apiUrl), 
+        storiesRequest$, 
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`)
       ]).pipe(
         map(([media, stories, library]) => {
           const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
-
           let currentOrder = 0;
 
+          // 1. ZWYKŁE MEDIA (Najniższy order)
+          const mediaWithNewOrder = media.map((m) => ({
+            ...m,
+            order: (currentOrder += 1),
+          }));
+
+          // 2. STORIES (Średni order)
           const storiesAsMedia = safeStories.map((story) => ({
             ...(story as Media),
             tenant_id: 'default_tenant',
@@ -60,27 +75,23 @@ export class MediaService {
             order: (currentOrder += 1),
           }));
 
-          const initialMediaOrder = currentOrder;
-          let mediaCurrentOrder = initialMediaOrder;
-
-          const mediaWithNewOrder = media.map((m) => ({
-            ...m,
-            order: mediaCurrentOrder++,
-          }));
-
+          // 3. BIBLIOTEKA (Najwyższy order)
           const libraryAsMedia = library.map((item) => ({
             ...(item as Media),
             tenant_id: 'default_tenant',
-            order: (mediaCurrentOrder += 1),
+            order: (currentOrder += 1),
           }));
 
-          return [...storiesAsMedia, ...mediaWithNewOrder, ...libraryAsMedia].sort((a, b) => a.order - b.order);
+          return [...mediaWithNewOrder, ...storiesAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
     };
 
+    // --- LOGIKA DLA UŻYTKOWNIKA ZWYKŁEGO (Z REKLAMAMI) ---
     const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
-      const storiesRequest$ = fetchStories ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared }) : of([] as FacebookStory[]);
+      const storiesRequest$ = fetchStories
+        ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared })
+        : of([] as FacebookStory[]);
 
       return zip([
         this.http.get<Media[]>(this.apiUrl),
@@ -89,10 +100,16 @@ export class MediaService {
         this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
       ]).pipe(
         map(([media, ads, stories, library]) => {
-
           const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
-
           let currentOrder = 0;
+
+          // 1. ZWYKŁE MEDIA
+          const mediaWithNewOrder = media.map((m) => ({
+            ...m,
+            order: (currentOrder += 1),
+          }));
+
+          // 2. STORIES
           const storiesAsMedia = safeStories.map((story) => ({
             ...(story as Media),
             tenant_id: 'default_tenant',
@@ -100,27 +117,21 @@ export class MediaService {
             order: (currentOrder += 1),
           }));
 
-          const initialMediaOrder = currentOrder;
-          let mediaCurrentOrder = initialMediaOrder;
-
-          const mediaWithNewOrder = media.map((m) => ({
-            ...m,
-            order: mediaCurrentOrder++,
-          }));
-
+          // 3. REKLAMY
           const adsAsMedia = ads.map((ad) => ({
             ...(ad as Media),
             tenant_id: 'default_tenant',
-            order: (mediaCurrentOrder += 1),
+            order: (currentOrder += 1),
           }));
 
+          // 4. BIBLIOTEKA
           const libraryAsMedia = library.map((item) => ({
             ...(item as Media),
             tenant_id: 'default_tenant',
-            order: (mediaCurrentOrder += 1),
+            order: (currentOrder += 1),
           }));
 
-          return [...storiesAsMedia, ...mediaWithNewOrder, ...adsAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
+          return [...mediaWithNewOrder, ...storiesAsMedia, ...adsAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
     };
@@ -128,9 +139,7 @@ export class MediaService {
     return combineLatest([
       this.auth.isPremiumUser(),
       this.auth.selectCurrentTenant(),
-      this.userSettingsService.settings$.pipe(
-        filter(settings => !!settings) 
-      )
+      this.userSettingsService.settings$.pipe(filter((settings) => !!settings)),
     ]).pipe(
       switchMap(([isPremium, currentTenant, settings]) => {
         const isModuleEnabled = settings.enableFacebookModule;
