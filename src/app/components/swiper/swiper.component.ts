@@ -27,7 +27,7 @@ export class SwiperComponent implements OnInit, OnDestroy {
   private pictureTimer: any;
   private readonly onDestroy$ = new Subject();
 
-  // NOWE ZMIENNE DO OBSŁUGI ODŚWIEŻANIA
+  private isFbModuleEnabled: boolean = false;
   private isTimeForUpdate: boolean = false;
   private readonly UPDATE_INTERVAL_MS = 15 * 60 * 1000; 
 
@@ -43,10 +43,9 @@ export class SwiperComponent implements OnInit, OnDestroy {
     this.watchUserSettings();
     this.initSwiper();
     this.watchRefreshMedia();
-    this.startUpdateTimer(); // START LICZNIKA CZASU
+    this.startUpdateTimer(); 
   }
 
-  // NOWA METODA: Tylko ustawia flagę po 15 min
   private startUpdateTimer(): void {
     interval(this.UPDATE_INTERVAL_MS)
       .pipe(takeUntil(this.onDestroy$))
@@ -65,7 +64,8 @@ export class SwiperComponent implements OnInit, OnDestroy {
         if (settings?.pictureSlideDuration !== undefined) {
           this.pictureSlideDuration = settings.pictureSlideDuration;
         }
-      });
+    this.isFbModuleEnabled = !!settings?.enableFacebookModule;
+    });
   }
 
   private watchRefreshMedia(): void {
@@ -109,7 +109,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
     }
   }
 
-  // TA METODA POZOSTAŁA W 100% BEZ ZMIAN (zachowane Twoje stylowanie)
   public initializeSwiper(): void {
     const swiperWrapper = document.querySelector('.swiper-wrapper') as HTMLElement;
     if (!swiperWrapper) return;
@@ -325,7 +324,6 @@ export class SwiperComponent implements OnInit, OnDestroy {
     this.handleSlideChange();
   }
 
-  // ZMODYFIKOWANA METODA - JEDYNE MIEJSCE Z LOGIKĄ PRZEŁĄCZANIA SLAJDÓW
   private handleSlideChange(): void {
     if (this.pictureTimer) {
       clearTimeout(this.pictureTimer);
@@ -337,31 +335,29 @@ export class SwiperComponent implements OnInit, OnDestroy {
 
     const video = currentSlide.querySelector('video') as HTMLVideoElement;
 
-    // Funkcja pomocnicza: Decyduje czy iść dalej, czy odświeżyć
-    const finalizeSlide = () => {
-        const currentIndex = this.mySwiper.realIndex; // Prawdziwy indeks w tablicy media
-        const isLastSlide = currentIndex === this.media.length - 1;
+   const finalizeSlide = () => {
+    const currentIndex = this.mySwiper.realIndex;
+    const isLastSlide = currentIndex === this.media.length - 1;
 
-        if (this.isTimeForUpdate && isLastSlide) {
-            // Czas na update I jesteśmy na końcu kolejki
-            console.log('Interwał 15 min minął, zakończono kolejkę slajdów - pobieram nowe media...');
-            this.isTimeForUpdate = false;
-            // Wywołujemy refresh - to spowoduje destroySwiper i initSwiper w subskrypcji
-            this.mediaService.refreshMedia().subscribe({
-                next: () => console.log('Media zostały pomyślnie odświeżone.'),
-                error: (err) => console.error('Błąd podczas odświeżania mediów:', err)
-            });
-        } else {
-            // Normalne przejście
-            this.mySwiper.slideNext();
+    if (isLastSlide && this.isTimeForUpdate) {
+        this.isTimeForUpdate = false; 
+
+        if (this.isFbModuleEnabled) {
+            console.log('Odświeżam media, bo czas minął i FB jest włączony.');
+            this.mediaService.refreshMedia().subscribe();
+            return; 
         }
-    };
+    }
+
+    this.mySwiper.slideNext();
+};
+
 
     if (video) {
       this.mySwiper.autoplay.stop();
       this.isVideoPlaying = true;
       video.currentTime = 0;
-      // Jeśli błąd odtwarzania -> idź do finalizacji
+     
       video.play().catch((err) => {
         console.error('Błąd wideo:', err);
         finalizeSlide();
