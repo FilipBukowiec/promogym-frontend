@@ -35,6 +35,10 @@ export class AuthService {
     );
   }
 
+  public isStandardUser(): Observable<boolean> {
+    return this.selectUserInfo().pipe(map((userInfo) => userInfo?.roles.includes(Role.User) || false));
+  }
+
   public isPremiumUser(): Observable<boolean> {
     return this.selectUserInfo().pipe(map((userInfo) => userInfo?.roles.includes(Role.PremiumUser) || false));
   }

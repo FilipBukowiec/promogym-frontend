@@ -25,7 +25,7 @@ export class UserLibraryComponent implements OnInit, OnDestroy {
   libraryIdsByTenant: string[] = [];
   loading: boolean = true;
   error: string | null = null;
-  public readonly isNotPremium$ = this.authService.isPremiumUser().pipe(map((isPremium) => !isPremium));
+  public readonly isStandardUser$ = this.authService.isStandardUser();
   private readonly onDestroy$ = new Subject();
 
   constructor(

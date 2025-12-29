@@ -23,7 +23,7 @@
     </div>
   </section>
 
-  @if(isNotPremium$ | async) {
+  @if(isStandardUser$ | async) {
   <section>
     <app-user-advertisements></app-user-advertisements>
   </section>

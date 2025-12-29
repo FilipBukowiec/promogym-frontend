@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { catchError, EMPTY, filter, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/services/auth.service';
 import { Advertisement } from '../../models/advertisement.model';
@@ -8,7 +8,6 @@ import { Media } from '../../models/media.model';
 import { AdvertisementsService } from '../../services/advertisements.service';
 import { LibraryService } from '../../services/library.service';
 import { MediaService } from '../../services/media.service';
-import { RetryHelperService } from '../../services/retry-helper.service';
 import { MediaFileNamePipe } from '../../shared/pipes/media-file-name.pipe';
 import { LoaderComponent } from '../loader/loader.component';
 
@@ -30,7 +29,6 @@ export class AdminLibraryComponent implements OnInit, OnDestroy {
 
   constructor(
     private mediaService: MediaService,
-    private retryHelper: RetryHelperService,
     private authService: AuthService,
     private advertisementsService: AdvertisementsService,
     private readonly libraryService: LibraryService
@@ -42,8 +40,8 @@ export class AdminLibraryComponent implements OnInit, OnDestroy {
   }
 
   public loadMedia(): void {
-    this.retryHelper
-      .withRetry(this.libraryService.getFiles())
+    this.libraryService
+      .getFiles()
       .pipe(
         catchError(() => {
           this.loading = false;
@@ -59,11 +57,10 @@ export class AdminLibraryComponent implements OnInit, OnDestroy {
 
   public loadAdvertisementsForUserCountry(): void {
     this.authService
-      .isPremiumUser()
+      .isStandardUser()
       .pipe(
-        filter((isPremium) => !isPremium),
         switchMap(() => this.authService.selectUserInfo()),
-        switchMap((userInfo) => this.retryHelper.withRetry(this.advertisementsService.getAdvertisements(userInfo.country))),
+        switchMap((userInfo) => this.advertisementsService.getAdvertisements(userInfo.country)),
         tap((ads) => {
           this.advertisementsList = ads;
           this.loading = false;
