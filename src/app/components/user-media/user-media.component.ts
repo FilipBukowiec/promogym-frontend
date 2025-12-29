@@ -26,7 +26,7 @@ export class UserMediaComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
   advertisementsList: Advertisement[] = [];
-  public readonly isPremium$ = this.authService.isPremiumUser();
+  public readonly isStandardUser$ = this.authService.isStandardUser();
 
   constructor(
     private mediaService: MediaService,
