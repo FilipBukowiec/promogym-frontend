@@ -1,15 +1,20 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs'; // Używamy firstValueFrom zamiast lastValueFrom
+import { toSignal } from '@angular/core/rxjs-interop'; // Kluczowe do łączenia RxJS i Sygnałów
+
+// Serwisy i Modele
 import { UserSettingsService } from '../../services/user-settings.service';
 import { AdminSettingsService } from '../../services/admin-settings.service';
 import { RadioStreamService } from '../../services/radio-stream.service';
 import { RetryHelperService } from '../../services/retry-helper.service';
+import { WebSocketService } from '../../services/websocket.service';
+import { FacebookService } from '../../services/facebook.service';
 import { UserSettings } from '../../models/user-settings.model';
+import { FacebookPage, FacebookStory } from '../../models/facebook.model';
 import { LoaderComponent } from '../loader/loader.component';
 import { environment } from '../../../environments/environment';
-import { WebSocketService } from '../../services/websocket.service';
 
 @Component({
   selector: 'app-user-settings',
@@ -18,8 +23,22 @@ import { WebSocketService } from '../../services/websocket.service';
   templateUrl: './user-settings.component.html',
   styleUrls: ['./user-settings.component.scss'],
 })
-export class UserSettingsComponent implements OnInit, OnDestroy {
-  userSettings: UserSettings = {
+export class UserSettingsComponent implements OnInit {
+  // --- WSTRZYKIWANIE ZALEŻNOŚCI (inject() i public) ---
+  private userSettingsService = inject(UserSettingsService);
+  private adminSettingsService = inject(AdminSettingsService);
+  // radioStreamService musi być public, aby był dostępny w szablonie (.html)
+  public radioStreamService = inject(RadioStreamService);
+  private retryHelper = inject(RetryHelperService);
+  private webSocketService = inject(WebSocketService);
+  private facebookService = inject(FacebookService);
+
+  public environmentPublicUrl = environment.publicUrl;
+
+  // --- STAN APLIKACJI (SYGNAŁY) ---
+
+  // 1. Główne Ustawienia (Zawsze Sygnał)
+  userSettings = signal<UserSettings>({
     tenant_id: '',
     language: '',
     country: '',
@@ -29,73 +48,75 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
     pictureSlideDuration: 0,
     logoFilePath: '',
     separatorFilePath: '',
-  };
+    enableFacebookModule: false,
+    includeSharedStories: false,
+    selectedFacebookPage: null,
+    facebookPageAccess: null,
+    facebookPageId: null,
+    facebookPageAdress: null,
+  });
 
-  tempLogoFile: File | null = null;
-  tempSeparatorFile: File | null = null;
-  tempLogoPreviewUrl: string | null = null;
-  tempSeparatorPreviewUrl: string | null = null;
-  selectedRadioIndex: number | null = null;
-  editUserName: boolean = false;
+  // 2. Stan UI i Pól Tymczasowych
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+  editUserName = signal<boolean>(false);
+
+  // Pliki i Podglądy (Sygnały)
+  tempLogoFile = signal<File | null>(null);
+  tempSeparatorFile = signal<File | null>(null);
+  tempLogoPreviewUrl = signal<string | null>(null);
+  tempSeparatorPreviewUrl = signal<string | null>(null);
+  logoMarkedForDeletion = signal<boolean>(false);
+  separatorMarkedForDeletion = signal<boolean>(false);
+
+  // Pola formularzy tymczasowych (Sygnały)
+  newStartMinute = signal<number | null>(null);
+  newEndMinute = signal<number | null>(null);
+  editFooterVisibilityIndex = signal<number | null>(null);
+
+  // 3. Dane Administracyjne i Strumienie (Sygnały)
+  languages = signal<string[]>([]);
+  radioStreamList = signal<{ url: string; description: string }[]>([]);
+
+  // selectedRadioIndex, fbPages, fbUserToken muszą być Sygnałami!
+  selectedRadioIndex = signal<number | null>(null);
+  fbPages = signal<FacebookPage[]>([]);
+  fbUserToken = signal<string | null>(null);
+  selectedFacebookPage = signal<FacebookPage | null>(null); // Dodajemy do wiązania w HTML
+
+  // Konwersja RxJS Observable na Sygnał (automatyczne zarządzanie subskrypcją)
+  currentPlayingStreamIndex = toSignal(this.radioStreamService.currentPlayingStreamIndexState$, { initialValue: null });
+
+  // Stała tablica minut
   time: number[] = Array.from({ length: 60 }, (_, i) => i);
-  languages: string[] = [];
-  newStartMinute: number | null = null;
-  newEndMinute: number | null = null;
-  radioStreamList: { url: string; description: string }[] = [];
-  currentPlayingStreamIndex: number | null = null;
-  currentPlayingStreamUrl: string | null = null;
-
-  editFooterVisibilityIndex: number | null = null;
-  loading: boolean = false;
-  error: string | null = null;
-  private streamSubscription: Subscription = new Subscription();
-
-  logoMarkedForDeletion: boolean = false;
-  separatorMarkedForDeletion: boolean = false;
-  public environmentPublicUrl = environment.publicUrl;
-
-  constructor(
-    private userSettingsService: UserSettingsService,
-    private adminSettingsService: AdminSettingsService,
-    public radioStreamService: RadioStreamService,
-    private cdr: ChangeDetectorRef,
-    private retryHelper: RetryHelperService,
-    private webSocketService: WebSocketService
-  ) {}
 
   ngOnInit(): void {
     this.loadSettings();
     this.getAdminSettings();
-    this.radioStreamService.currentPlayingStreamIndexState$.subscribe((index) => {
-      this.currentPlayingStreamIndex = index;
-    });
   }
 
   onTenantChange() {
     console.log('🔄 Tenant zmieniony – przeładowuję dane...');
-    this.loadSettings(); // albo inna metoda
-  }
-
-  ngOnDestroy(): void {
-    this.streamSubscription.unsubscribe();
+    this.loadSettings();
   }
 
   loadSettings(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.error.set(null);
+
     this.retryHelper.withRetry(this.userSettingsService.settings$).subscribe({
       next: (response) => {
-        if (!response) {
-          this.error = 'Brak danych użytkownika.';
-          console.warn('❗ Brak danych ustawień użytkownika.');
-          return;
+        if (response) {
+          this.userSettings.set(response);
+        } else {
+          this.error.set('Brak danych użytkownika.');
         }
-        this.userSettings = response;
-        this.loading = false;
+        this.loading.set(false);
       },
-      error: (error) => {
-        this.loading = false;
-        this.error = 'Nie udało się załadować ustawień użytkownika.';
-        console.error('❌ Błąd podczas pobierania ustawień:', error);
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set('Nie udało się załadować ustawień.');
+        console.error('❌ Błąd podczas pobierania ustawień:', err);
       },
     });
   }
@@ -103,140 +124,77 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
   getAdminSettings(): void {
     this.adminSettingsService.settings$.subscribe({
       next: (adminSettings) => {
-        if (adminSettings?.languages) {
-          this.languages = adminSettings.languages;
-        }
-        if (adminSettings?.radioStreamList) {
-          this.radioStreamList = adminSettings.radioStreamList;
+        if (adminSettings) {
+          this.languages.set(adminSettings.languages || []);
+          this.radioStreamList.set(adminSettings.radioStreamList || []);
         }
       },
     });
   }
 
+  // --- LOGIKA FORMULARZY ---
+
   editUserNameField(): void {
-    this.editUserName = true;
+    this.editUserName.set(true);
   }
 
   saveUserName(): void {
-    this.editUserName = false;
-  }
-
-  addFooterVisibilityRule(): void {
-    if (this.newStartMinute === null || this.newEndMinute === null) {
-      alert('Please select both start and end minutes.');
-      return;
-    }
-    if (this.newStartMinute >= this.newEndMinute) {
-      alert('Start time must be less than end time.');
-      return;
-    }
-
-    this.userSettings.footerVisibilityRules.push({
-      startMinute: this.newStartMinute,
-      endMinute: this.newEndMinute,
-    });
-
-    this.newStartMinute = null;
-    this.newEndMinute = null;
-  }
-
-  editFooterVisibilityRule(index: number): void {
-    this.editFooterVisibilityIndex = index;
-  }
-
-  saveFooterVisibilityRule(index: number): void {
-    const rule = this.userSettings.footerVisibilityRules[index];
-
-    if (rule.startMinute === null || rule.endMinute === null) {
-      alert('Both start and end minutes must be selected.');
-      return;
-    }
-    if (rule.startMinute >= rule.endMinute) {
-      alert('Start minute must be less than end minute.');
-      return;
-    }
-
-    this.editFooterVisibilityIndex = null;
-  }
-
-  deleteFooterVisibilityRule(index: number): void {
-    const confirmDelete = confirm('Are you sure you want to delete this Footer Visibility Rule?');
-    if (confirmDelete) {
-      this.userSettings.footerVisibilityRules.splice(index, 1);
-    }
-  }
-
-  async saveSettings(): Promise<void> {
-    try {
-      debugger;
-      if (this.logoMarkedForDeletion) {
-        await lastValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
-        this.logoMarkedForDeletion = false;
-        this.tempLogoPreviewUrl = null;
-      }
-
-      if (this.separatorMarkedForDeletion) {
-        await lastValueFrom(this.userSettingsService.deleteLogo('separator'));
-        this.separatorMarkedForDeletion = false;
-        this.tempSeparatorPreviewUrl = null;
-      }
-
-      if (this.tempLogoFile) {
-        if (this.userSettings.logoFilePath) {
-          await lastValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
-        }
-
-        const res = await lastValueFrom(this.userSettingsService.uploadLogo(this.tempLogoFile, 'mainlogo'));
-
-        if (res) {
-          this.userSettings = res;
-          if (this.userSettings.logoFilePath) {
-            this.tempLogoPreviewUrl = `${environment.publicUrl}${this.userSettings.logoFilePath}?t=${Date.now()}`;
-          }
-        }
-
-        this.tempLogoFile = null;
-      }
-
-      if (this.tempSeparatorFile) {
-        if (this.userSettings.separatorFilePath) {
-          await lastValueFrom(this.userSettingsService.deleteLogo('separator'));
-        }
-
-        const res = await lastValueFrom(this.userSettingsService.uploadLogo(this.tempSeparatorFile, 'separator'));
-
-        if (res) {
-          this.userSettings = res;
-          if (this.userSettings.separatorFilePath) {
-            this.tempSeparatorPreviewUrl = `${environment.publicUrl}${this.userSettings.separatorFilePath}?t=${Date.now()}`;
-          }
-        }
-
-        this.tempSeparatorFile = null;
-      }
-
-      this.userSettingsService.updateSettings(this.userSettings).subscribe({
-        next: () => {
-          alert('Settings saved successfully');
-          this.loadSettings();
-        },
-        error: (error) => {
-          console.error('Błąd podczas zapisywania', error);
-          alert('Błąd podczas zapisywania ustawień. Spróbuj ponownie później.');
-        },
-      });
-    } catch (err) {
-      console.error('Błąd podczas zapisu:', err);
-      alert('Błąd podczas zapisu. Spróbuj ponownie.');
-    }
+    this.editUserName.set(false);
   }
 
   updateSelectedIndex(event: Event): void {
     const selectedElement = event.target as HTMLSelectElement;
-    this.selectedRadioIndex = selectedElement.selectedIndex;
+    // Aktualizujemy Sygnał
+    this.selectedRadioIndex.set(selectedElement.selectedIndex);
   }
 
-  playRadioStream(): void {}
+  // ... reszta prostych metod (playRadioStream)
+
+  // --- ZARZĄDZANIE REGUŁAMI STOPKI (Mutacja tablic wewnątrz Sygnału) ---
+
+  addFooterVisibilityRule(): void {
+    const start = this.newStartMinute();
+    const end = this.newEndMinute();
+
+    if (start === null || end === null) {
+      alert('Please select both start and end minutes.');
+      return;
+    }
+    if (start >= end) {
+      alert('Start time must be less than end time.');
+      return;
+    }
+
+    // Używamy .update() do bezpiecznej mutacji obiektu wewnątrz Sygnału
+    this.userSettings.update((current) => ({
+      ...current,
+      footerVisibilityRules: [...current.footerVisibilityRules, { startMinute: start, endMinute: end }],
+    }));
+
+    this.newStartMinute.set(null);
+    this.newEndMinute.set(null);
+  }
+
+  editFooterVisibilityRule(index: number): void {
+    this.editFooterVisibilityIndex.set(index);
+  }
+
+  saveFooterVisibilityRule(index: number): void {
+    // W TDF to wystarczy, aby zatwierdzić edycję UI
+    this.editFooterVisibilityIndex.set(null);
+  }
+
+  deleteFooterVisibilityRule(index: number): void {
+    if (confirm('Are you sure you want to delete this Footer Visibility Rule?')) {
+      this.userSettings.update((current) => {
+        const newRules = [...current.footerVisibilityRules];
+        newRules.splice(index, 1);
+        return { ...current, footerVisibilityRules: newRules };
+      });
+    }
+  }
+
+  // --- OBSŁUGA PLIKÓW ---
 
   onFileSelected(event: Event, type: 'mainlogo' | 'separator'): void {
     const input = event.target as HTMLInputElement;
@@ -245,35 +203,177 @@ export class UserSettingsComponent implements OnInit, OnDestroy {
       const url = URL.createObjectURL(file);
 
       if (type === 'mainlogo') {
-        this.tempLogoFile = file;
-        this.tempLogoPreviewUrl = url;
+        this.tempLogoFile.set(file);
+        this.tempLogoPreviewUrl.set(url);
       } else {
-        this.tempSeparatorFile = file;
-        this.tempSeparatorPreviewUrl = url;
+        this.tempSeparatorFile.set(file);
+        this.tempSeparatorPreviewUrl.set(url);
       }
-
-      this.cdr.detectChanges();
     }
   }
 
   deleteLogo(type: 'mainlogo' | 'separator'): void {
-    const confirmed = confirm(`Are you sure you want to mark the ${type} logo for deletion?`);
-    if (!confirmed) return;
+    if (!confirm(`Are you sure you want to mark the ${type} logo for deletion?`)) return;
 
-    if (type === 'mainlogo') {
-      this.logoMarkedForDeletion = true;
-      this.userSettings.logoFilePath = '';
-      this.tempLogoPreviewUrl = null;
-      this.tempLogoFile = null;
-    }
+    this.userSettings.update((settings) => {
+      if (type === 'mainlogo') {
+        this.logoMarkedForDeletion.set(true);
+        this.tempLogoPreviewUrl.set(null);
+        this.tempLogoFile.set(null);
+        return { ...settings, logoFilePath: '' };
+      } else {
+        this.separatorMarkedForDeletion.set(true);
+        this.tempSeparatorPreviewUrl.set(null);
+        this.tempSeparatorFile.set(null);
+        return { ...settings, separatorFilePath: '' };
+      }
+    });
+  }
 
-    if (type === 'separator') {
-      this.separatorMarkedForDeletion = true;
-      this.userSettings.separatorFilePath = '';
-      this.tempSeparatorPreviewUrl = null;
-      this.tempSeparatorFile = null;
+  // --- GŁÓWNA METODA ZAPISU (ASYNC + SYGNAŁY) ---
+
+  async saveSettings(): Promise<void> {
+    this.loading.set(true);
+
+    try {
+      // 1. Obsługa usuwania logo (aktualizacja Sygnałów po sukcesie)
+      if (this.logoMarkedForDeletion()) {
+        await firstValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
+        this.logoMarkedForDeletion.set(false);
+      }
+      // ... reszta logiki usuwania separatora
+      if (this.separatorMarkedForDeletion()) {
+        await firstValueFrom(this.userSettingsService.deleteLogo('separator'));
+        this.separatorMarkedForDeletion.set(false);
+      }
+
+      // 2. Obsługa wysyłania plików
+      const logoFile = this.tempLogoFile();
+      if (logoFile) {
+        if (this.userSettings().logoFilePath) {
+          try {
+            await firstValueFrom(this.userSettingsService.deleteLogo('mainlogo'));
+          } catch (e) {}
+        }
+
+        const res = await firstValueFrom(this.userSettingsService.uploadLogo(logoFile, 'mainlogo'));
+        if (res) {
+          this.userSettings.set(res);
+          this.tempLogoPreviewUrl.set(`${this.environmentPublicUrl}${res.logoFilePath}?t=${Date.now()}`);
+        }
+        this.tempLogoFile.set(null);
+      }
+
+      const sepFile = this.tempSeparatorFile();
+      if (sepFile) {
+        if (this.userSettings().separatorFilePath) {
+          try {
+            await firstValueFrom(this.userSettingsService.deleteLogo('separator'));
+          } catch (e) {}
+        }
+        const res = await firstValueFrom(this.userSettingsService.uploadLogo(sepFile, 'separator'));
+        if (res) {
+          this.userSettings.set(res);
+          this.tempSeparatorPreviewUrl.set(`${this.environmentPublicUrl}${res.separatorFilePath}?t=${Date.now()}`);
+        }
+        this.tempSeparatorFile.set(null);
+      }
+
+      // 3. Zapis głównych ustawień
+      await firstValueFrom(this.userSettingsService.updateSettings(this.userSettings()));
+
+      alert('Settings saved successfully');
+      this.loadSettings();
+    } catch (err) {
+      console.error('Save error:', err);
+      alert('Error saving settings.');
+    } finally {
+      this.loading.set(false);
     }
   }
+
+  // --- FACEBOOK LOGIN (W PEŁNI SYGNAŁOWY) ---
+
+  facebooklogin(): void {
+    this.error.set(null);
+    this.loading.set(true);
+
+    this.facebookService
+      .login() // Promise
+      .then((userToken) => {
+        this.fbUserToken.set(userToken); // Zapis tokenu do Sygnału
+
+        this.facebookService.getPages(userToken).subscribe({
+          // Observable
+          next: (pages) => {
+            this.fbPages.set(pages); // Zapis stron do Sygnału
+            this.loading.set(false);
+            console.log('nowe strony:', pages);
+          },
+          error: (err) => {
+            this.error.set('Błąd pobierania stron FB.');
+            this.loading.set(false);
+            console.error('❌ Błąd w subskrypcji stron:', err);
+          },
+        });
+      })
+      .catch((err) => {
+        this.error.set('Logowanie FB anulowane lub nieudane.');
+        this.loading.set(false);
+        console.error('❌ Błąd w logowaniu (Promise):', err);
+      });
+  }
+
+  onPageSelected(selectedPage: FacebookPage | null): void {
+    this.selectedFacebookPage.set(selectedPage);
+    this.userSettings.update((current) => {
+      if (selectedPage) {
+        return { ...current, selectedFacebookPage: selectedPage.name, facebookPageAccess: selectedPage.page_token, facebookPageId: selectedPage.id, facebookPageAdress:selectedPage.link };
+      } else {
+        return {
+          ...current,
+          selectedFacebookPage: null,
+          facebookPageAccess: null,
+          facebookPageId: null,
+          facebookPageAdress: null,
+        };
+      }
+    });
+
+    console.log('✅ Ustawienia FB zaktualizowane lokalnie:', this.userSettings());
+  }
+
+getFacebookStories(pageToken: string, pageId: string, includeSharedStories:boolean = false): void {
+   this.facebookService.getStories(pageToken, pageId, includeSharedStories).subscribe({
+    next: (stories: FacebookStory[]) => {
+      console.log('Liczba Stories:', stories.length);
+      console.log(stories)
+    },
+    error: (err) => {
+      console.error('❌ Błąd podczas pobierania Stories:', err);
+    },
+    complete: () => {
+      console.log('Pobieranie Stories zakończone.');
+    }
+   })
+
+}
+
+getRandomStory(pageToken: string, pageId: string, includeSharedStories: boolean = false): void {
+   this.facebookService.getRandomStory(pageToken, pageId, includeSharedStories).subscribe({
+    next: (story: FacebookStory) => {
+     
+      console.log(story)
+    },
+    error: (err) => {
+      console.error('❌ Błąd podczas pobierania Stories:', err);
+    },
+    complete: () => {
+      console.log('Pobieranie Stories zakończone.');
+    }
+   })
+
+}
 
   liveUpdate(): void {
     this.webSocketService.requestUserSettingsUpdate();

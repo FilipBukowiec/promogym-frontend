@@ -15,7 +15,7 @@ export class UserSettingsService {
   private settingsSubject = new BehaviorSubject<UserSettings | null>(null);
   settings$ = this.settingsSubject.asObservable().pipe(filter((settings) => !!settings));
 
-  constructor(private http: HttpClient, private readonly authService: AuthService) {}
+  constructor(private http: HttpClient, private readonly authService: AuthService, ) {}
 
   public initSettings(): Observable<UserSettings> {
     return this.authService.selectCurrentTenant().pipe(
@@ -56,6 +56,12 @@ export class UserSettingsService {
           pictureSlideDuration: 15,
           logoFilePath: '',
           separatorFilePath: '',
+          enableFacebookModule: false,
+          includeSharedStories: false,
+          selectedFacebookPage: null,
+          facebookPageId: null,
+          facebookPageAccess: null,
+          facebookPageAdress: null
         };
 
         return this.http.post<UserSettings>(this.apiUrl, defaultSettings).pipe(tap((createdSettings) => this.settingsSubject.next(createdSettings)));

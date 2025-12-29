@@ -29,9 +29,7 @@ tr > td:last-child {
   width: 200px;
 }
 
-.buttons {
-  width: 50%;
-}
+
 
 .name {
   display: flex;
@@ -59,3 +57,16 @@ tr > td:last-child {
 label {
   font-size: 0.9rem;
 }
+
+
+.test{
+text-align: center;
+}
+
+
+h3{
+  margin-top: 20px;
+  text-align: center;
+  color: $accentColor;
+}
+

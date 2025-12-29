@@ -1,193 +1,273 @@
-<ng-container *ngIf="loading">
-  <app-loader></app-loader>
-</ng-container>
-<ng-container *ngIf="!loading">
-  <section>
-    <h1>General settings</h1>
-    <span class="description"
-      >Remember, after adding new settings, you must press the 'Save settings' button. From that moment, each device will be activated with the new settings.
-      However, if you want to change the settings on devices that are currently in use, click the 'Live update' button. This will reload the application on
-      those devices.</span
-    >
+@if(loading()){ <app-loader></app-loader>} @else {
+<section>
+  <h1>General settings</h1>
+  <span class="description">
+    Remember, after adding new settings, you must press the 'Save settings' button. From that moment, each device will be activated with the new settings.
+    However, if you want to change the settings on devices that are currently in use, click the 'Live update' button. This will reload the application on those
+    devices.
+  </span>
 
-    <button (click)="liveUpdate()">Live update</button>
-  </section>
-  <section>
-    <h2>Settings guide tutorial</h2>
-    <br />
+  <button (click)="liveUpdate()">Live update</button>
+</section>
 
-    <iframe
-      src="https://www.youtube.com/embed/gyxCNEsobgw?si=sFZg5Spe6CWVNMqo"
-      title="YouTube video player"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allowfullscreen
-    ></iframe>
-  </section>
-  <section>
-    <table>
-      <caption>
-        <h2>General settings</h2>
-      </caption>
-      <tr>
-        <td>
-          <label for=""> User name:</label>
-          <br />
-          <span class="name" *ngIf="!editUserName">{{ userSettings.name }}</span>
-          <input class="edit" *ngIf="editUserName" [(ngModel)]="userSettings.name" type="text" />
-        </td>
-        <td class="buttons">
-          <br />
-          <div class="icon-container">
-            <i class="bi bi-pencil-fill" *ngIf="!editUserName" (click)="editUserNameField()"></i>
-            <i class="bi bi-floppy-fill" *ngIf="editUserName" (click)="saveUserName()"></i>
-          </div>
-        </td>
-      </tr>
+<section>
+  <h2>Settings guide tutorial</h2>
+  <br />
+  <iframe
+    src="https://www.youtube.com/embed/2rWON_h9hhQ?si=SvEzB9haoFVoqGw6"
+    title="YouTube video player"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
+</section>
 
-      <!-- <tr>
-      <td colspan="3">
-        Select language:
-        <select name="" id="" [(ngModel)]="userSettings.language">
-          <option *ngFor="let language of languages" [value]="language">
-            {{ language }}
+<section>
+  <table>
+    <caption>
+      <h2>General settings</h2>
+    </caption>
+<tr><td colspan="3"><h3>Main settings</h3></td></tr>
+
+    <tr>
+      <td colspan="2">
+        <label for=""> User name:</label>
+        <br />
+        @if(!editUserName()){
+        <span class="name">{{ userSettings().name }}</span>
+        } @else {
+        <input class="edit" [(ngModel)]="userSettings().name" type="text" />
+        }
+      </td>
+      <td class="buttons">
+        <br />
+        <div class="icon-container">
+          @if(!editUserName()){
+          <i class="bi bi-pencil-fill" (click)="editUserNameField()"></i>
+          } @else{
+          <i class="bi bi-floppy-fill" (click)="saveUserName()"></i>
+          }
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <label for="radioSelect">Selected radio stream:</label><br />
+        <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings().selectedRadioStream" (change)="updateSelectedIndex($event)">
+          <option [disabled]="true" value="">Select radio stream</option>
+          @for(radio of radioStreamList(); track radio.url; let i = $index){
+          <option [value]="radio.url">
+            {{ radio.description }}
           </option>
+          }
         </select>
       </td>
-    </tr> -->
-      <tr>
-        <td>
-          <label for="radioSelect">Selected radio stream:</label><br />
-          <select class="radio-name" id="radioSelect" [(ngModel)]="userSettings.selectedRadioStream" (change)="updateSelectedIndex($event)">
-            <option [disabled]="true" value="">Select radio stream</option>
-            <option *ngFor="let radio of radioStreamList; let i = index" [value]="radio.url">
-              {{ radio.description }}
+
+      <td>
+        <br />
+        <div class="icon-container">
+          <i
+            *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex() !== selectedRadioIndex()"
+            class="bi bi-play-fill"
+            (click)="
+              radioStreamService.playRadioStream(
+                userSettings().selectedRadioStream || '',
+                radioStreamService.userSettingsAudio$,
+                [radioStreamService.adminSettingsAudio$, radioStreamService.sideMenuAudio$],
+                selectedRadioIndex() ?? undefined
+              )
+            "
+          >
+          </i>
+
+          <i
+            *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex() === selectedRadioIndex()"
+            class="bi bi-stop-fill"
+            (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)"
+          >
+          </i>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <label for="slideduration">Set picture slide duration:</label><br />
+        <select class="slide-duration" id="slideduration" [(ngModel)]="userSettings().pictureSlideDuration">
+          <option *ngFor="let seconds of time" [value]="seconds">
+            {{ seconds }}
+          </option>
+        </select>
+        seconds per slide
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3"><hr /></td>
+    </tr>
+    <tr>
+      <td colspan="3"><h3>Access for facebook module</h3></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <label for="enableFb">Enable Facebook module</label>
+      </td>
+      <td class="buttons">
+        <div class="icon-container">
+          <input id="enableFb" type="checkbox" [(ngModel)]="userSettings().enableFacebookModule" />
+        </div>
+      </td>
+    </tr>
+
+    @if(userSettings().enableFacebookModule){
+
+       
+    <tr><td colspan="2">Enable shared stories (from other users)
+
+    </td> <td class="buttons">
+        <div class="icon-container">
+          <input id="enableSharedStories" type="checkbox" [(ngModel)]="userSettings().includeSharedStories" />
+        </div>
+      </td></tr>
+
+      @if(userSettings().includeSharedStories){
+        <tr><td colspan="3"><Span style="color: red;">Please note: Displaying shared content outside of Facebook may require explicit permission from the original owner.</Span></td></tr>
+      }
+    <tr>
+      <td colspan="2">
+        Aktualna strona: @if(userSettings().selectedFacebookPage !== null && userSettings().selectedFacebookPage !== '' && userSettings().selectedFacebookPage
+        !== undefined){
+
+        {{ userSettings().selectedFacebookPage }}
+        } @else { You should get acces and choose the facebook page }
+      </td>
+      <td>
+        <div class="icon-container">
+          <button (click)="facebooklogin()">Login Facebook</button>
+          @if(error()){
+          <div style="color: red; margin-top: 5px">{{ error() }}</div>
+          }
+        </div>
+      </td>
+   
+    <tr></tr>
+
+    @if(fbUserToken() && fbPages().length > 0){
+    <tr>
+      <td>
+        <label for="fbPageSelect">Choose the Facebook page to display stories in the slider.</label>
+      </td>
+
+      <td>
+        <div class="icon-container">
+          <select id="fbPageSelect" [(ngModel)]="selectedFacebookPage" (ngModelChange)="onPageSelected($event)">
+            @for(page of fbPages(); track page.id){
+            <option [ngValue]="page">
+              {{ page.name }}
             </option>
+            }
           </select>
-        </td>
+        </div>
+      </td>
+    </tr>
+    } }
+<tr><td colspan="3"><hr></td>
+</tr>
 
-        <td>
-          <br />
-          <div class="icon-container">
-            <i
-              *ngIf="!(radioStreamService.userSettingsAudioState$ | async) || currentPlayingStreamIndex !== selectedRadioIndex"
-              class="bi bi-play-fill"
-              (click)="
-                radioStreamService.playRadioStream(
-                  userSettings.selectedRadioStream || '',
-                  radioStreamService.userSettingsAudio$,
-                  [radioStreamService.adminSettingsAudio$, radioStreamService.sideMenuAudio$],
-                  selectedRadioIndex ?? undefined
-                )
-              "
-            >
-            </i>
+    <tr>
+      <td colspan="3" class="test">
+        <span>-----------------------------------------------</span><br />
+        <span>tu jest tylko testowo zeby (sprawdzać) logować pobrane story. pozniej sie to usunie</span>
 
-            <i
-              *ngIf="(radioStreamService.userSettingsAudioState$ | async) && currentPlayingStreamIndex === selectedRadioIndex"
-              class="bi bi-stop-fill"
-              (click)="radioStreamService.stopRadioStream(radioStreamService.userSettingsAudio$)"
-            >
-            </i>
-          </div>
-        </td>
-      </tr>
+        <button (click)="getFacebookStories(userSettings().facebookPageAccess, userSettings().facebookPageId, userSettings().includeSharedStories)">click to show list of stories</button>
+        <button (click)="getRandomStory(userSettings().facebookPageAccess, userSettings().facebookPageId, userSettings().includeSharedStories)">dawaj wybrane story</button>
+      </td>
+    </tr>
+     <tr>
+      <td colspan="3"><hr /></td>
+    </tr>
+    <tr>
+      <td colspan="3"><h3>Footer newsbar option</h3></td>
+    </tr>
+    <tr>
+      <td>Main footer logo</td>
+      <td>
+        <span *ngIf="tempLogoPreviewUrl() || userSettings().logoFilePath">
+          <img [src]="tempLogoPreviewUrl() || environmentPublicUrl + userSettings().logoFilePath" alt="Main logo" class="logo-preview" />
+        </span>
+      </td>
+      <td>
+        <div class="icon-container">
+          <input type="file" (change)="onFileSelected($event, 'mainlogo')" />
+          <i class="bi bi-trash3-fill" *ngIf="userSettings().logoFilePath" (click)="deleteLogo('mainlogo')"></i>
+        </div>
+      </td>
+    </tr>
 
-      <tr>
-        <td colspan="2">
-          <label for="slideduration">Set picture slide duration:</label><br />
-          <select class="slide-duration" name="" id="slideduration" [(ngModel)]="userSettings.pictureSlideDuration">
-            <option *ngFor="let seconds of time" [value]="seconds">
-              {{ seconds }}
-            </option>
-          </select>
-          seconds per slide
-        </td>
-      </tr>
-    </table>
+    <tr>
+      <td>Separator logo (white background)</td>
+      <td>
+        <span *ngIf="tempSeparatorPreviewUrl() || userSettings().separatorFilePath">
+          <img [src]="tempSeparatorPreviewUrl() || environmentPublicUrl + userSettings().separatorFilePath" alt="Separator logo" class="logo-preview" />
+        </span>
+      </td>
+      <td>
+        <div class="icon-contaiener">
+          <input type="file" (change)="onFileSelected($event, 'separator')" />
+          <i class="bi bi-trash3-fill" *ngIf="userSettings().separatorFilePath" (click)="deleteLogo('separator')"></i>
+        </div>
+      </td>
+    </tr>
+    <tr><td colspan="3"><hr></td>
+    </tr>
 
-    <table>
-      <caption>
-        <h2>Footer newsbar option</h2>
-      </caption>
-      <tr>
-        <td>Main footer logo</td>
-        <td>
-          <span *ngIf="tempLogoPreviewUrl || userSettings.logoFilePath">
-            <img [src]="tempLogoPreviewUrl || environmentPublicUrl + userSettings.logoFilePath" alt="Main logo" class="logo-preview" />
-          </span>
-        </td>
-        <td>
-          <div class="icon-container">
-            <input type="file" (change)="onFileSelected($event, 'mainlogo')" />
-            <i class="bi bi-trash3-fill" *ngIf="userSettings.logoFilePath" (click)="deleteLogo('mainlogo')"></i>
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td>Separator logo (white background)</td>
-        <td>
-          <span *ngIf="tempSeparatorPreviewUrl || userSettings.separatorFilePath">
-            <img [src]="tempSeparatorPreviewUrl || environmentPublicUrl + userSettings.separatorFilePath" alt="Separator logo" class="logo-preview" />
-          </span>
-        </td>
-        <td>
-          <div class="icon-contaiener">
-            <input type="file" (change)="onFileSelected($event, 'separator')" />
-            <i class="bi bi-trash3-fill" *ngIf="userSettings.separatorFilePath" (click)="deleteLogo('separator')"></i>
-          </div>
-        </td>
-      </tr>
-
-      <tr *ngFor="let rule of userSettings.footerVisibilityRules; let i = index">
-        <td colspan="2">
-          <ng-container *ngIf="editFooterVisibilityIndex === i; else displayRule">
-            Footer visible from minute
-            <select [(ngModel)]="rule.startMinute" id="">
-              <option *ngFor="let minute of time" [value]="minute">
-                {{ minute }}
-              </option>
-            </select>
-            to minute
-            <select [(ngModel)]="rule.endMinute" id="">
-              <option *ngFor="let minute of time" [value]="minute">
-                {{ minute }}
-              </option>
-            </select>
-          </ng-container>
-          <ng-template #displayRule>Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }}</ng-template>
-        </td>
-        <td>
-          <div class="icon-container">
-            <i class="bi bi-pencil-fill" *ngIf="editFooterVisibilityIndex !== i" (click)="editFooterVisibilityRule(i)"></i>
-            <i class="bi bi-floppy-fill" *ngIf="editFooterVisibilityIndex === i" (click)="saveFooterVisibilityRule(i)"></i>
-            <i class="bi bi-trash3-fill" (click)="deleteFooterVisibilityRule(i)"></i>
-          </div>
-        </td>
-      </tr>
-
-      <tr>
-        <td class="new-rule center newsbar" colspan="3">Add new visibility footer rules</td>
-      </tr>
-      <tr>
-        <td colspan="2">
+    <tr *ngFor="let rule of userSettings().footerVisibilityRules; let i = index">
+      <td colspan="2">
+        <ng-container *ngIf="editFooterVisibilityIndex() === i; else displayRule">
           Footer visible from minute
-          <select [(ngModel)]="newStartMinute">
-            <option *ngFor="let minute of time" [value]="minute">
-              {{ minute }}
-            </option></select
-          >to minute
-          <select select [(ngModel)]="newEndMinute">
-            <option *ngFor="let minute of time" [value]="minute">
-              {{ minute }}
-            </option>
+          <select [(ngModel)]="rule.startMinute">
+            <option *ngFor="let minute of time" [value]="minute">{{ minute }}</option>
           </select>
-        </td>
-        <td class="center"><button (click)="addFooterVisibilityRule()">Add rule</button></td>
-      </tr>
-    </table>
-    <button (click)="saveSettings()">Save settings</button>
-  </section>
-</ng-container>
+          to minute
+          <select [(ngModel)]="rule.endMinute">
+            <option *ngFor="let minute of time" [value]="minute">{{ minute }}</option>
+          </select>
+        </ng-container>
+        <ng-template #displayRule> Footer visible from minute {{ rule.startMinute }} to minute {{ rule.endMinute }} </ng-template>
+      </td>
+      <td>
+        <div class="icon-container">
+          @if(editFooterVisibilityIndex() !== i){
+          <i class="bi bi-pencil-fill" (click)="editFooterVisibilityRule(i)"></i>} @else {
+          <i class="bi bi-floppy-fill" (click)="saveFooterVisibilityRule(i)"></i>}
+
+          <i class="bi bi-trash3-fill" (click)="deleteFooterVisibilityRule(i)"></i>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="new-rule center newsbar" colspan="3">Add new visibility footer rules</td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        Footer visible from minute
+        <select [ngModel]="newStartMinute()" (ngModelChange)="newStartMinute.set($event)">
+          <option *ngFor="let minute of time" [value]="minute">{{ minute }}</option>
+        </select>
+        to minute
+        <select [ngModel]="newEndMinute()" (ngModelChange)="newEndMinute.set($event)">
+          @for(minute of time; track minute){
+          <option [value]="minute">{{ minute }}</option>
+          }
+        </select>
+      </td>
+      <td class="center"><button (click)="addFooterVisibilityRule()">Add rule</button></td>
+    </tr>
+  </table>
+
+  <button (click)="saveSettings()">Save settings</button>
+</section>
+
+}

@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, forkJoin, iif, Observable, zip } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, iif, Observable, of, zip } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/auth.service';
 import { Advertisement } from '../models/advertisement.model';
 import { Library } from '../models/library.model';
 import { Media } from '../models/media.model';
+import { FacebookStory } from '../models/facebook.model';
+import { UserSettingsService } from './user-settings.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,14 +17,21 @@ export class MediaService {
   private apiUrl = `${environment.apiUrl}media`;
   private apiUrl2 = `${environment.apiUrl}advertisement`;
   private apiUrl3 = `${environment.apiUrl}library`;
+  private apiUrl4 = `${environment.apiUrl}facebook/stories`;
 
   private mediaSubject = new BehaviorSubject<Media[]>([]);
   media$ = this.mediaSubject.asObservable();
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(
+    private http: HttpClient, 
+    private auth: AuthService, 
+    private readonly userSettingsService: UserSettingsService
+  ) {}
 
   public refreshMedia(): Observable<Media[]> {
-    return this.getFilesForSwiper().pipe(tap((media) => this.mediaSubject.next(media)));
+    return this.getFilesForSwiper().pipe(
+      tap((media) => this.mediaSubject.next(media))
+    );
   }
 
   public uploadFile(file: File): Observable<Media> {
@@ -36,44 +45,116 @@ export class MediaService {
   }
 
   public getFilesForSwiper(): Observable<Media[]> {
-    const premiumRequest$ = (tenantId: string) =>
-      zip([this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`), this.http.get<Media[]>(this.apiUrl)]).pipe(
-        map(([media, library]) => {
-          const lastOrder = media.length > 0 ? Math.max(...media.map((item) => item.order)) : 0;
-          const libraryAsMedia = library.map((item, index) => ({
-            ...item,
-            tenant_id: 'default_tenant',
-            order: lastOrder + index + 1,
+    
+    // --- LOGIKA DLA UŻYTKOWNIKA PREMIUM ---
+    const premiumRequest$ = (tenantId: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
+      const storiesRequest$ = fetchStories
+        ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared })
+        : of([] as FacebookStory[]);
+
+      return zip([
+        this.http.get<Media[]>(this.apiUrl), 
+        storiesRequest$, 
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`)
+      ]).pipe(
+        map(([media, stories, library]) => {
+          const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
+          let currentOrder = 0;
+
+          // 1. ZWYKŁE MEDIA (Najniższy order)
+          const mediaWithNewOrder = media.map((m) => ({
+            ...m,
+            order: (currentOrder += 1),
           }));
-          return [...media, ...libraryAsMedia].sort((a, b) => a.order - b.order);
+
+          // 2. STORIES (Średni order)
+          const storiesAsMedia = safeStories.map((story) => ({
+            ...(story as Media),
+            tenant_id: 'default_tenant',
+            isStory: true,
+            order: (currentOrder += 1),
+          }));
+
+          // 3. BIBLIOTEKA (Najwyższy order)
+          const libraryAsMedia = library.map((item) => ({
+            ...(item as Media),
+            tenant_id: 'default_tenant',
+            order: (currentOrder += 1),
+          }));
+
+          return [...mediaWithNewOrder, ...storiesAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
-    const nonPremiumRequest$ = (tenantId: string, country: string) =>
-      zip([
-        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
+    };
+
+    // --- LOGIKA DLA UŻYTKOWNIKA ZWYKŁEGO (Z REKLAMAMI) ---
+    const nonPremiumRequest$ = (tenantId: string, country: string, pageToken: string, pageId: string, fetchStories: boolean, includeShared: boolean) => {
+      const storiesRequest$ = fetchStories
+        ? this.http.post<FacebookStory[]>(`${this.apiUrl4}`, { pageToken, pageId, includeShared })
+        : of([] as FacebookStory[]);
+
+      return zip([
         this.http.get<Media[]>(this.apiUrl),
         this.http.get<Advertisement[]>(`${this.apiUrl2}/${country}`),
+        storiesRequest$,
+        this.http.get<Library[]>(`${this.apiUrl3}/tenant/list/${tenantId}`),
       ]).pipe(
-        map(([media, ads, library]) => {
-          const lastOrder = media.length > 0 ? Math.max(...media.map((item) => item.order)) : 0;
-          const adsAsMedia = ads.map((ad, index) => ({
-            ...ad,
-            tenant_id: 'default_tenant',
-            order: lastOrder + index + 1,
+        map(([media, ads, stories, library]) => {
+          const safeStories: FacebookStory[] = Array.isArray(stories) ? stories : stories ? [stories] : [];
+          let currentOrder = 0;
+
+          // 1. ZWYKŁE MEDIA
+          const mediaWithNewOrder = media.map((m) => ({
+            ...m,
+            order: (currentOrder += 1),
           }));
-          const libraryAsMedia = library.map((item, index) => ({
-            ...item,
+
+          // 2. STORIES
+          const storiesAsMedia = safeStories.map((story) => ({
+            ...(story as Media),
             tenant_id: 'default_tenant',
-            order: media.length + ads.length + index + 1,
+            isStory: true,
+            order: (currentOrder += 1),
           }));
-          return [...media, ...adsAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
+
+          // 3. REKLAMY
+          const adsAsMedia = ads.map((ad) => ({
+            ...(ad as Media),
+            tenant_id: 'default_tenant',
+            order: (currentOrder += 1),
+          }));
+
+          // 4. BIBLIOTEKA
+          const libraryAsMedia = library.map((item) => ({
+            ...(item as Media),
+            tenant_id: 'default_tenant',
+            order: (currentOrder += 1),
+          }));
+
+          return [...mediaWithNewOrder, ...storiesAsMedia, ...adsAsMedia, ...libraryAsMedia].sort((a, b) => a.order - b.order);
         })
       );
+    };
 
-    return combineLatest([this.auth.isStandardUser(), this.auth.selectCurrentTenant()]).pipe(
-      switchMap(([isStandardUser, currentTenant]) =>
-        iif(() => isStandardUser, nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country), premiumRequest$(currentTenant.tenant_id))
-      )
+    return combineLatest([
+      this.auth.isPremiumUser(),
+      this.auth.selectCurrentTenant(),
+      this.userSettingsService.settings$.pipe(filter((settings) => !!settings)),
+    ]).pipe(
+      switchMap(([isPremium, currentTenant, settings]) => {
+        const isModuleEnabled = settings.enableFacebookModule;
+        const pageToken = settings.facebookPageAccess;
+        const pageId = settings.facebookPageId;
+        const includeShared = settings.includeSharedStories || false;
+
+        const shouldFetchStories = isModuleEnabled && !!pageToken && !!pageId;
+
+        return iif(
+          () => isPremium,
+          premiumRequest$(currentTenant.tenant_id, pageToken, pageId, shouldFetchStories, includeShared),
+          nonPremiumRequest$(currentTenant.tenant_id, currentTenant.country, pageToken, pageId, shouldFetchStories, includeShared)
+        );
+      })
     );
   }
 

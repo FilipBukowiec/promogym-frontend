@@ -3,7 +3,6 @@ export interface Location {
   coordinates: [number, number];
 }
 
-
 export interface FooterVisibilityRule {
   startMinute: number;
   endMinute: number;
@@ -17,7 +16,12 @@ export interface UserSettings {
   selectedRadioStream?: string;
   footerVisibilityRules: FooterVisibilityRule[];
   pictureSlideDuration?: number;
-  // location?: Location;
-logoFilePath: string;
-separatorFilePath: string;
+  logoFilePath: string;
+  separatorFilePath: string;
+  enableFacebookModule: boolean;
+  includeSharedStories: boolean;
+  selectedFacebookPage: string | null;
+  facebookPageAccess: string | null;
+  facebookPageId: string | null;
+  facebookPageAdress: string | null
 }
